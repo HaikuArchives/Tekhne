@@ -37,15 +37,22 @@ VArchivable::~VArchivable() {
 }
 
 VArchivable *VArchivable::Instantiate(VMessage *archive) {
-	return NULL;
+	// in super classes we'd extract all the data...
+	return new VArchivable();
 }
 
 status_t VArchivable::Archive(VMessage *archive, bool deep) const {
-	// Every Archive method should have this pice in it
+	// Every Archive method should look like this...
 	if (archive != NULL) {
 		// subsitute actual class name here
-		archive->AddString("class", "VArchivable");
-		// add clss specific stuff here
+		// the array of class items is the hierarchy
+		archive->AddString("class", "tekhne::VArchivable");
+		
+		// add class specific stuff here
+		
+		if (deep) {
+			// call return super::Archive()
+		}
 		return V_OK;
 	}
 	return V_BAD_VALUE;
