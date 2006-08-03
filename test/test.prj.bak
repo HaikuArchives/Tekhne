@@ -10,7 +10,7 @@ cppunit tests<PROJECT_DESCRIPTION_END>
 <CONFIG_HEADERS_START>
 <CONFIG_HEADERS_END>
 <CONFIG_CHARACTERISTICS_START>
-<CONFIG_CHARACTERISTICS_END>
+CXX="ccache g++"<CONFIG_CHARACTERISTICS_END>
 <CONFIG_LIB_FUNCS_START>
 <CONFIG_LIB_FUNCS_END>
 <CONFIG_ADDITIONAL_START>
@@ -107,10 +107,10 @@ module.po.files=
 
 compiler.options.supports=
 compiler.options.include.paths=\
-	${HOME}/Projects/tekhne/include\
-	${HOME}/Projects/test/include
+	/usr/local/include/tekhne\
+	../include
 compiler.options.library.paths=\
-	${HOME}/Projects/tekhne/src
+	./src
 compiler.options.libraries=\
 	tekhne\
 	cppunit

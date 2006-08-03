@@ -21,7 +21,7 @@ clean before build=false
 2=
 
 [filelist]
-0=src/main.cc
+0=/home/clements/work/tekhne/trunk/test/src/main.cc
 
 [Project Tree]
 0=0

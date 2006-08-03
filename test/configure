@@ -20606,6 +20606,8 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
+CXX="ccache g++"
+
 
 packagesrcdir=`cd $srcdir && pwd`
 

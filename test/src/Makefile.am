@@ -5,7 +5,7 @@
 ## 	Please disable it in the Anjuta project configuration
 
 INCLUDES =\
-	 -I../../tekhne/include -I../include
+	 -I../include -I../../tekhne/include
 
 AM_CXXFLAGS =\
 	 -D__STDC_LIMIT_MACROS\
@@ -26,7 +26,7 @@ test_SOURCES = \
 	VListTest.cc
 
 test_LDFLAGS = \
-	-L../../tekhne/src
+	 -L../../tekhne/src
 
 test_LDADD = \
 	 -ltekhne -lcppunit
