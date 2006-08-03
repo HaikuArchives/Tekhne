@@ -49,6 +49,7 @@ public:
 	}
 	
 	virtual void ReadyToRun(void) {
+	  VStopWatch sw("me");
 		std::cout << "ReadyToRun" << std::endl;
 		
 		CppUnit::TextUi::TestRunner runner;
@@ -61,7 +62,6 @@ public:
 		runner.addTest( ThreadTest::suite() );
 		runner.addTest( VMessageTest::suite() );
 		runner.run();
-		
 	}
 	
 	virtual void Pulse(void) {
