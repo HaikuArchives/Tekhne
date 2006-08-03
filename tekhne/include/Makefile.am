@@ -34,6 +34,9 @@ libtekhne_include_DATA = \
 	VQuery.h\
 	VRect.h\
 	VString.h\
-	tekhne.h
+	tekhne.h\
+	ClassInfo.h\
+	VAutoLock.h\
+	VStopWatch.h
 
 EXTRA_DIST = $(libtekhne_include_DATA)

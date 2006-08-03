@@ -28,17 +28,6 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-
-
-#ifdef __cplusplus
-}
-#endif
-
 namespace tekhne {
 
 const int32_t B_APP_VERSION_KIND = 1;

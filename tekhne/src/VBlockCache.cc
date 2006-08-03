@@ -63,7 +63,7 @@ inline void *allocateCacheItem(size_t size, uint32_t type) {
 }
 
 inline void freeCacheItem(CacheItem *ci, uint32_t type) {
-	if (ci != NULL) {
+	if (ci) {
 		if(ci->used) {
 			freeMemory(ci->ptr, type);
 		}

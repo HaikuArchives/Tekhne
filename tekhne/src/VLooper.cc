@@ -29,13 +29,13 @@
 using namespace tekhne;
 
 VLooper::VLooper(const char *name, int32_t priority, int32_t portCapacity) :
-	VHandler(name), _quitting(false), _currentMessage(NULL) {
+	VHandler(name), _quitting(false), _currentMessage(0) {
 	_looper = this;
 	_handlers.AddItem(this);
 	_mq = new VMessageQueue();
 }
 
-VLooper::VLooper(VMessage *archive) : VHandler(archive), _quitting(false), _currentMessage(NULL) {
+VLooper::VLooper(VMessage *archive) : VHandler(archive), _quitting(false), _currentMessage(0) {
 	_looper = this;
 	_handlers.AddItem(this);
 	_mq = new VMessageQueue();
@@ -45,7 +45,7 @@ VLooper::~VLooper() {
 }
 
 VLooper *VLooper::LooperForThread(thread_t thread) {
-	return NULL;
+	return 0;
 }
 
 void VLooper::AddCommonFilter(VMessageFilter *filter) {
@@ -59,7 +59,7 @@ void VLooper::SetCommonFilterList(VList *filters) {
 }
 
 VList *VLooper::CommonFilterList(void) const {
-	return NULL;
+	return 0;
 }
 
 void VLooper::AddHandler(VHandler *handler) {
@@ -87,23 +87,23 @@ VMessage *VLooper::CurrentMessage(void) const {
 }
 
 VMessage *VLooper::DetachCurrentMessage(void) {
-	return NULL;
+	return 0;
 }
 
 void VLooper::DispatchMessage(VMessage *message, VHandler *target) {
 	_currentMessage = message;
 	VHandler *ph = PreferredHandler();
-	if (target != NULL) {
+	if (target) {
 		// 1) Specific handler
 		target->MessageReceived(message);
-	} else if (ph != NULL) {
+	} else if (ph) {
 		// 2) preferred handler
 		ph->MessageReceived(message);
 	} else {
 		// 3) send to ourself
 		this->MessageReceived(message);
 	}
-	_currentMessage = NULL;
+	_currentMessage = 0;
 }
 
 bool VLooper::Lock(void) {
@@ -202,12 +202,12 @@ void *tekhne::looper_thread_func(void *l) {
 				break;
 			default:
 				// goes to the preferred handler if there is one and then ourselves
-				looper->DispatchMessage(msg, NULL);
+				looper->DispatchMessage(msg, 0);
 		}
 		looper->Unlock();
 		delete msg;
 	}
-	return NULL;
+	return 0;
 }
 
 thread_t VLooper::Run(void) {
@@ -223,5 +223,20 @@ void VLooper::SetPreferredHandler(VHandler *handler) const {
 }
 
 VHandler *VLooper::PreferredHandler(void) {
-	return NULL;
+	return 0;
+}
+
+VArchivable *VLooper::Instantiate(VMessage *archive) {
+	return new VLooper(archive);
+}
+status_t VLooper::Archive(VMessage *archive, bool deep) const {
+	// Every Archive method should look like this...
+	if (archive) {
+		if (deep) {
+			// call return super::Archive()
+			return VHandler::Archive(archive);
+		}
+		return V_OK;
+	}
+	return V_BAD_VALUE;
 }

@@ -35,9 +35,10 @@ class VMessageQueue;
 
 void *looper_thread_func(void *l);
 
-class VLooper : public VHandler {
+class VLooper : public VHandler  {
 protected:
 	bool _quitting;
+	char *_name;
 private:
 	VMessage *_currentMessage;
 	VList _handlers;
@@ -45,7 +46,7 @@ private:
 	pthread_t _thread;
 	pthread_attr_t _attr;
 public:
-	VLooper(const char *name = NULL, int32_t priority = V_NORMAL_PRIORITY, int32_t portCapacity = V_LOOPER_PORT_DEFAULT_CAPACITY);
+	VLooper(const char *name = 0, int32_t priority = V_NORMAL_PRIORITY, int32_t portCapacity = V_LOOPER_PORT_DEFAULT_CAPACITY);
 	VLooper(VMessage *archive);
 	virtual ~VLooper();
 
@@ -81,8 +82,8 @@ public:
 	
 	status_t PostMessage(VMessage *message);
 	status_t PostMessage(uint32_t command);
-	status_t PostMessage(VMessage *message, VHandler *handler, VHandler *replyHandler = NULL);
-	status_t PostMessage(uint32_t command, VHandler *handler, VHandler *replyHandler = NULL);
+	status_t PostMessage(VMessage *message, VHandler *handler, VHandler *replyHandler = 0);
+	status_t PostMessage(uint32_t command, VHandler *handler, VHandler *replyHandler = 0);
 
 	virtual void Quit(void);
 	
@@ -98,6 +99,9 @@ public:
 	
 	friend void *looper_thread_func(void *l);
 
+	// VArchivable methods
+	static VArchivable *Instantiate(VMessage *archive);
+	virtual status_t Archive(VMessage *archive, bool deep = true) const;
 };
 
 void *looper_thread_func(void *l);

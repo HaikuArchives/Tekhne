@@ -116,18 +116,18 @@ public:
 	status_t FindFlat(const char *name, int32_t index, VFlattenable *object) const;
 	status_t FindFlat(const char *name, VFlattenable *object) const;
 
-	status_t Flatten(VDataIO *object, ssize_t *numBytes = NULL) const;
-	status_t Flatten(char *address, ssize_t numBytes = NULL) const;
+	status_t Flatten(VDataIO *object, ssize_t *numBytes = 0) const;
+	status_t Flatten(char *address, ssize_t numBytes = 0) const;
 	status_t Unflatten(VDataIO *object);
 	status_t Unflatten(const char *address);
 	ssize_t FlattenedSize(void) const;
 	
-	status_t GetCurrentSpecifier(int32_t *index, VMessage *specifier = NULL, int32_t *what = NULL, const char **property = NULL) const;
+	status_t GetCurrentSpecifier(int32_t *index, VMessage *specifier = 0, int32_t *what = 0, const char **property = 0) const;
 	status_t PopSpecifier(void);
 	
-	status_t GetInfo(const char *name, type_code *typeFound, int32_t *countFound = NULL) const;
+	status_t GetInfo(const char *name, type_code *typeFound, int32_t *countFound = 0) const;
 	status_t GetInfo(const char *name, type_code *typeFound, bool *fixedSize) const;
-	status_t GetInfo(type_code type, int32_t index, char **nameFound, type_code *typeFound, int32_t *countFound = NULL) const;
+	status_t GetInfo(type_code type, int32_t index, char **nameFound, type_code *typeFound, int32_t *countFound = 0) const;
 	
 	bool HasSpecifiers(void) const;
 	
@@ -177,9 +177,9 @@ public:
 	VMessenger *ReturnAddress(void);
 	
 	status_t SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout = V_INFINITE_TIMEOUT, bigtime_t replyTimeout = V_INFINITE_TIMEOUT);
-	status_t SendReply(VMessage *message, VHandler *replyHandler = NULL, bigtime_t sendTimeout = V_INFINITE_TIMEOUT);
+	status_t SendReply(VMessage *message, VHandler *replyHandler = 0, bigtime_t sendTimeout = V_INFINITE_TIMEOUT);
 	status_t SendReply(uint32_t command, VMessage *reply);
-	status_t SendReply(uint32_t command, VHandler *replyHandler = NULL);
+	status_t SendReply(uint32_t command, VHandler *replyHandler = 0);
 	
 	bool WasDelivered(void) const;
 	bool IsSourceRemote(void) const;
@@ -188,7 +188,7 @@ public:
 	const VMessage *Previous(void) const;
 	
 	bool WasDropped(void) const;
-	VPoint DropPoint(VPoint *offset = NULL) const;
+	VPoint DropPoint(VPoint *offset = 0) const;
 	
 	VMessage &operator =(const VMessage& msg);
 	void *operator new(size_t numBytes);

@@ -94,7 +94,8 @@ module.include.files=\
 	VQuery.h\
 	VRect.h\
 	VString.h\
-	tekhne.h
+	tekhne.h\
+	ClassInfo.h
 
 module.source.name=src
 module.source.type=
@@ -136,7 +137,7 @@ module.po.files=
 
 compiler.options.supports=
 compiler.options.include.paths=\
-	${HOME}/Projects/tekhne/include
+	../include
 compiler.options.library.paths=
 compiler.options.libraries=
 compiler.options.libraries.selected=

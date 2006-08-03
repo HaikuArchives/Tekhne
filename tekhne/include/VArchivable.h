@@ -43,6 +43,14 @@ public:
 	virtual status_t Archive(VMessage *archive, bool deep = true) const;
 };
 
+typedef VArchivable *(*instantiation_func) (VMessage *archive);
+//typedef void *instantiation_func;
+
+instantiation_func find_instantiation_func(const char *className);
+instantiation_func find_instantiation_func(VMessage *archive);
+
+VArchivable *instantiate_object(VMessage *archive);
+
 }
 
 #endif /* _VARCHIVABLE_H */

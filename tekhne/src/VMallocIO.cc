@@ -29,7 +29,7 @@ using namespace tekhne;
 
 VMallocIO::VMallocIO() {
 	curPosition = 0;
-	buf = NULL;
+	buf = 0;
 	bufferLen = 0;
 	SetBlockSize(256);
 	SetSize(blockSize);
@@ -101,7 +101,7 @@ status_t VMallocIO::SetSize(off_t numBytes) {
 	}
 	uint8_t *newBuf = (uint8_t *)malloc(newBufferLen);
 	bzero(newBuf, newBufferLen);
-	if (buf != NULL) {
+	if (buf) {
 		memmove(newBuf, buf, bufferLen);
 	}
 	buf = newBuf;

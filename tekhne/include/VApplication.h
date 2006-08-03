@@ -44,10 +44,11 @@ typedef struct app_info {
 	~app_info(void) {}
 } app_info;
 
-class VApplication : VLooper {
+class VApplication : public VLooper {
 private:
 	void InjectStartupMessages(void);
 	pulse_thread *_pulse_thread;
+	VString _signature;
 public:
 	VApplication(const char *signature);
 	VApplication(const char *signature, status_t *error);
@@ -90,6 +91,10 @@ public:
 	
 	//VWindow *WindowAt(int32_t index) const;
 	int32_t CountWindows(void) const;
+	
+	// VArchivable methods
+	static VArchivable *Instantiate(VMessage *archive);
+	virtual status_t Archive(VMessage *archive, bool deep = true) const;
 };
 
 extern VApplication *v_app;

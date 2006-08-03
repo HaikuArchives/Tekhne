@@ -94,7 +94,10 @@ module.include.files=\
 	VQuery.h\
 	VRect.h\
 	VString.h\
-	tekhne.h
+	tekhne.h\
+	ClassInfo.h\
+	VAutoLock.h\
+	VStopWatch.h
 
 module.source.name=src
 module.source.type=
@@ -114,7 +117,8 @@ module.source.files=\
 	VMessenger.cc\
 	VPoint.cc\
 	VRect.cc\
-	VString.cc
+	VString.cc\
+	VStopWatch.cc
 
 module.pixmap.name=pixmaps
 module.pixmap.type=

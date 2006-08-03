@@ -27,10 +27,11 @@
 
 using namespace tekhne;
 
-VHandler::VHandler(const char *name) : _name(name), _looper(NULL), _nextHandler(NULL), _filterList(NULL) {
+VHandler::VHandler(const char *name) : _name(name), _looper(0), _nextHandler(0), _filterList(0) {
 }
 
-VHandler::VHandler(VMessage *archive) : VArchivable(archive), _name(NULL), _looper(NULL), _nextHandler(NULL), _filterList(NULL) {
+VHandler::VHandler(VMessage *archive) : VArchivable(archive), _looper(0), _nextHandler(0), _filterList(0) {
+	archive->FindString("_name", &_name);
 }
 
 VHandler::~VHandler() {
@@ -41,21 +42,21 @@ status_t VHandler::GetSupportedSuites(VMessage *message) {
 }
 
 bool VHandler::LockLooper(void) {
-	if (_looper != NULL) {
+	if (_looper) {
 		return _looper->Lock();
 	}
 	return false;
 }
 
 status_t VHandler::LockLooperWithTimeout(bigtime_t timeout) {
-	if (_looper != NULL) {
+	if (_looper) {
 		return _looper->LockWithTimeout(timeout);
 	}
 	return V_BAD_VALUE;
 }
 
 void VHandler::UnlockLooper(void) {
-	if (_looper != NULL) {
+	if (_looper) {
 		_looper->Unlock();
 	}
 }
@@ -68,7 +69,7 @@ void VHandler::MessageReceived(VMessage *message) {
 }
 
 VHandler *VHandler::ResolveSpecifier(VMessage *message, int32_t index, VMessage *specifier, int32_t what, const char *property) {
-	return NULL;
+	return 0;
 }
 
 void VHandler::SetFilterList(VList *list) {
@@ -139,4 +140,22 @@ status_t VHandler::StopWatchingAll(VMessenger *watcher) {
 
 status_t VHandler::StopWatchingAll(VHandler *watcher) {
 	return V_ERROR;
+}
+
+VArchivable *VHandler::Instantiate(VMessage *archive) {
+	return new VHandler(archive);
+}
+status_t VHandler::Archive(VMessage *archive, bool deep) const {
+	// Every Archive method should look like this...
+	if (archive) {
+		// add class specific stuff here
+		archive->AddString("_name", _name);
+		
+		if (deep) {
+			// call return super::Archive()
+			return VArchivable::Archive(archive);
+		}
+		return V_OK;
+	}
+	return V_BAD_VALUE;
 }

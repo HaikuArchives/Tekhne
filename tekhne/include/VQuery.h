@@ -26,17 +26,6 @@
 #ifndef _VQUERY_H
 #define _VQUERY_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-
-
-#ifdef __cplusplus
-}
-#endif
-
 namespace tekhne {
 
 const int32_t V_EQ = 1;

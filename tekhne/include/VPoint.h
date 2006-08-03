@@ -39,7 +39,7 @@ public:
 	inline VPoint(void) { x = 0; y = 0; }
 	
 	inline void Set(float x, float y) { this->x = x; this->y = y; }
-	inline VPoint& operator =(const VPoint &from) { x = from.x; y = from.y; return *this; }
+	inline VPoint& operator =(const VPoint &from) { if (this != &from) { x = from.x; y = from.y; } return *this; }
 
 	void ConstrainTo(VRect rect);
 	void PrintToStream(void) const;

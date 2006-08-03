@@ -59,7 +59,7 @@ filter_result VMessageFilter::Filter(VMessage *message, VHandler **target) {
 }
 
 VLooper *VMessageFilter::Looper(void) const {
-	return NULL;
+	return 0;
 }
 
 message_delivery VMessageFilter::MessageDelivery(void) const {

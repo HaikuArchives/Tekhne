@@ -27,7 +27,7 @@
 
 using namespace tekhne;
 
-VLocker::VLocker(void) : _name(NULL), _locking_thread(0) {
+VLocker::VLocker(void) : _name(0), _locking_thread(0) {
 	
 	pthread_mutexattr_init(&_attr);
 	pthread_mutexattr_settype(&_attr, PTHREAD_MUTEX_RECURSIVE_NP);

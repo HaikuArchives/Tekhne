@@ -24,6 +24,7 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include "ClassInfo.h"
 
 using namespace tekhne;
 
@@ -42,18 +43,35 @@ VArchivable *VArchivable::Instantiate(VMessage *archive) {
 }
 
 status_t VArchivable::Archive(VMessage *archive, bool deep) const {
-	// Every Archive method should look like this...
-	if (archive != NULL) {
-		// subsitute actual class name here
-		// the array of class items is the hierarchy
-		archive->AddString("class", "tekhne::VArchivable");
-		
-		// add class specific stuff here
-		
-		if (deep) {
-			// call return super::Archive()
-		}
+	if (archive) {
+		archive->AddString("class", class_name(this));
 		return V_OK;
 	}
 	return V_BAD_VALUE;
+}
+
+// this is a magical function I don't know how to write at the moment
+instantiation_func tekhne::find_instantiation_func(const char *className) {
+	return 0;
+}
+
+instantiation_func tekhne::find_instantiation_func(VMessage *archive) {
+	VString className;
+	int32_t index = 0;
+	while(archive->FindString("class", index, &className) == V_OK) {
+		instantiation_func f = find_instantiation_func(className.String());
+		if (f) {
+			return f;
+		}
+		index++;
+	}
+	return 0;
+}
+
+VArchivable *tekhne::instantiate_object(VMessage *archive) {
+	instantiation_func f = find_instantiation_func(archive);
+	if (f) {
+		return f(archive);
+	}
+	return 0;
 }

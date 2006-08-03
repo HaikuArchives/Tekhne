@@ -1,5 +1,5 @@
 /***************************************************************************
- *            VNodeMonitor.h
+ *            VAutoLock.h
  *
  * Copyright (c) 2006 Geoffrey Clements
  * 
@@ -23,29 +23,27 @@
  * 
  ****************************************************************************/
 
-#ifndef _VNODEMONITOR_H
-#define _VNODEMONITOR_H
+#ifndef _VAUTOLOCK_H
+#define _VAUTOLOCK_H
 
-#include <stdint.h>
+#include "VLocker.h"
+#include "VLooper.h"
 
 namespace tekhne {
 
-const int32_t V_STOP_WATCHING = 1;
-const int32_t V_WATCH_NAME = 2;
-const int32_t V_WATCH_STAT = 4;
-const int32_t V_WATCH_ATTR = 8;
-const int32_t V_WATCH_DIRECTORY = 16;
-const int32_t V_WATCH_MOUNT = 32;
-const int32_t V_WATCH_ALL = V_WATCH_NAME+V_WATCH_STAT+V_WATCH_ATTR+V_WATCH_DIRECTORY+V_WATCH_MOUNT;
+class VAutoLock {
+private:
+	VLocker *_locker;
+	VLooper *_looper;
+public:
+	inline VAutoLock(VLooper *looper) : _locker(0), _looper(looper) { if (_looper) { _looper->Lock(); } }
+	inline VAutoLock(VLocker *locker) : _locker(locker), _looper(0) { if (_locker) { _locker->Lock(); } }
+	inline VAutoLock(VLocker &locker) : _locker(&locker), _looper(0) { if (_locker) { _locker->Lock(); } }
+	inline ~VAutoLock()  { if (_looper) { _looper->Unlock(); } else if (_locker) { _locker->Unlock(); } }
 
-const int32_t V_ENTRY_CREATED = 1;
-const int32_t V_ENTRY_REMOVED = 2;
-const int32_t V_ENTRY_MOVED = 3;
-const int32_t V_STAT_CHANGED = 4;
-const int32_t V_ATTR_CHANGED = 5;
-const int32_t V_DEVICE_MOUNTED = 6;
-const int32_t V_DEVICE_UNMOUNTED = 7;
+	inline bool IsLocked(void) { if (_looper) { return _looper->IsLocked(); } else if (_locker) { return _locker->IsLocked(); } return false; }
+};
 
 } // namespace tekhne
 
-#endif /* _VNODEMONITOR_H */
+#endif /* _VAUTOLOCK_H */

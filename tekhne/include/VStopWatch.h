@@ -1,5 +1,5 @@
 /***************************************************************************
- *            VMessenger.h
+ *            VStopWatch.h
  *
  * Copyright (c) 2006 Geoffrey Clements
  * 
@@ -23,48 +23,38 @@
  * 
  ****************************************************************************/
 
-#ifndef _VMESSENGER_H
-#define _VMESSENGER_H
+#ifndef _VSTOPWATCH_H
+#define _VSTOPWATCH_H
 
-#include "StandardDefs.h"
 #include "VErrors.h"
-	
+
 namespace tekhne {
 
-class VHandler;
-class VLooper;
-class VMessage;
-	
-class VMessenger {
+class VStopWatch {
 private:
-	VHandler *_handler;
-	VLooper *_looper;
+	const char *_name;
+	bool _silent;
+	VList _laps;
+	bigtime_t _starttime;
+	bigtime_t _suspendtime;
+
 public:
-	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);
-	VMessenger(const char *signature, team_t team = -1, status_t *error = 0);
-	VMessenger(const VMessenger &messenger);
-	VMessenger(void);
+	VStopWatch(const char *name, bool silent = false);
+	~VStopWatch();
 
-	~VMessenger();
+	bigtime_t ElapsedTime(void) const;
 
-	bool IsValid(void) const;
+	void Save(void *pointer, size_t size);
 
-	bool LockTarget(void) const;
-	status_t LockTargetWithTimeout(bigtime_t timeout) const;
+	bigtime_t Lap();
 
-	status_t SendMessage(VMessage *message, VMessage *reply, bigtime_t deliveryTimeout = V_INFINITE_TIMEOUT, bigtime_t replyTimeout = V_INFINITE_TIMEOUT) const;
-	status_t SendMessage(VMessage *message, VHandler *replyHandler = 0, bigtime_t deliveryTimeout = V_INFINITE_TIMEOUT) const;
-	status_t SendMessage(VMessage *message, VMessenger *replyMessenger, bigtime_t deliveryTimeout = V_INFINITE_TIMEOUT) const;
-	status_t SendMessage(uint32_t command, VMessage *reply) const;
-	status_t SendMessage(uint32_t command, VHandler *replyHandler = 0) const;
-
-	VHandler *Target(VLooper **looper) const;
-	bool IsTargetLocal(void) const;
-	inline team_t Team(void) const;
+	const char *Name(void) const;
 	
-	VMessenger &operator =(const VMessenger& v);
-	bool operator ==(const VMessenger& v) const;
+	void Suspend(void);
+	void Resume(void);
+	void Reset(void);
 };
 
-}
-#endif /* _VMESSENGER_H */
+} // namespace tekhne
+
+#endif /* _VSTOPWATCH_H */

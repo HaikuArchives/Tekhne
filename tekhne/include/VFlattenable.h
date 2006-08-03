@@ -40,7 +40,7 @@ public:
 	virtual ssize_t FlattenedSize(void) const = 0;
 	virtual bool IsFixedSize(void) const = 0;
 	virtual type_code TypeCode(void) const = 0;
-	virtual bool AllowsTypeCode(type_code code) const;
+	virtual bool AllowsTypeCode(type_code code) const { return code == TypeCode(); }
 };
 
 } // namespace tekhne

@@ -54,7 +54,7 @@ bool VList::AddItem(void *item, int32_t index) {
 		makeBuffer(index);
 		memmove(items, oldItems, sizeof(void*)*oldLen);
 		delete oldItems;
-	} else if (items[index] != NULL) {
+	} else if (items[index]) {
 		if (lastItem+1 > bufferLen) {
 			void ** oldItems = items;
 			int32_t oldLen =  bufferLen;
@@ -100,7 +100,7 @@ bool VList::AddList(VList *list) {
 int32_t VList::CountItems(void) const {
 	int count = 0;
 	for (int32_t i=0;i<=lastItem;i++) {
-		if (items[i] != NULL) {
+		if (items[i]) {
 			count++;
 		}
 	}
@@ -108,9 +108,9 @@ int32_t VList::CountItems(void) const {
 }
 
 void VList::DoForEach(bool (*func)(void *))  {
-	if (func != NULL) {
+	if (func) {
 		for (int32_t i=0;i<=lastItem;i++) {
-			if (items[i] != NULL) {
+			if (items[i]) {
 				if (func(items[i])) {
 					return;
 				}
@@ -120,9 +120,9 @@ void VList::DoForEach(bool (*func)(void *))  {
 }
 
 void VList::DoForEach(bool (*func)(void *, void *), void *arg2) {
-	if (func != NULL) {
+	if (func) {
 		for (int32_t i=0;i<=lastItem;i++) {
-			if (items[i] != NULL) {
+			if (items[i]) {
 				func(items[i], arg2);
 			}
 		}
@@ -132,15 +132,15 @@ void VList::DoForEach(bool (*func)(void *, void *), void *arg2) {
 void *VList::FirstItem(void) const {
 	int32_t i = 0;
 	while (i <= lastItem) {
-		if (items[i] != NULL) {
+		if (items[i]) {
 			return items[i];
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 void *VList::GetItem(int32_t index) const {
-	if (index > bufferLen || index < 0) return NULL;
+	if (index > bufferLen || index < 0) return 0;
 	return items[index];
 }
 
@@ -164,7 +164,7 @@ int32_t VList::IndexOf(void *item) const {
 
 bool VList::IsEmpty(void) const{
 	for (int32_t i=0;i<=lastItem;i++) {
-		if (items[i] != NULL) {
+		if (items[i]) {
 			return false;
 		}
 	}
@@ -177,11 +177,11 @@ void *VList::Items(void) const {
 
 void *VList::LastItem(void) const {
 	for (int32_t i=lastItem;i>=0;i--) {
-		if (items[i] != NULL) {
+		if (items[i]) {
 			return items[i];
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 void VList::MakeEmpty(void) {
@@ -205,7 +205,7 @@ void *VList::RemoveItem(int32_t index) {
 		lastItem--;
 		return ans;
 	}
-	return NULL;
+	return 0;
 }
 
 bool VList::RemoveItems(int32_t index, int32_t count) {
@@ -218,7 +218,7 @@ bool VList::RemoveItems(int32_t index, int32_t count) {
 }
 
 void *VList::ReplaceItem(int32_t index, void *item) {
-	void *reply = NULL;
+	void *reply = 0;
 	if (index >= 0 && index < bufferLen) {
 		reply = items[index];
 	}

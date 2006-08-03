@@ -44,9 +44,9 @@ typedef filter_result (*filter_hook)(VMessage *message, VHandler **target, VMess
 class VMessageFilter {
 private:
 public:
-	VMessageFilter(message_delivery delivery, message_source source, uint32_t command, filter_hook filter = NULL);
-	VMessageFilter(message_delivery delivery, message_source source, filter_hook filter = NULL);
-	VMessageFilter(uint32_t command, filter_hook filter = NULL);
+	VMessageFilter(message_delivery delivery, message_source source, uint32_t command, filter_hook filter = 0);
+	VMessageFilter(message_delivery delivery, message_source source, filter_hook filter = 0);
+	VMessageFilter(uint32_t command, filter_hook filter = 0);
 	VMessageFilter(const VMessageFilter &object);
 	VMessageFilter(const VMessageFilter *object);
 

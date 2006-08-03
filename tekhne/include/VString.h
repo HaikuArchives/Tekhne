@@ -40,7 +40,7 @@ private:
 	bool bufferLocked;
 	inline void makeBuffer(int32_t count, bool deleteBuffer=true) {
 		bufferLen = count;
-		if (deleteBuffer && buf != NULL) delete buf;
+		if (deleteBuffer && buf != 0) delete buf;
 		buf = new char[count];
 		bzero(buf, count);
 	}
@@ -59,7 +59,7 @@ public:
 	VString &Append(const VString &source, int32_t charCount);
 	inline VString &Append(const char *source) {
 		assert(!bufferLocked);
-		if (source != NULL) {
+		if (source != 0) {
 			int32_t oldLen = bufferLen -1;
 			int32_t sourceLen = strlen(source);
 			int32_t newLen = oldLen + sourceLen + 1;
@@ -170,7 +170,7 @@ public:
 
 	inline VString &SetTo(const char *source) {
 		assert(!bufferLocked);
-		if (source != NULL) {
+		if (source != 0) {
 			int32_t len = strlen(source);
 			if (len > 0) {
 				makeBuffer(len+1, false);
@@ -241,7 +241,7 @@ public:
 		return Length() != string.Length() || memcmp(buf, string.buf, Length()) != 0;
 	}
 	inline bool operator!=(const char *string) const {
-		if (string != NULL) {
+		if (string != 0) {
 			int32_t length = strlen(string);
 			return Length() != length || memcmp(buf, string, length) != 0;
 		}
@@ -294,39 +294,39 @@ public:
 };
 
 inline bool operator==(const char *string1, const VString &string2) {
-	if (string1 != NULL) {
+	if (string1 != 0) {
 		return strcmp(string1, string2.buf) == 0;
 	}
 	return false;
 }
 
 inline bool operator!=(const char *string1, const VString &string2) {
-	if (string1 != NULL) {
+	if (string1 != 0) {
 		return strcmp(string1, string2.buf) != 0;
 	}
 	return false;
 }
 
 inline bool operator<(const char *string1, const VString &string2) {
-	if (string1 != NULL) {
+	if (string1 != 0) {
 		return strcmp(string1, string2.buf) < 0;
 	}
 	return false;
 }
 inline bool operator<=(const char *string1, const VString &string2) {
-	if (string1 != NULL) {
+	if (string1 != 0) {
 		return strcmp(string1, string2.buf) <= 0;
 	}
 	return false;
 }
 inline bool operator>(const char *string1, const VString &string2) {
-	if (string1 != NULL) {
+	if (string1 != 0) {
 		return strcmp(string1, string2.buf) > 0;
 	}
 	return false;
 }
 inline bool operator>=(const char *string1, const VString &string2) {
-	if (string1 != NULL) {
+	if (string1 != 0) {
 		return strcmp(string1, string2.buf) >= 0;
 	}
 	return false;

@@ -38,12 +38,12 @@ static inline int32_t convertCompareResult(int32_t result) {
 	return 0;
 }
 
-VString::VString(void) : buf(NULL), bufferLocked(false) {
+VString::VString(void) : buf(0), bufferLocked(false) {
 	makeBuffer(1);
 }
 
-VString::VString(const char *string) : buf(NULL), bufferLocked(false) {
-	if (string != NULL) {
+VString::VString(const char *string) : buf(0), bufferLocked(false) {
+	if (string) {
 		int32_t len = strlen(string)+1;
 		makeBuffer(len);
 		memmove(buf, string, len);
@@ -52,8 +52,8 @@ VString::VString(const char *string) : buf(NULL), bufferLocked(false) {
 	}
 }
 
-VString::VString(const char *string, int32_t maxLength) : buf(NULL), bufferLocked(false) {
-	if (string != NULL && maxLength > 0) {
+VString::VString(const char *string, int32_t maxLength) : buf(0), bufferLocked(false) {
+	if (string && maxLength > 0) {
 		int32_t len = strlen(string);
 		if (maxLength < len) {
 			len = maxLength;
@@ -65,7 +65,7 @@ VString::VString(const char *string, int32_t maxLength) : buf(NULL), bufferLocke
 	}
 }
 
-VString::VString(const VString &string) : buf(NULL), bufferLocked(false) {
+VString::VString(const VString &string) : buf(0), bufferLocked(false) {
 	makeBuffer(string.bufferLen);
 	memmove(buf, string.buf, bufferLen);
 }
@@ -81,7 +81,7 @@ VString &VString::Append(const VString &source, int32_t charCount) {
 
 VString &VString::Append(const char *source, int32_t charCount) {
 	assert(!bufferLocked);
-	if (source != NULL && charCount > 0) {
+	if (source && charCount > 0) {
 		int32_t sourceLen = strlen(source);
 		if (sourceLen < charCount) {
 			return Append(source);
@@ -123,7 +123,7 @@ VString &VString::Prepend(const VString &source, int32_t charCount) {
 
 VString &VString::Prepend(const char *source) {
 	assert(!bufferLocked);
-	if (source != NULL) {
+	if (source) {
 		int32_t oldLen = bufferLen -1;
 		int32_t sourceLen = strlen(source);
 		int32_t newLen = oldLen + sourceLen + 1;
@@ -138,7 +138,7 @@ VString &VString::Prepend(const char *source) {
 
 VString &VString::Prepend(const char *source, int32_t charCount) {
 	assert(!bufferLocked);
-	if (source != NULL && charCount > 0) {
+	if (source && charCount > 0) {
 		int32_t sourceLen = strlen(source);
 		if (sourceLen < charCount) {
 			return Prepend(source);
@@ -184,7 +184,7 @@ VString &VString::Insert(const VString &source, int32_t sourceOffset, int32_t ch
 
 VString &VString::Insert(const char *source, int32_t insertAt) {
 	assert(!bufferLocked);
-	if (source != NULL && insertAt >= 0 && insertAt <= Length()) {
+	if (source && insertAt >= 0 && insertAt <= Length()) {
 		if (insertAt == 0) {
 			return Prepend(source);
 		} else if (insertAt == Length()) {
@@ -207,7 +207,7 @@ VString &VString::Insert(const char *source, int32_t insertAt) {
 
 VString &VString::Insert(const char *source, int32_t charCount, int32_t insertAt) {
 	assert(!bufferLocked);
-	if (source != NULL && insertAt >= 0 && insertAt <= Length()) {
+	if (source && insertAt >= 0 && insertAt <= Length()) {
 		if (insertAt == 0) {
 			return Prepend(source, charCount);
 		} else if (insertAt == Length()) {
@@ -233,7 +233,7 @@ VString &VString::Insert(const char *source, int32_t charCount, int32_t insertAt
 
 VString &VString::Insert(const char *source, int32_t sourceOffset, int32_t charCount, int32_t insertAt) {
 	assert(!bufferLocked);
-	if (source != NULL && insertAt >= 0 && insertAt <= Length() && charCount > 0) {
+	if (source && insertAt >= 0 && insertAt <= Length() && charCount > 0) {
 		if (sourceOffset < (int32_t)strlen(source)) {
 			VString chunk(source+sourceOffset, charCount);
 			if (insertAt == 0) {
@@ -272,7 +272,7 @@ VString &VString::Insert(char c, int32_t charCount, int32_t insertAt) {
 
 VString &VString::CharacterEscape(const char *original, const char *setOfCharsToEscape, char escapeWithChar) {
 	assert(!bufferLocked);
-	if (original != NULL && setOfCharsToEscape != NULL && escapeWithChar != 0) {
+	if (original && setOfCharsToEscape && escapeWithChar != 0) {
 		int32_t len = strlen(original);
 		int32_t lec = strlen(setOfCharsToEscape);
 		if (len > 0) {
@@ -298,7 +298,7 @@ VString &VString::CharacterEscape(const char *original, const char *setOfCharsTo
 
 VString &VString::CharacterEscape(const char *setOfCharsToEscape, char escapeWithChar) {
 	assert(!bufferLocked);
-	if (setOfCharsToEscape != NULL && escapeWithChar != 0) {
+	if (setOfCharsToEscape && escapeWithChar != 0) {
 		int32_t lec = strlen(setOfCharsToEscape);
 		if (bufferLen > 0) {
 			char *s = new char[bufferLen*2];
@@ -321,7 +321,7 @@ VString &VString::CharacterEscape(const char *setOfCharsToEscape, char escapeWit
 
 VString &VString::CharacterDeescape(const char *original, char escapeWithChar) {
 	assert(!bufferLocked);
-	if (original != NULL) {
+	if (original) {
 		int32_t len = strlen(original);
 		if (len > 0) {
 			char *s = new char[len+1];
@@ -616,7 +616,7 @@ VString &VString::RemoveFirst(const VString &string) {
 }
 
 VString &VString::RemoveFirst(const char *string) {
-	if (string != NULL) {
+	if (string) {
 		int32_t length = strlen(string);
 		if (length > 0) {
 			int32_t where = FindFirst(string);
@@ -637,7 +637,7 @@ VString &VString::RemoveLast(const VString &string) {
 }
 
 VString &VString::RemoveLast(const char *string) {
-	if (string != NULL) {
+	if (string) {
 		int32_t length = strlen(string);
 		if (length > 0) {
 			int32_t where = FindLast(string);
@@ -659,7 +659,7 @@ VString &VString::RemoveAll(const VString &string) {
 }
 
 VString &VString::RemoveAll(const char *string) {
-	if (string != NULL) {
+	if (string) {
 		int32_t length = strlen(string);
 		if (length > 0) {
 			int32_t where = FindFirst(string);
@@ -673,7 +673,7 @@ VString &VString::RemoveAll(const char *string) {
 }
 
 VString &VString::RemoveSet(const char *charSet) {
-	if (charSet != NULL) {
+	if (charSet) {
 		int32_t length = strlen(charSet);
 		if (length > 0) {
 			for(int i=0;i<length;i++) {
@@ -689,7 +689,7 @@ VString &VString::RemoveSet(const char *charSet) {
 }
 
 VString &VString::Replace(const char *old, const char *_new, int32_t count, int32_t offset) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		if (length > 0) {
@@ -720,7 +720,7 @@ VString &VString::Replace(char old, char _new, int32_t count, int32_t offset) {
 }
 
 VString &VString::ReplaceFirst(const char *old, const char *_new) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		int32_t loc = FindFirst(old);
@@ -743,7 +743,7 @@ VString &VString::ReplaceFirst(char old, char _new) {
 }
 
 VString &VString::ReplaceLast(const char *old, const char *_new) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		int32_t loc = FindLast(old);
@@ -766,7 +766,7 @@ VString &VString::ReplaceLast(char old, char _new) {
 }
 
 VString &VString::ReplaceAll(const char *old, const char *_new, int32_t offset) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		if (length > 0) {
@@ -795,7 +795,7 @@ VString &VString::ReplaceAll(char old, char _new, int32_t offset) {
 }
 
 VString &VString::ReplaceSet(const char *oldSet, const char *_new) {
-	if (oldSet != NULL) {
+	if (oldSet) {
 		int32_t length = strlen(oldSet);
 		char s[2];
 		s[1] = 0;
@@ -808,7 +808,7 @@ VString &VString::ReplaceSet(const char *oldSet, const char *_new) {
 }
 
 VString &VString::ReplaceSet(const char *oldSet, char _new) {
-	if (oldSet != NULL) {
+	if (oldSet) {
 		int32_t length = strlen(oldSet);
 		for (int i=0;i<length;i++) {
 			ReplaceAll(oldSet[i], _new);
@@ -818,7 +818,7 @@ VString &VString::ReplaceSet(const char *oldSet, char _new) {
 }
 
 VString &VString::IReplace(const char *old, const char *_new, int32_t count, int32_t offset) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		if (length > 0) {
@@ -849,7 +849,7 @@ VString &VString::IReplace(char old, char _new, int32_t count, int32_t offset) {
 }
 
 VString &VString::IReplaceFirst(const char *old, const char *_new) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		int32_t loc = IFindFirst(old);
@@ -879,7 +879,7 @@ VString &VString::IReplaceFirst(char old, char _new) {
 }
 
 VString &VString::IReplaceLast(const char *old, const char *_new) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		int32_t loc = IFindLast(old);
@@ -909,7 +909,7 @@ VString &VString::IReplaceLast(char old, char _new) {
 }
 
 VString &VString::IReplaceAll(const char *old, const char *_new, int32_t offset) {
-	if (old != NULL && _new != NULL) {
+	if (old && _new) {
 		int32_t length = strlen(old);
 		int32_t new_length = strlen(_new);
 		if (length > 0) {
@@ -938,7 +938,7 @@ VString &VString::IReplaceAll(char old, char _new, int32_t offset) {
 }
 
 VString &VString::SetTo(const char *source, int32_t charCount) {
-	if (source != NULL && charCount > 0) {
+	if (source && charCount > 0) {
 		int32_t len = strlen(source);
 		if (charCount > len) charCount = len;
 		makeBuffer(charCount+1);
@@ -1029,18 +1029,20 @@ VString &VString::Truncate(int32_t charCount, bool lazy) {
 
 
 VString& VString::operator=(const VString &string) {
-	int32_t length = string.Length();
-	if (length > 0) {
-		makeBuffer(length+1);
-		memmove(buf, string.buf, length);
-	} else {
-		makeBuffer(1);
+	if (this != &string) {
+		int32_t length = string.Length();
+		if (length > 0) {
+			makeBuffer(length+1);
+			memmove(buf, string.buf, length);
+		} else {
+			makeBuffer(1);
+		}
 	}
 	return *this;
 }
 
 VString& VString::operator=(const char *string) {
-	if (string != NULL) {
+	if (string) {
 		int32_t length = strlen(string);
 		if (length > 0) {
 			makeBuffer(length+1);
@@ -1133,35 +1135,35 @@ char VString::operator[](int32_t index) const {
 
 
 bool VString::operator==(const char *string) const {
-	if (string != NULL) {
+	if (string) {
 		return strcmp(buf, string) == 0;
 	}
 	return false;
 }
 
 bool VString::operator<(const char *string) const {
-	if (string != NULL) {
+	if (string) {
 		return strcmp(buf, string) < 0;
 	}
 	return false;
 }
 
 bool VString::operator<=(const char *string) const {
-	if (string != NULL) {
+	if (string) {
 		return strcmp(buf, string) <= 0;
 	}
 	return false;
 }
 
 bool VString::operator>(const char *string) const {
-	if (string != NULL) {
+	if (string) {
 		return strcmp(buf, string) > 0;
 	}
 	return true;
 }
 
 bool VString::operator>=(const char *string) const {
-	if (string != NULL) {
+	if (string) {
 		return strcmp(buf, string) >= 0;
 	}
 	return true;

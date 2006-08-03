@@ -39,7 +39,7 @@ class VLooper;
 class VMessageFilter;
 class VMessenger;
 
-class VHandler : VArchivable {
+class VHandler : public VArchivable {
 protected:
 	VString _name;
 	VLooper *_looper;
@@ -48,7 +48,7 @@ private:
 	VHandler *_nextHandler;
 	VList *_filterList;
 public:
-	VHandler(const char *name = NULL);
+	VHandler(const char *name = 0);
 	VHandler(VMessage *archive);
 
 	virtual ~VHandler();
@@ -84,6 +84,9 @@ public:
 	status_t StopWatching(VHandler *watcher, uint32_t what);
 	status_t StopWatchingAll(VMessenger *watcher);
 	status_t StopWatchingAll(VHandler *watcher);
+	// VArchivable methods
+	static VArchivable *Instantiate(VMessage *archive);
+	virtual status_t Archive(VMessage *archive, bool deep = true) const;
 };
 
 }

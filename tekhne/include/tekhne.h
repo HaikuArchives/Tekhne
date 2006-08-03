@@ -41,6 +41,8 @@
 #include "VHandler.h"
 #include "VLooper.h"
 #include "VLocker.h"
+#include "VAutoLock.h"
 #include "VMessenger.h"
+#include "VStopWatch.h"
 
 #endif /* _TEKHNE_H */

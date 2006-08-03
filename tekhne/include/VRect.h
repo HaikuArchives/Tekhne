@@ -93,7 +93,7 @@ public:
 	inline float Height(void) const { return bottom - top; }
 	inline int32_t IntegerHeight(void) const { return (int32_t)(ceil(bottom - top)); }
 
-	inline VRect& operator =(const VRect& from) { Set(from.left, from.top, from.right, from.bottom); return *this; }
+	inline VRect& operator =(const VRect& from) { if (this != &from) { Set(from.left, from.top, from.right, from.bottom); } return *this; }
 	bool operator ==(VRect r) const;
 	bool operator !=(VRect r) const;
 	VRect operator &(VRect r) const;

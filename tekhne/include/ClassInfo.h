@@ -1,5 +1,5 @@
 /***************************************************************************
- *            VNodeMonitor.h
+ *            ClassInfo.h
  *
  * Copyright (c) 2006 Geoffrey Clements
  * 
@@ -23,29 +23,17 @@
  * 
  ****************************************************************************/
 
-#ifndef _VNODEMONITOR_H
-#define _VNODEMONITOR_H
+#ifndef _CLASSINFO_H
+#define _CLASSINFO_H
 
-#include <stdint.h>
+#include <typeinfo>
 
 namespace tekhne {
 
-const int32_t V_STOP_WATCHING = 1;
-const int32_t V_WATCH_NAME = 2;
-const int32_t V_WATCH_STAT = 4;
-const int32_t V_WATCH_ATTR = 8;
-const int32_t V_WATCH_DIRECTORY = 16;
-const int32_t V_WATCH_MOUNT = 32;
-const int32_t V_WATCH_ALL = V_WATCH_NAME+V_WATCH_STAT+V_WATCH_ATTR+V_WATCH_DIRECTORY+V_WATCH_MOUNT;
-
-const int32_t V_ENTRY_CREATED = 1;
-const int32_t V_ENTRY_REMOVED = 2;
-const int32_t V_ENTRY_MOVED = 3;
-const int32_t V_STAT_CHANGED = 4;
-const int32_t V_ATTR_CHANGED = 5;
-const int32_t V_DEVICE_MOUNTED = 6;
-const int32_t V_DEVICE_UNMOUNTED = 7;
-
-} // namespace tekhne
-
-#endif /* _VNODEMONITOR_H */
+inline const char *class_name(const void *object) { if (object != 0) return typeid(object).name(); else return 0; }
+inline bool is_instance_of(const void *object, char *_class)  { if (object != 0 && _class != 0) return strcmp(typeid(object).name(), _class) == 0; else return false; }
+//bool is_kind_of(object, class)
+//class *cast_as(object, class)
+}
+		  
+#endif /* _CLASSINFO_H */

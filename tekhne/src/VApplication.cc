@@ -27,17 +27,18 @@
 #include "VMessenger.h"
 #include "VApplication.h"
 #include "VMessageQueue.h"
+#include "VAutoLock.h"
 #include <iostream>
 
 using namespace tekhne;
 using namespace std;
 
-VApplication *tekhne::v_app = NULL;
-VMessenger *tekhne::v_app_messenger = NULL;
+VApplication *tekhne::v_app = 0;
+VMessenger *tekhne::v_app_messenger = 0;
 
 VApplication::VApplication(const char *signature) :
-	VLooper(signature) {
-	if (v_app != NULL) {
+	VLooper(), _signature(signature) {
+	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
 		exit(-1);
@@ -49,8 +50,8 @@ VApplication::VApplication(const char *signature) :
 }
 
 VApplication::VApplication(const char *signature, status_t *error) :
-	VLooper(signature) {
-	if (v_app != NULL) {
+	VLooper(), _signature(signature) {
+	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
 		exit(-1);
@@ -62,12 +63,13 @@ VApplication::VApplication(const char *signature, status_t *error) :
 }
 
 VApplication::VApplication(VMessage *archive) : VLooper(archive) {
-	if (v_app != NULL) {
+	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
 	v_app = this;
+	archive->FindString("mime_sig", &_signature);
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
 	InjectStartupMessages();
@@ -114,7 +116,7 @@ private:
 	pthread_attr_t _attr;
 	pthread_t _thread;
 	static void* loop(void *t) {
-		tekhne::pulse_thread *th = (tekhne::pulse_thread *)t;
+		tekhne::pulse_thread *th = static_cast<tekhne::pulse_thread *>(t);
 		while (!th->_done) {
 			usleep(th->_rate);
 			if (!th->_done) {
@@ -122,7 +124,7 @@ private:
 			}
 		}
 		delete th;
-		return NULL;
+		return 0;
 	}
 public:
 	pulse_thread(int32_t rate) : _done(false), _rate(rate) {
@@ -139,7 +141,7 @@ public:
 };
 
 void VApplication::SetPulseRate(bigtime_t rate) {
-	if (_pulse_thread != NULL) {
+	if (_pulse_thread) {
 		_pulse_thread->done();
 	}
 	if (rate > 0) {
@@ -164,58 +166,59 @@ thread_t VApplication::Run(void) {
 	cout << "Run" << endl;
 	while (!_quitting) {
 		VMessage *msg = MessageQueue()->NextMessage();
-		Lock();
-		switch(msg->what) {
-			case V_ABOUT_REQUESTED:
-				AboutRequested();
-				break;
-			case V_APP_ACTIVATED:
-				{
-					bool active = true;
-					msg->FindBool("active", &active);
-					AppActivated(active);
-				}
-				break;
-			case V_ARGV_RECEIVED:
-				{
-					int32_t argc;
-					const char *argv[argc];
-					const char *cwd;
-					msg->FindInt32("argc", &argc);
-					for(int i=0; i<argc;i++) {
-						msg->FindString("argv", &argv[i]);
+		{
+			VAutoLock(this);
+			switch(msg->what) {
+				case V_ABOUT_REQUESTED:
+					AboutRequested();
+					break;
+				case V_APP_ACTIVATED:
+					{
+						bool active = true;
+						msg->FindBool("active", &active);
+						AppActivated(active);
 					}
-					msg->FindString("cwd", &cwd);
-					ArgvReceived(argc, (char **)argv);
-				}
-				break;
-			case V_OPEN_IN_WORKSPACE:
-				{
-					int32_t workspace;
-					msg->FindInt32("v:workspace", &workspace);
-				}
-				break;
-			case V_PULSE:
-				Pulse();
-				break;
-			case V_QUIT_REQUESTED:
-				if (QuitRequested()) {
-					_quitting = true;
-				}
-				break;
-			case V_READY_TO_RUN:
-				ReadyToRun();
-				break;
-			case V_REFS_RECEIVED:
-				// we'll never get this...
-				break;
-			case V_SILENT_RELAUNCH:
-				// not sure what to do about this
-				break;
-			default:
-				DispatchMessage(msg, NULL);
-		}
-		Unlock();
+					break;
+				case V_ARGV_RECEIVED:
+					{
+						int32_t argc;
+						const char *argv[argc];
+						const char *cwd;
+						msg->FindInt32("argc", &argc);
+						for(int i=0; i<argc;i++) {
+							msg->FindString("argv", &argv[i]);
+						}
+						msg->FindString("cwd", &cwd);
+						ArgvReceived(argc, (char **)argv);
+					}
+					break;
+				case V_OPEN_IN_WORKSPACE:
+					{
+						int32_t workspace;
+						msg->FindInt32("v:workspace", &workspace);
+					}
+					break;
+				case V_PULSE:
+					Pulse();
+					break;
+				case V_QUIT_REQUESTED:
+					if (QuitRequested()) {
+						_quitting = true;
+					}
+					break;
+				case V_READY_TO_RUN:
+					ReadyToRun();
+					break;
+				case V_REFS_RECEIVED:
+					// we'll never get this...
+					break;
+				case V_SILENT_RELAUNCH:
+					// not sure what to do about this
+					break;
+				default:
+					DispatchMessage(msg, 0);
+			}
+		} // delete AutoLock before message
 		delete msg;
 	}
 	return 0;
@@ -250,6 +253,24 @@ bool VApplication::IsCursorHidden(void) const {
 
 int32_t VApplication::CountWindows(void) const {
 	return 0;
+}
+
+VArchivable *VApplication::Instantiate(VMessage *archive) {
+	return new VApplication(archive);
+}
+status_t VApplication::Archive(VMessage *archive, bool deep) const {
+	// Every Archive method should look like this...
+	if (archive) {
+		// add class specific stuff here
+		archive->AddString("mime_sig", _signature);
+		
+		if (deep) {
+			// call return super::Archive()
+			return VLooper::Archive(archive);
+		}
+		return V_OK;
+	}
+	return V_BAD_VALUE;
 }
 
 void VApplication::InjectStartupMessages(void) {

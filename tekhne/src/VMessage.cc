@@ -134,7 +134,7 @@ typedef struct storage_item {
 
 status_t VMessage::AddData(const char *name, type_code type, const void *data,
 	ssize_t numBytes, bool fixedSize, int32_t numItems) {
-	if(name != NULL && data != NULL && numBytes > 0) {
+	if(name && data && numBytes > 0) {
 		if (numItems > 0) {
 			if (l.AddItem(new storage_item(name, type, data, numBytes, fixedSize, numItems))) {
 				return V_OK;
@@ -397,7 +397,7 @@ status_t VMessage::FindString(const char *name, const char **string) const {
 
 status_t VMessage::FindString(const char *name, VString *string) const {
 	ssize_t x;
-	char *s = NULL;
+	char *s = 0;
 	status_t ans = FindData(name, V_STRING_TYPE, (const void **)&s, &x);
 	if (ans == V_OK) {
 		string->SetTo(s);
@@ -407,7 +407,7 @@ status_t VMessage::FindString(const char *name, VString *string) const {
 
 status_t VMessage::FindString(const char *name, int32_t index, VString *string) const {
 	ssize_t x;
-	char *s = NULL;
+	char *s = 0;
 	status_t ans = FindData(name, V_STRING_TYPE, index, (const void **)&s, &x);
 	if (ans == V_OK) {
 		string->SetTo(s);
@@ -718,7 +718,7 @@ status_t VMessage::ReplaceFlat(const char *name, int32_t index, VFlattenable *ob
 }
 
 VMessenger *VMessage::ReturnAddress(void) {
-	return NULL;
+	return 0;
 }
 
 status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout, bigtime_t replyTimeout) {
@@ -755,7 +755,7 @@ bool VMessage::IsReply(void) const {
 }
 
 const VMessage *VMessage::Previous(void) const {
-	return NULL;
+	return 0;
 }
 
 bool VMessage::WasDropped(void) const {
@@ -767,7 +767,10 @@ VPoint VMessage::DropPoint(VPoint *offset) const {
 }
 
 VMessage &VMessage::operator =(const VMessage& msg){
-	what = msg.what;
+	if (this != &msg) {
+		what = msg.what;
+		l = msg.l;
+	}
 	return *this;
 }
 

@@ -33,18 +33,18 @@ VMessenger::VMessenger(const VHandler *handler, const VLooper *looper, status_t 
 }
 
 VMessenger::VMessenger(const char *signature, team_t team, status_t *error) {
-	_handler = NULL;
-	_looper = NULL;
+	_handler = 0;
+	_looper = 0;
 }
 
 VMessenger::VMessenger(const VMessenger &messenger) {
-	_handler = NULL;
-	_looper = NULL;
+	_handler = 0;
+	_looper = 0;
 }
 
 VMessenger::VMessenger(void) {
-	_handler = NULL;
-	_looper = NULL;
+	_handler = 0;
+	_looper = 0;
 }
 
 VMessenger::~VMessenger() {
@@ -55,14 +55,14 @@ bool VMessenger::IsValid(void) const {
 }
 
 bool VMessenger::LockTarget(void) const {
-	if (_looper != NULL) {
+	if (_looper) {
 		return _looper->Lock();
 	}
 	return false;
 }
 
 status_t VMessenger::LockTargetWithTimeout(bigtime_t timeout) const {
-	if (_looper != NULL) {
+	if (_looper) {
 		return _looper->LockWithTimeout(timeout);
 	}
 	return V_ERROR;
@@ -125,8 +125,10 @@ inline team_t VMessenger::Team(void) const {
 }
 
 VMessenger &VMessenger::operator =(const VMessenger& v) {
-	_looper = v._looper;
-	_handler = v._handler;
+	if (this != &v) {
+		_looper = v._looper;
+		_handler = v._handler;
+	}
 	return *this;
 }
 

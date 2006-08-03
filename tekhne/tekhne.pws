@@ -10,8 +10,22 @@ RunInTerminal=true
 [Project State]
 clean before build=false
 
+[filelist]
+0=/home/andrew/work/tekhne/trunk/tekhne/include/VFlattenable.h
+1=/home/andrew/work/tekhne/trunk/tekhne/src/VArchivable.cc
+
+[filenumbers]
+0=43
+1=54
+
+[filemarkers]
+0=
+1=
+
 [Project Tree]
 0=0
+1=0:0
+2=0:1
 
 [File Tree]
 0=0

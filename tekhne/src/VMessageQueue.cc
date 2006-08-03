@@ -66,7 +66,7 @@ VMessage *VMessageQueue::FindMessage(uint32_t what, int32_t index) const {
 			index--;
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 bool VMessageQueue::Lock(void) {
@@ -83,7 +83,7 @@ void VMessageQueue::Unlock(void) {
 
 VMessage *VMessageQueue::NextMessage(void) {
 	sem_wait(&_sem);
-	VMessage *m = NULL;
+	VMessage *m = 0;
 	m = (VMessage *)_list.FirstItem();
 	_list.RemoveItem(0);
 	return m;	

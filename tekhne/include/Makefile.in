@@ -170,10 +170,12 @@ target_alias = @target_alias@
 libtekhne_includedir = $(pkgincludedir)
 libtekhne_include_DATA = \
 	AppDefs.h\
+	ClassInfo.h\
 	StandardDefs.h\
 	VAppFileInfo.h\
 	VApplication.h\
 	VArchivable.h\
+	VAutoLock.h\
 	VBlockCache.h\
 	VDataIO.h\
 	VErrors.h\
@@ -195,6 +197,7 @@ libtekhne_include_DATA = \
 	VPositionIO.h\
 	VQuery.h\
 	VRect.h\
+	VStopWatch.h\
 	VString.h\
 	tekhne.h
 

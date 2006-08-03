@@ -28,15 +28,15 @@
 using namespace tekhne;
 
 VMemoryIO::VMemoryIO(void *buffer, size_t numBytes) {
-	buf = (uint8_t *)buffer;
-	constBuf = NULL;
+	buf = static_cast<uint8_t *>(buffer);
+	constBuf = 0;
 	bufferLen = numBytes;
 	curPosition = 0;
 }
 
 VMemoryIO::VMemoryIO(const void *buffer, size_t numBytes) {
-	buf = NULL;
-	constBuf = (const uint8_t *)buffer;
+	buf = 0;
+	constBuf = static_cast<uint8_t *>(const_cast<void *>(buffer));
 	bufferLen = numBytes;
 	curPosition = 0;
 }
@@ -92,7 +92,7 @@ ssize_t VMemoryIO::Write(const void *buffer, size_t numBytes) {
 }
 
 ssize_t VMemoryIO::WriteAt(off_t position, const void *buffer, size_t numBytes) {
-	if (buf == NULL) {
+	if (!buf) {
 		return V_NOT_ALLOWED;
 	}
 	if (position < 0) return 0;
