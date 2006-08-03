@@ -59,8 +59,8 @@ libtekhne_la_DEPENDENCIES =
 am_libtekhne_la_OBJECTS = VApplication.lo VArchivable.lo \
 	VBlockCache.lo VHandler.lo VList.lo VLocker.lo VLooper.lo \
 	VMallocIO.lo VMemoryIO.lo VMessage.lo VMessageFilter.lo \
-	VMessageQueue.lo VMessenger.lo VPoint.lo VRect.lo VStopWatch.lo \
-	VString.lo
+	VMessageQueue.lo VMessenger.lo VMessageRunner.lo VPoint.lo \
+	VRect.lo VStopWatch.lo VString.lo
 libtekhne_la_OBJECTS = $(am_libtekhne_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -210,6 +210,7 @@ libtekhne_la_SOURCES = \
 	VMessage.cc\
 	VMessageFilter.cc\
 	VMessageQueue.cc\
+	VMessageRunner.cc\
 	VMessenger.cc\
 	VPoint.cc\
 	VRect.cc\
@@ -300,6 +301,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VMessageFilter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VMessageQueue.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VMessenger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VMessageRunner.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VPoint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VRect.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VStopWatch.Plo@am__quote@

@@ -10,17 +10,23 @@ RunInTerminal=true
 [Project State]
 clean before build=false
 
-[filelist]
-0=/home/andrew/work/tekhne/trunk/tekhne/include/VFlattenable.h
-1=/home/andrew/work/tekhne/trunk/tekhne/src/VArchivable.cc
-
 [filenumbers]
-0=43
-1=54
+0=32
+1=41
+2=30
+3=27
 
 [filemarkers]
 0=
 1=
+2=
+3=
+
+[filelist]
+0=/home/andrew/work/tekhne/trunk/tekhne/src/VMessageRunner.cc
+1=/home/andrew/work/tekhne/trunk/tekhne/include/VMessageRunner.h
+2=/home/andrew/work/tekhne/trunk/tekhne/include/VFlattenable.h
+3=/home/andrew/work/tekhne/trunk/tekhne/src/VArchivable.cc
 
 [Project Tree]
 0=0

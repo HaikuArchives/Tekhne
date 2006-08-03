@@ -1,6 +1,8 @@
 /***************************************************************************
- *            tekhne.h
+ *            VmessageRunner.h
  *
+ * Copyright (c) 2006 Geoffrey Clements
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
@@ -21,29 +23,42 @@
  * 
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VMESSAGERUNNER_H
+#define _VMESSAGERUNNER_H
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
 #include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VFlattenable.h"
-#include "VMessageFilter.h"
 #include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
 #include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VStopWatch.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VMessageRunner {
+private:
+	VMessenger _target;
+	const VMessage *_message;
+	bigtime_t _interval;
+	int32_t _count;
+	VMessenger _replyTo;
+
+	pthread_t _thread;
+	pthread_attr_t _attr;
+
+	static void *loop_function(void *m);
+	static void *loop_function_with_reply(void *m);
+public:
+	VMessageRunner(VMessenger target, const VMessage *message, bigtime_t interval, int32_t count = -1);
+	VMessageRunner(VMessenger target, const VMessage *message, bigtime_t interval, int32_t count, VMessenger replyTo);
+	
+	virtual ~VMessageRunner();
+	
+	status_t GetInfo(bigtime_t *interval, int32_t *count) const;
+
+	status_t InitCheck(void) const;
+
+	status_t SetCount(int32_t count);
+	status_t SetInterval(bigtime_t interval);
+};
+
+}
+
+#endif /* _VMESSAGERUNNER_H */

@@ -29,6 +29,7 @@ libtekhne_la_SOURCES = \
 	VMessageFilter.cc\
 	VMessageQueue.cc\
 	VMessenger.cc\
+	VMessageRunner.cc\
 	VPoint.cc\
 	VRect.cc\
 	VString.cc\
