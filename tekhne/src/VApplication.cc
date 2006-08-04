@@ -29,6 +29,7 @@
 #include "VMessageQueue.h"
 #include "VAutoLock.h"
 #include <iostream>
+#include <sys/ipc.h>
 
 using namespace tekhne;
 using namespace std;
@@ -36,33 +37,47 @@ using namespace std;
 VApplication *tekhne::v_app = 0;
 VMessenger *tekhne::v_app_messenger = 0;
 
+namespace tekhne {
+static unsigned int const shift = 6;
+static int32_t const mask = ~0U << (32 - shift); // 32 == bitsizeof(int32_t)
+static inline int32_t hash(const char *s) {
+	int32_t result = 0;
+	for(uint32_t i=0; s[i] != 0; i++) {
+		result = (result&mask) ^ (result << shift) ^ s[i];
+	}
+	return result;
+}
+}
+
 VApplication::VApplication(const char *signature) :
-	VLooper(), _signature(signature) {
+	VLooper(), _signature(signature), _isLaunching(true) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
 	v_app = this;
+	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
 	InjectStartupMessages();
 }
 
 VApplication::VApplication(const char *signature, status_t *error) :
-	VLooper(), _signature(signature) {
+	VLooper(), _signature(signature), _isLaunching(true) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
 	v_app = this;
+	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
 	InjectStartupMessages();
 }
 
-VApplication::VApplication(VMessage *archive) : VLooper(archive) {
+VApplication::VApplication(VMessage *archive) : VLooper(archive), _isLaunching(true) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
@@ -70,6 +85,7 @@ VApplication::VApplication(VMessage *archive) : VLooper(archive) {
 	}
 	v_app = this;
 	archive->FindString("mime_sig", &_signature);
+	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
 	InjectStartupMessages();
@@ -94,7 +110,19 @@ void VApplication::ArgvReceived(int32_t argc, char **argv) {
 }
 
 status_t VApplication::GetAppInfo(app_info *theInfo) const {
-	return V_ERROR;
+	if (theInfo) {
+		theInfo->thread = pthread_self();
+		theInfo->team = 0; // this needs to be set to the process id
+		theInfo->port = 0;
+		theInfo->flags = 0;
+		if (_signature.CountChars() > V_MIME_TYPE_LENGTH) {
+			strncpy(theInfo->signature, _signature.String(), V_MIME_TYPE_LENGTH);
+		} else {
+			strcpy(theInfo->signature, _signature.String());
+		}
+		return V_OK;
+	}
+	return V_BAD_VALUE;
 }
 
 status_t VApplication::GetSupportedSuites(VMessage *message) {
@@ -102,7 +130,7 @@ status_t VApplication::GetSupportedSuites(VMessage *message) {
 }
 
 bool VApplication::IsLaunching(void) const {
-	return false;
+	return _isLaunching;
 }
 
 void VApplication::Pulse(void) {
@@ -208,6 +236,7 @@ thread_t VApplication::Run(void) {
 					break;
 				case V_READY_TO_RUN:
 					ReadyToRun();
+					_isLaunching = false;
 					break;
 				case V_REFS_RECEIVED:
 					// we'll never get this...

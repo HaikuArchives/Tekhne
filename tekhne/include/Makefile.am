@@ -16,7 +16,6 @@ libtekhne_include_DATA = \
 	VDataIO.h\
 	VErrors.h\
 	VFindDirectory.h\
-	VFlattenable.h\
 	VHandler.h\
 	VList.h\
 	VLocker.h\
@@ -37,6 +36,7 @@ libtekhne_include_DATA = \
 	tekhne.h\
 	ClassInfo.h\
 	VAutoLock.h\
-	VStopWatch.h
+	VStopWatch.h\
+	VMessageRunner.h
 
 EXTRA_DIST = $(libtekhne_include_DATA)

@@ -34,7 +34,6 @@
 #include "VMemoryIO.h"
 #include "VArchivable.h"
 #include "VArchivable.h"
-#include "VFlattenable.h"
 #include "VMessageFilter.h"
 #include "VMessage.h"
 #include "VMessageQueue.h"

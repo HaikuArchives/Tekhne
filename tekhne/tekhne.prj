@@ -97,7 +97,8 @@ module.include.files=\
 	tekhne.h\
 	ClassInfo.h\
 	VAutoLock.h\
-	VStopWatch.h
+	VStopWatch.h\
+	VMessageRunner.h
 
 module.source.name=src
 module.source.type=
@@ -118,7 +119,8 @@ module.source.files=\
 	VPoint.cc\
 	VRect.cc\
 	VString.cc\
-	VStopWatch.cc
+	VStopWatch.cc\
+	VMessageRunner.cc
 
 module.pixmap.name=pixmaps
 module.pixmap.type=

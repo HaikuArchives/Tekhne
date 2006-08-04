@@ -35,7 +35,6 @@
 
 namespace tekhne {
 
-class VFlattenable;
 class VMessenger;
 class VHandler;
 
@@ -71,7 +70,6 @@ public:
 	status_t AddMessage(const char *name, const VMessage *message);
 	status_t AddMessenger(const char *name, VMessenger *messenger);
 	status_t AddPointer(const char *name, const void *pointer);
-	status_t AddFlat(const char *name, VFlattenable *object, int32_t numItems = 1);
 	
 	status_t AddSpecifier(const VMessage *message);
 	status_t AddSpecifier(const char *property);
@@ -113,8 +111,6 @@ public:
 	status_t FindMessenger(const char *name, VMessenger *messenger) const;
 	status_t FindPointer(const char *name, int32_t index, void **pointer) const;
 	status_t FindPointer(const char *name, void **pointer) const;
-	status_t FindFlat(const char *name, int32_t index, VFlattenable *object) const;
-	status_t FindFlat(const char *name, VFlattenable *object) const;
 
 	status_t Flatten(VDataIO *object, ssize_t *numBytes = 0) const;
 	status_t Flatten(char *address, ssize_t numBytes = 0) const;
@@ -171,8 +167,6 @@ public:
 	status_t ReplaceMessenger(const char *name, int32_t index, VMessenger *messenger);
 	status_t ReplacePointer(const char *name, const void *pointer);
 	status_t ReplacePointer(const char *name, int32_t index, const void *pointer);
-	status_t ReplaceFlat(const char *name, VFlattenable *object);
-	status_t ReplaceFlat(const char *name, int32_t index, VFlattenable *object);
 	
 	VMessenger *ReturnAddress(void);
 	

@@ -202,10 +202,6 @@ status_t VMessage::AddPointer(const char *name, const void *pointer) {
 	return AddData(name, V_POINTER_TYPE, &pointer, sizeof(const void *), true, 1);
 }
 
-status_t VMessage::AddFlat(const char *name, VFlattenable *object, int32_t numItems) {
-	return AddData(name, V_FLAT_TYPE, &object, sizeof(const void *), true, 1);
-}
-
 status_t VMessage::AddSpecifier(const VMessage *message) {
 	return V_ERROR;
 }
@@ -461,15 +457,6 @@ status_t VMessage::FindPointer(const char *name, void **pointer) const {
 	return FindData(name, V_POINTER_TYPE, (const void**)pointer, &x);
 }
 
-status_t VMessage::FindFlat(const char *name, int32_t index, VFlattenable *object) const {
-	return V_ERROR;
-}
-
-status_t VMessage::FindFlat(const char *name, VFlattenable *object) const {
-	return V_ERROR;
-}
-
-
 status_t VMessage::Flatten(VDataIO *object, ssize_t *numBytes) const {
 	return V_ERROR;
 }
@@ -707,14 +694,6 @@ status_t VMessage::ReplacePointer(const char *name, const void *pointer) {
 
 status_t VMessage::ReplacePointer(const char *name, int32_t index, const void *pointer) {
 	return ReplaceData(name, V_POINTER_TYPE, index, &pointer, sizeof(void *));
-}
-
-status_t VMessage::ReplaceFlat(const char *name, VFlattenable *object) {
-	return V_ERROR;
-}
-
-status_t VMessage::ReplaceFlat(const char *name, int32_t index, VFlattenable *object) {
-	return V_ERROR;
 }
 
 VMessenger *VMessage::ReturnAddress(void) {

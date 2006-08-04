@@ -27,6 +27,7 @@
 #define _VAPPLICATION_H
 
 #include "VLooper.h"
+#include <sys/msg.h>
 
 namespace tekhne {
 
@@ -49,6 +50,8 @@ private:
 	void InjectStartupMessages(void);
 	pulse_thread *_pulse_thread;
 	VString _signature;
+	bool _isLaunching;
+	key_t _key; // msgport key
 public:
 	VApplication(const char *signature);
 	VApplication(const char *signature, status_t *error);
