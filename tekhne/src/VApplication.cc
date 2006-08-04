@@ -38,12 +38,19 @@ VApplication *tekhne::v_app = 0;
 VMessenger *tekhne::v_app_messenger = 0;
 
 namespace tekhne {
+/*
+ * This is lifted from the website for the book "Data Structures and Algorithms
+ * with Object-Oriented Design Patterns in C++" by Bruno Preiss. At some point
+ * it will need to get replaced.
+ */ 
 static unsigned int const shift = 6;
 static int32_t const mask = ~0U << (32 - shift); // 32 == bitsizeof(int32_t)
 static inline int32_t hash(const char *s) {
 	int32_t result = 0;
-	for(uint32_t i=0; s[i] != 0; i++) {
-		result = (result&mask) ^ (result << shift) ^ s[i];
+	if (s) {
+		for(uint32_t i=0; s[i] != 0; i++) {
+			result = (result&mask) ^ (result << shift) ^ s[i];
+		}
 	}
 	return result;
 }
