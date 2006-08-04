@@ -49,8 +49,9 @@ public:
 	}
 	
 	virtual void ReadyToRun(void) {
-	  VStopWatch sw("me");
+		VStopWatch sw("me");
 		std::cout << "ReadyToRun" << std::endl;
+		std::cout << "IsLaunching " << (IsLaunching()?"true":"false") << std::endl;
 		
 		CppUnit::TextUi::TestRunner runner;
 		runner.addTest( VListTest::suite() );
@@ -66,6 +67,7 @@ public:
 	
 	virtual void Pulse(void) {
 		std::cout << "Pulse" << std::endl;
+		std::cout << "IsLaunching " << (IsLaunching()?"true":"false") << std::endl;
 		Quit();
 	}
 	
