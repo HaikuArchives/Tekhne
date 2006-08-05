@@ -42,6 +42,8 @@ public:
 									&VMessageTest::testCreate ) );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VMessageTest>("testAdd",
 									&VMessageTest::testAdd ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VMessageTest>("testFlatten",
+									&VMessageTest::testFlatten ) );
 		return suiteOfTests;
 	}
 
@@ -50,6 +52,7 @@ public:
 
 	void testCreate();
 	void testAdd();
+	void testFlatten();
 };
 
 

@@ -24,6 +24,9 @@
  ****************************************************************************/
 
 #include "VBlockCacheTest.h"
+#include <iostream>
+
+using namespace std;
 
 void VBlockCacheTest::setUp() {
 	bc = new VBlockCache(5, 64, V_OBJECT_CACHE);

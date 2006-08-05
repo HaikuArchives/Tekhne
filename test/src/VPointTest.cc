@@ -26,6 +26,8 @@
 #include "VPointTest.h"
 #include <iostream>
 
+using namespace std;
+
 static inline bool cf(float x, float y) {
 	float z = x-y;
 	if (z < 0) z = -z; 

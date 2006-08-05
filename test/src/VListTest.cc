@@ -25,6 +25,9 @@
 
 #include "VListTest.h"
 #include <string.h>
+#include <iostream>
+
+using namespace std;
 
 void VListTest::setUp() {
 	l = new VList();

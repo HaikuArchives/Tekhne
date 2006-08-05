@@ -35,12 +35,12 @@ void VMessageTest::tearDown() {
 }
 
 void VMessageTest::testCreate() {
-	VMessage *msg = new VMessage(0);
+	VMessage *msg = new VMessage(V_PULSE);
 	delete msg;
 }
 
 void VMessageTest::testAdd() {
-	VMessage *msg = new VMessage(0);
+	VMessage *msg = new VMessage(V_PULSE);
 	msg->AddString("bar", "fann");
 	VString s;
 	CPPUNIT_ASSERT(msg->FindString("bar", &s) == V_OK);
@@ -73,5 +73,32 @@ void VMessageTest::testAdd() {
 	CPPUNIT_ASSERT(msg->ReplaceInt32("clip", 4, 44) == V_NAME_NOT_FOUND);
 	CPPUNIT_ASSERT(msg->FindInt32("clip", &i) == V_OK);
 	CPPUNIT_ASSERT( i == 18 );
+	
+	delete msg;
+}
+
+void VMessageTest::testFlatten() {
+	VMessage *msg = new VMessage(V_PULSE);
+
+	CPPUNIT_ASSERT(msg->AddInt32("clip", 18) == V_OK);
+	CPPUNIT_ASSERT(msg->AddString("foo", "desk") == V_OK);
+	CPPUNIT_ASSERT(msg->AddString("bar", "what the...?") == V_OK);
+	CPPUNIT_ASSERT(msg->AddBool("tag", true) == V_OK);
+	
+	VMallocIO mio;
+	int32_t  i;
+	VString s;
+	bool b;
+	CPPUNIT_ASSERT(msg->Flatten(&mio) == V_OK);
+	CPPUNIT_ASSERT(msg->Unflatten(&mio) == V_OK);
+	CPPUNIT_ASSERT(msg->FindInt32("clip", &i) == V_OK);
+	CPPUNIT_ASSERT( i == 18 );
+	CPPUNIT_ASSERT(msg->FindString("foo", &s) == V_OK);
+	const char *str = s.String();
+	CPPUNIT_ASSERT( strlen(str) == 4 );
+	CPPUNIT_ASSERT( strcmp(str, "desk") == 0 );
+	CPPUNIT_ASSERT(msg->FindBool("tag", &b) == V_OK);
+	CPPUNIT_ASSERT( b );
+	
 	delete msg;
 }

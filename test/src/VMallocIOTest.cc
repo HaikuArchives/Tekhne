@@ -27,6 +27,8 @@
 
 #include <iostream>
 
+using namespace std;
+
 void VMallocIOTest::setUp() {
 	mio = new VMallocIO();
 	buf = malloc(38);
