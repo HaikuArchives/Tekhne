@@ -244,6 +244,9 @@ void VList::SortItems(int (*compareFunc)(const void *, const void *)) {
 }
 
 VList& VList::operator =(const VList& l) {
-	VList *nl = new VList(l);
-	return *nl;
+	makeBuffer(l.bufferLen);
+	lastItem = l.lastItem;
+
+	memmove(items, &l.items, sizeof(void*)*(l.lastItem+1));
+	return *this;
 }
