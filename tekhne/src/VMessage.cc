@@ -32,19 +32,20 @@ using namespace std;
 
 static VBlockCache blockCache(100, sizeof(VMessage), V_MALLOC_CACHE);
 
-VMessage::VMessage(uint32_t command) : what(command){
+VMessage::VMessage(uint32_t command) : _isReply(false), what(command) {
 }
 
-VMessage::VMessage(const VMessage &message) : what(message.what) {
+VMessage::VMessage(const VMessage &message) : _isReply(false), what(message.what) {
 }
 
-VMessage::VMessage(void) : what(0){
+VMessage::VMessage(void) : _isReply(false), what(0) {
 }
 
 VMessage::~VMessage() {
 	MakeEmpty();
 }
 
+namespace tekhne {
 union Value {
 	bool b;
 	int8_t i8;
@@ -54,6 +55,16 @@ union Value {
 	float f;
 	double d;
 	const void *p;
+	struct {
+		float x;
+		float y;
+	} pt;
+	struct {
+		float top;
+		float left;
+		float bottom;
+		float right;
+	} r;
 };
 
 typedef struct storage_item {
@@ -101,6 +112,16 @@ typedef struct storage_item {
 			case V_DOUBLE_TYPE:
 				this->data.d = *((const double *)data);
 				break;
+			case V_POINT_TYPE:
+				this->data.pt.x = ((const VPoint *)data)->x;
+				this->data.pt.y = ((const VPoint *)data)->y;
+				break;
+			case V_RECT_TYPE:
+				this->data.r.top = ((const VRect *)data)->top;
+				this->data.r.left = ((const VRect *)data)->left;
+				this->data.r.bottom = ((const VRect *)data)->bottom;
+				this->data.r.right = ((const VRect *)data)->right;
+				break;
 			case V_POINTER_TYPE:
 			case V_MESSAGE_TYPE:
 			case V_MESSENGER_TYPE:
@@ -123,6 +144,8 @@ typedef struct storage_item {
 			case V_FLOAT_TYPE:
 			case V_DOUBLE_TYPE:
 			case V_POINTER_TYPE:
+			case V_POINT_TYPE:
+			case V_RECT_TYPE:
 			case V_MESSAGE_TYPE:
 			case V_MESSENGER_TYPE:
 				break;
@@ -132,9 +155,17 @@ typedef struct storage_item {
 	}
 } storage_item;
 
+static bool deleteItem(void *item) {
+	storage_item *si = static_cast<storage_item *>(item);
+	delete si;
+	return false;
+}
+
+}
+
 status_t VMessage::AddData(const char *name, type_code type, const void *data,
 	ssize_t numBytes, bool fixedSize, int32_t numItems) {
-	if(name && data && numBytes > 0) {
+	if(name && data && numBytes > 0 && type != V_ANY_TYPE) {
 		if (numItems > 0) {
 			if (l.AddItem(new storage_item(name, type, data, numBytes, fixedSize, numItems))) {
 				return V_OK;
@@ -183,11 +214,11 @@ status_t VMessage::AddString(const char *name, const VString &string) {
 }
 
 status_t VMessage::AddPoint(const char *name, VPoint point) {
-	return V_ERROR;
+	return AddData(name, V_POINT_TYPE, &point, sizeof(VPoint), true, 1);
 }
 
 status_t VMessage::AddRect(const char *name, VRect rect) {
-	return V_ERROR;
+	return AddData(name, V_RECT_TYPE, &rect, sizeof(VRect), true, 1);
 }
 
 status_t VMessage::AddMessage(const char *name, const VMessage *message) {
@@ -227,9 +258,12 @@ int32_t VMessage::CountNames(type_code type) const {
 }
 
 status_t VMessage::FindData(const char *name, type_code type, int32_t index, const void **data, ssize_t *numBytes) const {
+	if (index < 0) {
+		return V_BAD_INDEX;
+	}
 	for (int i=0;i<l.CountItems();i++) {
-		storage_item *si = (storage_item *)l.GetItem(i);
-		if (type == si->type && strcmp(name, si->name) == 0) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			switch(type) {
 				case V_BOOL_TYPE:
 					**(bool**)data = si->data.b;
@@ -251,6 +285,12 @@ status_t VMessage::FindData(const char *name, type_code type, int32_t index, con
 					break;
 				case V_DOUBLE_TYPE:
 					**(double**)data = si->data.d;
+					break;
+				case V_POINT_TYPE:
+					(*((VPoint**)data))->Set(si->data.pt.x, si->data.pt.y);
+					break;
+				case V_RECT_TYPE:
+					(*((VRect**)data))->Set(si->data.r.left, si->data.r.top, si->data.r.right, si->data.r.bottom);
 					break;
 				case V_POINTER_TYPE:
 				case V_MESSAGE_TYPE:
@@ -272,8 +312,8 @@ status_t VMessage::FindData(const char *name, type_code type, int32_t index, con
 
 status_t VMessage::FindData(const char *name, type_code type, const void **data, ssize_t *numBytes) const {
 	for (int i=0;i<l.CountItems();i++) {
-		storage_item *si = (storage_item *)l.GetItem(i);
-		if (type == si->type && strcmp(name, si->name) == 0) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			switch(type) {
 				case V_BOOL_TYPE:
 					**(bool**)data = si->data.b;
@@ -295,6 +335,12 @@ status_t VMessage::FindData(const char *name, type_code type, const void **data,
 					break;
 				case V_DOUBLE_TYPE:
 					**(double**)data = si->data.d;
+					break;
+				case V_POINT_TYPE:
+					(*((VPoint**)data))->Set(si->data.pt.x, si->data.pt.y);
+					break;
+				case V_RECT_TYPE:
+					(*((VRect**)data))->Set(si->data.r.left, si->data.r.top, si->data.r.right, si->data.r.bottom);
 					break;
 				case V_POINTER_TYPE:
 				case V_MESSAGE_TYPE:
@@ -412,19 +458,23 @@ status_t VMessage::FindString(const char *name, int32_t index, VString *string) 
 }
 
 status_t VMessage::FindPoint(const char *name, int32_t index, VPoint *point) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_POINT_TYPE, index, (const void**)&point, &x);
 }
 
 status_t VMessage::FindPoint(const char *name, VPoint *point) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_POINT_TYPE, (const void**)&point, &x);
 }
 
 status_t VMessage::FindRect(const char *name, int32_t index, VRect *rect) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_RECT_TYPE, index, (const void**)&rect, &x);
 }
 
 status_t VMessage::FindRect(const char *name, VRect *rect) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_RECT_TYPE, (const void**)&rect, &x);
 }
 
 
@@ -432,19 +482,23 @@ status_t VMessage::FindRect(const char *name, VRect *rect) const {
 // status_t FindRef(const char *name, entry_ref *ref) const;
 
 status_t VMessage::FindMessage(const char *name, int32_t index, VMessage *message) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_MESSAGE_TYPE, index, (const void**)message, &x);
 }
 
 status_t VMessage::FindMessage(const char *name, VMessage *message) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_MESSAGE_TYPE, (const void**)message, &x);
 }
 
 status_t VMessage::FindMessenger(const char *name, int32_t index, VMessenger *messenger) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_MESSENGER_TYPE, index, (const void**)messenger, &x);
 }
 
 status_t VMessage::FindMessenger(const char *name, VMessenger *messenger) const {
-	return V_ERROR;
+	ssize_t x;
+	return FindData(name, V_MESSENGER_TYPE, (const void**)messenger, &x);
 }
 
 status_t VMessage::FindPointer(const char *name, int32_t index, void **pointer) const {
@@ -486,15 +540,53 @@ status_t VMessage::PopSpecifier(void) {
 }
 
 status_t VMessage::GetInfo(const char *name, type_code *typeFound, int32_t *countFound) const {
-	return V_ERROR;
+	*countFound = 0;
+	*typeFound = 0;
+	for (int i=0;i<l.CountItems();i++) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		if (strcmp(name, si->name) == 0) {
+			if (*typeFound == 0) {
+				*typeFound++;
+				*countFound++;
+			} else if (*typeFound == si->type) {
+				*countFound++;
+			}
+		}
+	}
+	return V_OK;
 }
 
 status_t VMessage::GetInfo(const char *name, type_code *typeFound, bool *fixedSize) const {
-	return V_ERROR;
+	*fixedSize = false;
+	*typeFound = 0;
+	for (int i=0;i<l.CountItems();i++) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		if (strcmp(name, si->name) == 0) {
+			*typeFound = si->type;
+			*fixedSize = si->fixedSize;
+			return V_OK;
+		}
+	}
+	return V_NAME_NOT_FOUND;
 }
 
 status_t VMessage::GetInfo(type_code type, int32_t index, char **nameFound, type_code *typeFound, int32_t *countFound) const {
-	return V_ERROR;
+	if (index < 0) {
+		return V_BAD_INDEX;
+	}
+	for (int i=0;i<l.CountItems();i++) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		if (type == V_ANY_TYPE || type == si->type) {
+			if (index == 0) {
+				*nameFound = si->name;
+				*typeFound = si->type;
+				*countFound = 1;
+				return V_OK;
+			}
+			index--;
+		}
+	}
+	return V_NAME_NOT_FOUND;
 }
 
 
@@ -504,12 +596,6 @@ bool VMessage::HasSpecifiers(void) const {
 
 
 bool VMessage::IsSystem(void) const {
-	return false;
-}
-
-static bool deleteItem(void *item) {
-	storage_item *si = (storage_item *)item;
-	delete si;
 	return false;
 }
 
@@ -523,14 +609,53 @@ bool VMessage::IsEmpty(void) const {
 	return l.IsEmpty();
 }
 
+namespace tekhne {
+	typedef struct msg_print_item {
+		char *name;
+		type_code type;
+		int32_t count;
+	} msg_print_item;
+	
+	bool print_msg_item(void *i, void *c) {
+		msg_print_item *mpi = static_cast<msg_print_item *>(i);
+		cout << *(static_cast<int *>(c)) <<" "<< mpi->name<<", type = "<<mpi->type<<", count = "<<mpi->count << endl;
+		delete mpi;
+		(*(static_cast<int *>(c)))++;
+		return false;
+	}
+}
+
 void VMessage::PrintToStream(void) const {
-	cout << "VMessage: "<< endl;
+	cout << "VMessage: "<<what<< endl;
+	VList pi;
+	for (int i=0; i<l.CountItems();i++) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		bool found = false;
+		for (int j=0; j<pi.CountItems();j++) {
+			msg_print_item *mpi = static_cast<msg_print_item *>(pi.GetItem(j));
+			if (strcmp(mpi->name, si->name) == 0) {
+				found = true;
+				mpi->count++;
+				break;
+			}
+		}
+		if (!found) {
+			msg_print_item *mpi = new msg_print_item();
+			mpi->name = si->name;
+			mpi->type = si->type;
+			mpi->count = 1;
+			pi.AddItem(mpi);
+		}
+	}
+	int32_t count = 0;
+	pi.DoForEach(tekhne::print_msg_item, &count);
+
 }
 
 
 status_t VMessage::RemoveName(const char *name) {
 	for (int i=l.CountItems()-1;i>0;i--) {
-		storage_item *si = (storage_item *)l.GetItem(i);
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
 		if (strcmp(name, si->name) == 0) {
 			l.RemoveItem(i);
 			delete si;
@@ -544,7 +669,7 @@ status_t VMessage::RemoveData(const char *name, int32_t index) {
 		return V_BAD_INDEX;
 	}
 	for (int i=0; i<l.CountItems();i++) {
-		storage_item *si = (storage_item *)l.GetItem(i);
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
 		if (strcmp(name, si->name) == 0) {
 			if (index == 0) {
 				l.RemoveItem(i);
@@ -560,8 +685,8 @@ status_t VMessage::RemoveData(const char *name, int32_t index) {
 
 status_t VMessage::ReplaceData(const char *name, type_code type, const void *data, ssize_t numBytes) {
 	for (int i=0; i<l.CountItems();i++) {
-		storage_item *si = (storage_item *)l.GetItem(i);
-		if (type == si->type && strcmp(name, si->name) == 0) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			l.ReplaceItem(i, new storage_item(name, type, data, numBytes, false, 1));
 			delete si;
 			return V_OK;
@@ -575,9 +700,10 @@ status_t VMessage::ReplaceData(const char *name, type_code type, int32_t index, 
 		return V_BAD_INDEX;
 	}
 	for (int i=0; i<l.CountItems();i++) {
-		storage_item *si = (storage_item *)l.GetItem(i);
-		if (type == si->type && strcmp(name, si->name) == 0) {
+		storage_item *si = static_cast<storage_item *>(l.GetItem(i));
+		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			if (index == 0) {
+				if (type == V_ANY_TYPE) type = si->type;
 				l.ReplaceItem(i, new storage_item(name, type, data, numBytes, false, 1));
 				delete si;
 				return V_OK;
@@ -654,38 +780,38 @@ status_t VMessage::ReplaceString(const char *name, int32_t index, const char *st
 }
 
 status_t VMessage::ReplacePoint(const char *name, VPoint point) {
-	return V_ERROR;
+	return ReplaceData(name, V_POINT_TYPE, &point, sizeof(VPoint));
 }
 
 status_t VMessage::ReplacePoint(const char *name, int32_t index, VPoint point) {
-	return V_ERROR;
+	return ReplaceData(name, V_POINT_TYPE, index, &point, sizeof(VPoint));
 }
 
 status_t VMessage::ReplaceRect(const char *name, VRect rect) {
-	return V_ERROR;
+	return ReplaceData(name, V_RECT_TYPE, &rect, sizeof(VRect));
 }
 
 status_t VMessage::ReplaceRect(const char *name, int32_t index, VRect rect) {
-	return V_ERROR;
+	return ReplaceData(name, V_RECT_TYPE, index, &rect, sizeof(VRect));
 }
 
 // status_t ReplaceRef(const char *name, entry_ref *ref);
 // status_t ReplaceRef(const char *name, int32_t index, entry_ref *ref);
 
 status_t VMessage::ReplaceMessage(const char *name, VMessage *message) {
-	return V_ERROR;
+	return ReplaceData(name, V_MESSAGE_TYPE, &message, sizeof(void *));
 }
 
 status_t VMessage::ReplaceMessage(const char *name, int32_t index, VMessage *message) {
-	return V_ERROR;
+	return ReplaceData(name, V_MESSAGE_TYPE, index, &message, sizeof(void *));
 }
 
 status_t VMessage::ReplaceMessenger(const char *name, VMessenger *messenger) {
-	return V_ERROR;
+	return ReplaceData(name, V_MESSENGER_TYPE, &messenger, sizeof(void *));
 }
 
 status_t VMessage::ReplaceMessenger(const char *name, int32_t index, VMessenger *messenger) {
-	return V_ERROR;
+	return ReplaceData(name, V_MESSENGER_TYPE, index, &messenger, sizeof(void *));
 }
 
 status_t VMessage::ReplacePointer(const char *name, const void *pointer) {
@@ -730,7 +856,7 @@ bool VMessage::IsSourceWaiting(void) const {
 }
 
 bool VMessage::IsReply(void) const {
-	return false;
+	return _isReply;
 }
 
 const VMessage *VMessage::Previous(void) const {
@@ -753,10 +879,24 @@ VMessage &VMessage::operator =(const VMessage& msg){
 	return *this;
 }
 
-void *VMessage::operator new(size_t numBytes) {
-	return blockCache.Get(numBytes);
+void *VMessage::operator new(size_t numBytes) throw () {
+	new_handler h = set_new_handler(0);
+	set_new_handler(h);
+	while(1) {
+		void *ptr = blockCache.Get(numBytes);
+		if (ptr) {
+			return ptr;
+		}
+		if (h) {
+			(*h)();
+		} else {
+			throw std::bad_alloc();
+		}
+	}
 }
 
 void VMessage::operator delete(void *memory, size_t numBytes) {
-	return blockCache.Save(memory, numBytes);
+	if (memory) {
+		return blockCache.Save(memory, numBytes);
+	}
 }

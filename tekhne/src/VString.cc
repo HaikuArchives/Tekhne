@@ -72,7 +72,7 @@ VString::VString(const VString &string) : buf(0), bufferLocked(false) {
 
 VString::~VString() {
 	assert(!bufferLocked);
-	delete buf;
+	delete [] buf;
 }
 
 VString &VString::Append(const VString &source, int32_t charCount) {
@@ -92,7 +92,7 @@ VString &VString::Append(const char *source, int32_t charCount) {
 		makeBuffer(newLen, false);
 		memmove(buf, oldBuf, oldLen);
 		memmove(buf+oldLen, source, charCount);
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -108,7 +108,7 @@ VString &VString::Append(char c, int32_t charCount) {
 			charCount--;
 			buf[oldLen+charCount] = c;
 		}
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -131,7 +131,7 @@ VString &VString::Prepend(const char *source) {
 		makeBuffer(newLen, false);
 		memmove(buf+sourceLen, oldBuf, oldLen);
 		memmove(buf, source, sourceLen);
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -149,7 +149,7 @@ VString &VString::Prepend(const char *source, int32_t charCount) {
 		makeBuffer(newLen, false);
 		memmove(buf+charCount, oldBuf, oldLen);
 		memmove(buf, source, charCount);
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -166,7 +166,7 @@ VString &VString::Prepend(char c, int32_t charCount) {
 			charCount--;
 			buf[charCount] = c;
 		}
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -200,7 +200,7 @@ VString &VString::Insert(const char *source, int32_t insertAt) {
 		memmove(buf+sourceLen+insertAt, oldBuf+insertAt, oldLen-insertAt);
 		memmove(buf+insertAt, source, sourceLen);
 		
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -226,7 +226,7 @@ VString &VString::Insert(const char *source, int32_t charCount, int32_t insertAt
 		memmove(buf+sourceLen+insertAt, oldBuf+insertAt, oldLen-insertAt);
 		memmove(buf+insertAt, source, sourceLen);
 		
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -265,7 +265,7 @@ VString &VString::Insert(char c, int32_t charCount, int32_t insertAt) {
 		for (int i=0;i<charCount;i++) {
 			buf[insertAt+i] = c;
 		}
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return *this;
 }
@@ -288,7 +288,7 @@ VString &VString::CharacterEscape(const char *original, const char *setOfCharsTo
 				s[j++] = c;
 			}
 			SetTo(s);
-			delete s;
+			delete [] s;
 			return *this;
 		}
 	}
@@ -313,7 +313,7 @@ VString &VString::CharacterEscape(const char *setOfCharsToEscape, char escapeWit
 				s[j++] = c;
 			}
 			SetTo(s);
-			delete s;
+			delete [] s;
 		}
 	}
 	return *this;
@@ -332,7 +332,7 @@ VString &VString::CharacterDeescape(const char *original, char escapeWithChar) {
 				}
 			}
 			SetTo(s);
-			delete s;
+			delete [] s;
 			return *this;
 		}
 	}
@@ -351,7 +351,7 @@ VString &VString::CharacterDeescape(char escapeWithChar) {
 			}
 		}
 		SetTo(s);
-		delete s;
+		delete [] s;
 		return *this;
 	}
 	return *this;
@@ -573,7 +573,7 @@ char *VString::LockBuffer(int32_t maxLength) {
 		char *oldBuf = buf;
 		makeBuffer(maxLength+1, false);
 		memmove(buf, oldBuf, oldLen);
-		delete oldBuf;
+		delete [] oldBuf;
 	}
 	return buf;
 }
@@ -585,7 +585,7 @@ VString &VString::UnlockBuffer(int32_t length) {
 		char *oldBuf = buf;
 		makeBuffer(length+1, false);
 		memmove(buf, oldBuf, oldLen);
-		delete oldBuf;
+		delete [] oldBuf;
 	} else {
 		makeBuffer(1);
 	}

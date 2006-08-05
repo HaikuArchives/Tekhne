@@ -32,6 +32,7 @@
 #include "VPoint.h"
 #include "VDataIO.h"
 #include "VList.h"
+#include <new>
 
 namespace tekhne {
 
@@ -41,6 +42,7 @@ class VHandler;
 class VMessage {
 private:
 	VList l;
+	bool _isReply;
 public:
 	uint32_t what;
 
@@ -185,7 +187,7 @@ public:
 	VPoint DropPoint(VPoint *offset = 0) const;
 	
 	VMessage &operator =(const VMessage& msg);
-	void *operator new(size_t numBytes);
+	void *operator new(size_t numBytes) throw ();
 	void operator delete(void *memory, size_t numBytes);
 };
 

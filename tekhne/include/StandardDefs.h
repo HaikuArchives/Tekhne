@@ -53,20 +53,21 @@ const int32_t V_REAL_TIME_PRIORITY = 5;
 
 
 // type codes	
-const int32_t V_BOOL_TYPE = 1;
-const int32_t V_INT8_TYPE = 2;
-const int32_t V_INT16_TYPE = 3;
-const int32_t V_INT32_TYPE = 4;
-const int32_t V_INT64_TYPE = 5;
-const int32_t V_FLOAT_TYPE = 6;
-const int32_t V_DOUBLE_TYPE = 7;
-const int32_t V_POINT_TYPE = 8;
-const int32_t V_RECT_TYPE = 9;
-const int32_t V_STRING_TYPE = 10;
-const int32_t V_MESSAGE_TYPE = 11;
-const int32_t V_MESSENGER_TYPE = 12;
-const int32_t V_POINTER_TYPE = 13;
-const int32_t V_FLAT_TYPE = 14;
+const type_code V_BOOL_TYPE = 1;
+const type_code V_INT8_TYPE = 2;
+const type_code V_INT16_TYPE = 3;
+const type_code V_INT32_TYPE = 4;
+const type_code V_INT64_TYPE = 5;
+const type_code V_FLOAT_TYPE = 6;
+const type_code V_DOUBLE_TYPE = 7;
+const type_code V_POINT_TYPE = 8;
+const type_code V_RECT_TYPE = 9;
+const type_code V_STRING_TYPE = 10;
+const type_code V_MESSAGE_TYPE = 11;
+const type_code V_MESSENGER_TYPE = 12;
+const type_code V_POINTER_TYPE = 13;
+// match any type
+const type_code V_ANY_TYPE = 14;
 
 // random constants
 const int32_t V_NAME_LENGTH = 255;

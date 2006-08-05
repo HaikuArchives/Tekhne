@@ -40,7 +40,7 @@ private:
 	bool bufferLocked;
 	inline void makeBuffer(int32_t count, bool deleteBuffer=true) {
 		bufferLen = count;
-		if (deleteBuffer && buf != 0) delete buf;
+		if (deleteBuffer && buf != 0) delete [] buf;
 		buf = new char[count];
 		bzero(buf, count);
 	}
@@ -67,7 +67,7 @@ public:
 			makeBuffer(newLen, false);
 			memmove(buf, oldBuf, oldLen);
 			memmove(buf+oldLen, source, sourceLen);
-			delete oldBuf;
+			delete [] oldBuf;
 		}
 		return *this;
 	}

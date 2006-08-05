@@ -53,7 +53,7 @@ bool VList::AddItem(void *item, int32_t index) {
 		int32_t oldLen =  bufferLen;
 		makeBuffer(index);
 		memmove(items, oldItems, sizeof(void*)*oldLen);
-		delete oldItems;
+		delete [] oldItems;
 	} else if (items[index]) {
 		if (lastItem+1 > bufferLen) {
 			void ** oldItems = items;
@@ -227,7 +227,7 @@ void *VList::ReplaceItem(int32_t index, void *item) {
 		int32_t oldLen =  bufferLen;
 		makeBuffer(index);
 		memmove(items, oldItems, sizeof(void*)*oldLen);
-		delete oldItems;
+		delete [] oldItems;
 	}
 	items[index] = item;
 	if (index > lastItem) {
