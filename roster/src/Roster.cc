@@ -1,5 +1,5 @@
 /***************************************************************************
- *            main.cc
+ *            Roster.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
  * 
@@ -23,12 +23,15 @@
  ****************************************************************************/
 
 #include "Roster.h"
-#include <iostream>
 
-int main()
-{
-	Roster *r = new Roster();
-	r->Run();
-	delete r;
-	return 0;
+using namespace tekhne;
+
+Roster::Roster() : VApplication("app/x-baldmountain-roster") {
+}
+
+Roster::~Roster() {
+}
+
+void Roster::ReadyToRun(void) {
+	Quit();
 }

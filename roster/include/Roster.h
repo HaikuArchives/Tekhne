@@ -1,5 +1,5 @@
 /***************************************************************************
- *            main.cc
+ *            Roster.h
  *
  * Copyright (c) 2006 Geoffrey Clements
  * 
@@ -22,13 +22,18 @@
  * IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "Roster.h"
-#include <iostream>
+#include "tekhne.h"
 
-int main()
-{
-	Roster *r = new Roster();
-	r->Run();
-	delete r;
-	return 0;
-}
+#ifndef _ROSTER_H
+#define _ROSTER_H
+
+class Roster : public tekhne::VApplication {
+private:
+public:
+	Roster();
+	virtual ~Roster();
+	
+	virtual void ReadyToRun(void);
+};
+
+#endif /* _ROSTER_H */

@@ -4,18 +4,25 @@
 ## If you don't want it to overwrite it,
 ## 	Please disable it in the Anjuta project configuration
 
-INCLUDES =
+INCLUDES =\
+	 -I../include -I../../tekhne/include
 
 AM_CXXFLAGS =\
+	 -D__STDC_LIMIT_MACROS\
+	-pthread\
 	 -Wall\
 	 -g
 
 bin_PROGRAMS = roster
 
 roster_SOURCES = \
-	main.cc
+	main.cc\
+	Roster.cc
 
-roster_LDFLAGS = 
+roster_LDFLAGS = \
+	-pthread\
+	 -L../../tekhne/src
 
-roster_LDADD = 
+roster_LDADD = \
+	 -ltekhne
 
