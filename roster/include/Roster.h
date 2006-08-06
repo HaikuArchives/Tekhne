@@ -23,17 +23,32 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include <sys/msg.h>
+#include <sys/ipc.h>
 
 #ifndef _ROSTER_H
 #define _ROSTER_H
 
+const int32_t V_ROSTER_REGISTER = 3000;
+const int32_t V_ROSTER_ACTIVATE = 3001;
+const int32_t V_ROSTER_TEAM_FOR = 3002;
+const int32_t V_ROSTER_IS_RUNNING = 3003;
+const int32_t V_ROSTER_START_WATCHING = 3004;
+const int32_t V_ROSTER_STOP_WATCHING = 3005;
+const int32_t V_ROSTER_LAUNCH = 3006;
+const int32_t V_ROSTER_APP_LIST = 3007;
+const int32_t V_ROSTER_APP_INFO = 3008;
+const int32_t V_ROSTER_BROADCAST = 3009;
+
 class Roster : public tekhne::VApplication {
 private:
+	tekhne::VList _runningApps;
 public:
 	Roster();
 	virtual ~Roster();
 	
 	virtual void ReadyToRun(void);
+	virtual void MessageReceived(tekhne::VMessage *message);
 };
 
 #endif /* _ROSTER_H */

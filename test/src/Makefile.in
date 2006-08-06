@@ -53,7 +53,8 @@ PROGRAMS = $(bin_PROGRAMS)
 am_test_OBJECTS = main.$(OBJEXT) ThreadTest.$(OBJEXT) \
 	VBlockCacheTest.$(OBJEXT) VMallocIOTest.$(OBJEXT) \
 	VMessageTest.$(OBJEXT) VPointTest.$(OBJEXT) \
-	VStringTest.$(OBJEXT) VListTest.$(OBJEXT)
+	VStringTest.$(OBJEXT) VListTest.$(OBJEXT) \
+	VMessengerTest.$(OBJEXT)
 test_OBJECTS = $(am_test_OBJECTS)
 test_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -198,7 +199,8 @@ test_SOURCES = \
 	VMessageTest.cc\
 	VPointTest.cc\
 	VStringTest.cc\
-	VListTest.cc
+	VListTest.cc \
+	VMessengerTest.cc
 
 test_LDFLAGS = \
 	 -L../../tekhne/src
@@ -284,6 +286,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VMessageTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VPointTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VStringTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VMessengerTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .cc.o:

@@ -33,5 +33,29 @@ Roster::~Roster() {
 }
 
 void Roster::ReadyToRun(void) {
-	Quit();
+}
+
+void Roster::MessageReceived(VMessage *message) {
+	switch(message->what) {
+		case V_ROSTER_REGISTER:
+			break;
+		case V_ROSTER_ACTIVATE:
+			break;
+		case V_ROSTER_TEAM_FOR:
+			break;
+		case V_ROSTER_IS_RUNNING:
+			break;
+		case V_ROSTER_START_WATCHING:
+			break;
+		case V_ROSTER_STOP_WATCHING:
+			break;
+		case V_ROSTER_LAUNCH:
+			break;
+		case V_ROSTER_APP_LIST:
+			break;
+		case V_ROSTER_APP_INFO:
+			break;
+		case V_ROSTER_BROADCAST:
+			break;
+	}
 }

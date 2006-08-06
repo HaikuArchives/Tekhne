@@ -13,6 +13,7 @@ test_include_DATA = \
 	VMessageTest.h\
 	VPointTest.h\
 	VStringTest.h\
-	VListTest.h
+	VListTest.h \
+	VMessengerTest.h
 
 EXTRA_DIST = $(test_include_DATA)

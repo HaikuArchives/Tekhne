@@ -39,6 +39,11 @@ class VMessenger {
 private:
 	VHandler *_handler;
 	VLooper *_looper;
+	bool _localTarget;
+	key_t _key; // msgport key
+	int32_t _msgport;
+	bool _isValid;
+	
 public:
 	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);
 	VMessenger(const char *signature, team_t team = -1, status_t *error = 0);

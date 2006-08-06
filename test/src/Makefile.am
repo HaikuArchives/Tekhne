@@ -23,7 +23,8 @@ test_SOURCES = \
 	VMessageTest.cc\
 	VPointTest.cc\
 	VStringTest.cc\
-	VListTest.cc
+	VListTest.cc \
+	VMessengerTest.cc
 
 test_LDFLAGS = \
 	 -L../../tekhne/src

@@ -38,7 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
+	$(top_srcdir)/configure AUTHORS ChangeLog LICENSE NEWS \
 	TODO acconfig.h config.guess config.sub depcomp install-sh \
 	ltmain.sh missing
 subdir = .
@@ -196,10 +196,9 @@ SUBDIRS = include src
 libtekhnedocdir = ${prefix}/doc/tekhne
 libtekhnedoc_DATA = \
 	README\
-	COPYING\
 	AUTHORS\
 	ChangeLog\
-	INSTALL\
+	LICENSE\
 	NEWS\
 	TODO
 

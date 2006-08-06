@@ -11,7 +11,7 @@ RunInTerminal=true
 clean before build=false
 
 [filenumbers]
-0=76
+0=91
 1=44
 2=26
 
@@ -19,9 +19,6 @@ clean before build=false
 0=
 1=
 2=
-
-[filelist]
-0=/home/clements/work/tekhne/trunk/test/src/main.cc
 
 [Project Tree]
 0=0

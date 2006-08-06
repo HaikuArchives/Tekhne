@@ -30,6 +30,7 @@
 #include "VPointTest.h"
 #include "ThreadTest.h"
 #include "VMessageTest.h"
+#include "VMessengerTest.h"
 
 #include "VApplication.h"
 
@@ -62,6 +63,7 @@ public:
 		runner.addTest( VRectTest::suite() );
 		runner.addTest( ThreadTest::suite() );
 		runner.addTest( VMessageTest::suite() );
+		runner.addTest( VMessengerTest::suite() );
 		runner.run();
 	}
 	

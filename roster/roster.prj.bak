@@ -66,11 +66,14 @@ preferences.indent.closing=0
 
 module.include.name=include
 module.include.type=
-module.include.files=
+module.include.files=\
+	Roster.h
 
 module.source.name=src
 module.source.type=
-module.source.files=
+module.source.files=\
+	main.cc\
+	Roster.cc
 
 module.pixmap.name=pixmaps
 module.pixmap.type=
@@ -91,17 +94,22 @@ module.doc.files=
 module.po.files=
 
 compiler.options.supports=
-compiler.options.include.paths=
-compiler.options.library.paths=
-compiler.options.libraries=
-compiler.options.libraries.selected=
-compiler.options.defines=
-compiler.options.defines.selected=
+compiler.options.include.paths=\
+	../include\
+	../../tekhne/include
+compiler.options.library.paths=\
+	../../tekhne/src
+compiler.options.libraries=\
+	tekhne
+compiler.options.libraries.selected=1 
+compiler.options.defines=\
+	__STD_LIMIT_MACROS
+compiler.options.defines.selected=1 
 compiler.options.warning.buttons=0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 
 compiler.options.optimize.buttons=1 0 0 0 
 compiler.options.other.buttons=1 0 
-compiler.options.other.c.flags=
-compiler.options.other.l.flags=
+compiler.options.other.c.flags=-pthread
+compiler.options.other.l.flags=-pthread
 compiler.options.other.l.libs=
 
 project.src.paths=

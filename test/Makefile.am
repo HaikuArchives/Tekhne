@@ -8,10 +8,9 @@ SUBDIRS = include src
 testdocdir = ${prefix}/doc/test
 testdoc_DATA = \
 	README\
-	COPYING\
 	AUTHORS\
 	ChangeLog\
-	INSTALL\
+	LICENSE\
 	NEWS\
 	TODO
 

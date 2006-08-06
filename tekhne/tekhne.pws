@@ -11,22 +11,28 @@ RunInTerminal=true
 clean before build=false
 
 [filenumbers]
-0=32
-1=41
-2=30
-3=27
+0=1
+1=55
+2=94
+3=2
+4=43
+5=43
+6=54
 
 [filemarkers]
 0=
 1=
 2=
 3=
+4=
+5=
+6=
 
 [filelist]
-0=/home/andrew/work/tekhne/trunk/tekhne/src/VMessageRunner.cc
-1=/home/andrew/work/tekhne/trunk/tekhne/include/VMessageRunner.h
-2=/home/andrew/work/tekhne/trunk/tekhne/include/VFlattenable.h
-3=/home/andrew/work/tekhne/trunk/tekhne/src/VArchivable.cc
+0=/home/andrew/work/tekhne/trunk/tekhne/include/VMessenger.h
+1=/home/andrew/work/tekhne/trunk/tekhne/include/VApplication.h
+2=/home/andrew/work/tekhne/trunk/tekhne/src/VApplication.cc
+3=/home/andrew/work/tekhne/trunk/tekhne/include/AppDefs.h
 
 [Project Tree]
 0=0

@@ -33,6 +33,7 @@ namespace tekhne {
 
 class VMessage;
 class pulse_thread;
+class msg_thread;
 	
 typedef struct app_info {
 	thread_t thread;
@@ -47,11 +48,15 @@ typedef struct app_info {
 
 class VApplication : public VLooper {
 private:
-	void InjectStartupMessages(void);
 	pulse_thread *_pulse_thread;
 	VString _signature;
 	bool _isLaunching;
 	key_t _key; // msgport key
+	int32_t _msgport;
+	msg_thread *_msg_thread;
+
+	void InjectStartupMessages(void);
+	int32_t open_msg_port();
 public:
 	VApplication(const char *signature);
 	VApplication(const char *signature, status_t *error);
@@ -102,6 +107,24 @@ public:
 
 extern VApplication *v_app;
 extern VMessenger *v_app_messenger;
+
+/*
+ * This is lifted from the website for the book "Data Structures and Algorithms
+ * with Object-Oriented Design Patterns in C++" by Bruno Preiss. At some point
+ * it will need to get replaced.
+ */ 
+static unsigned int const shift = 6;
+static uint16_t const mask = ~0U << (16 - shift); // 16 == bitsizeof(int16_t)
+static inline uint16_t hash(const char *s) {
+	uint16_t result = 0;
+	if (s && strlen(s) > 0) {
+		for(uint32_t i=0; s[i] != 0; i++) {
+			result = (result&mask) ^ (result << shift) ^ s[i];
+		}
+	}
+	return result;
+}
+
 }
 
 #endif /* _VAPPLICATION_H */

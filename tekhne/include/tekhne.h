@@ -43,6 +43,7 @@
 #include "VAutoLock.h"
 #include "VMessenger.h"
 #include "VMessageRunner.h"
+#include "VApplication.h"
 #include "VStopWatch.h"
 
 #endif /* _TEKHNE_H */

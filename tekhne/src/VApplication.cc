@@ -28,6 +28,7 @@
 #include "VApplication.h"
 #include "VMessageQueue.h"
 #include "VAutoLock.h"
+#include "VMemoryIO.h"
 #include <iostream>
 #include <sys/ipc.h>
 
@@ -37,27 +38,51 @@ using namespace std;
 VApplication *tekhne::v_app = 0;
 VMessenger *tekhne::v_app_messenger = 0;
 
-namespace tekhne {
-/*
- * This is lifted from the website for the book "Data Structures and Algorithms
- * with Object-Oriented Design Patterns in C++" by Bruno Preiss. At some point
- * it will need to get replaced.
- */ 
-static unsigned int const shift = 6;
-static int32_t const mask = ~0U << (32 - shift); // 32 == bitsizeof(int32_t)
-static inline int32_t hash(const char *s) {
-	int32_t result = 0;
-	if (s) {
-		for(uint32_t i=0; s[i] != 0; i++) {
-			result = (result&mask) ^ (result << shift) ^ s[i];
+class tekhne::msg_thread {
+private:
+	bool _done;
+	int32_t _msg_port;
+	pthread_attr_t _attr;
+	pthread_t _thread;
+	static void* loop(void *t) {
+		tekhne::msg_thread *th = static_cast<tekhne::msg_thread *>(t);
+		struct app_msg_buf {
+			long int type;
+			char buf[4096];
+		} msg_buf; 
+		cout << "receive msgport: " << th->_msg_port << endl;
+		while (!th->_done) {
+			ssize_t len = msgrcv(th->_msg_port, static_cast<void *>(&msg_buf), 4096, 0, 0);
+			if (len > 0) {
+				cout << "msg len: " << len << endl;
+				VMemoryIO *mio = new VMemoryIO(&msg_buf.buf, len);
+				VMessage *msg = new VMessage();
+				msg->Unflatten(mio);
+				delete mio;
+				msg->PrintToStream();
+				//be_app->PostMessage(msg);
+			}
 		}
+		delete th;
+		return 0;
 	}
-	return result;
-}
-}
+public:
+	msg_thread(int32_t msg_port) : _done(false), _msg_port(msg_port) {
+		pthread_attr_init(&_attr);
+		pthread_create(&_thread, &_attr, loop, this);
+		pthread_detach(_thread);
+	}
+	virtual ~msg_thread() {
+		pthread_attr_destroy(&_attr);
+	}
+	void done() {
+		_done = true;
+	}
+};
 
 VApplication::VApplication(const char *signature) :
-	VLooper(), _signature(signature), _isLaunching(true) {
+	VLooper(), _pulse_thread(0), _signature(signature), _isLaunching(true), _key(0), _msgport(-1),
+	_msg_thread(0) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
@@ -67,11 +92,13 @@ VApplication::VApplication(const char *signature) :
 	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
+	open_msg_port();
 	InjectStartupMessages();
 }
 
 VApplication::VApplication(const char *signature, status_t *error) :
-	VLooper(), _signature(signature), _isLaunching(true) {
+	VLooper(), _pulse_thread(0), _signature(signature), _isLaunching(true), _key(0), _msgport(-1),
+	_msg_thread(0) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
@@ -81,10 +108,13 @@ VApplication::VApplication(const char *signature, status_t *error) :
 	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
+	open_msg_port();
 	InjectStartupMessages();
 }
 
-VApplication::VApplication(VMessage *archive) : VLooper(archive), _isLaunching(true) {
+VApplication::VApplication(VMessage *archive) :
+	VLooper(archive), _pulse_thread(0), _signature(0), _isLaunching(true), _key(0), _msgport(-1),
+	_msg_thread(0) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
 		cout << "Exiting..." << endl;
@@ -95,10 +125,17 @@ VApplication::VApplication(VMessage *archive) : VLooper(archive), _isLaunching(t
 	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
+	open_msg_port();
 	InjectStartupMessages();
 }
 
 VApplication::~VApplication() {
+	if (_msgport >= 0) {
+		msgctl( _msgport, IPC_RMID, 0);
+		if (_msg_thread) {
+			_msg_thread->done();
+		}
+	}
 }
 
 //VResources *VApplication::AppResources(void) {
@@ -314,4 +351,15 @@ void VApplication::InjectStartupMessages(void) {
 	msg->AddBool("active", true);
 	PostMessage(msg);
 	PostMessage(V_READY_TO_RUN);
+}
+
+int32_t VApplication::open_msg_port() {
+	if (_key) {
+		_msgport = msgget( _key, IPC_CREAT | 0660 );
+		cout << "msgport: " << _msgport << endl;
+		if (_msgport >= 0) {
+			_msg_thread = new msg_thread(_msgport);
+		}
+	}
+	return _msgport;
 }
