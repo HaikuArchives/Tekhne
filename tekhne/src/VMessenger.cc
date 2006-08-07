@@ -31,7 +31,7 @@ using namespace tekhne;
 
 VMessenger::VMessenger(const VHandler *handler, const VLooper *looper, status_t *error) :
 	_handler(const_cast<VHandler *>(handler)), _looper(const_cast<VLooper *>(looper)),
-	_localTarget(true), _key(0), _msgport(-1), _isValid(true) {
+	_localTarget(true), _msgport(-1), _isValid(true) {
 	if (error) *error = V_OK;
 	if (!_handler || !_looper) {
 		_isValid = false;
@@ -40,16 +40,11 @@ VMessenger::VMessenger(const VHandler *handler, const VLooper *looper, status_t 
 }
 
 VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
-	_handler(0), _looper(0), _localTarget(false), _key(hash(signature)), _msgport(-1), _isValid(true) {
+	_handler(0), _looper(0), _localTarget(false), _msgport(-1), _isValid(true) {
 	// we want to open a messageport bassed on signature
 	if (error) *error = V_OK; // change this if we can't open the msgport
-	if (_key) {
-		_msgport = msgget( _key, IPC_CREAT | 0660 );
-		cout << "msgport: " << _msgport << endl;
-		if (_msgport < 0) {
-			_isValid = false;
-			if (error) *error = V_ERROR;
-		}
+	if (!_localTarget) {
+		_isValid = false;
 	} else {
 		_isValid = false;
 		if (error) *error = V_BAD_VALUE;
@@ -57,7 +52,7 @@ VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 }
 
 VMessenger::VMessenger(const VMessenger &messenger) :
-	_handler(0), _looper(0), _localTarget(true), _key(0), _msgport(-1), _isValid(true) {
+	_handler(0), _looper(0), _localTarget(true), _msgport(-1), _isValid(true) {
 	if (messenger._isValid) {
 		if (messenger._localTarget) {
 			_handler = messenger._handler;
@@ -206,7 +201,6 @@ VMessenger &VMessenger::operator =(const VMessenger& v) {
 	if (this != &v) {
 		_localTarget = v._localTarget;
 		_isValid = v._isValid;
-		_key = v._key;
 		_msgport = v._msgport;
 		_looper = v._looper;
 		_handler = v._handler;
@@ -218,7 +212,7 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 	if (_localTarget && v._localTarget) {
 		return _looper == v._looper && _handler == v._handler;
 	} else if (!_localTarget && !v._localTarget) {
-		return _key == v._key && _msgport == v._msgport;
+		return _msgport == v._msgport;
 	}
 	return false;
 }

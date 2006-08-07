@@ -40,7 +40,6 @@ private:
 	VHandler *_handler;
 	VLooper *_looper;
 	bool _localTarget;
-	key_t _key; // msgport key
 	int32_t _msgport;
 	bool _isValid;
 	

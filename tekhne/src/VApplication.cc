@@ -30,7 +30,8 @@
 #include "VAutoLock.h"
 #include "VMemoryIO.h"
 #include <iostream>
-#include <sys/ipc.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 using namespace tekhne;
 using namespace std;
@@ -41,33 +42,31 @@ VMessenger *tekhne::v_app_messenger = 0;
 class tekhne::msg_thread {
 private:
 	bool _done;
-	int32_t _msg_port;
+	int32_t _socket;
 	pthread_attr_t _attr;
 	pthread_t _thread;
 	static void* loop(void *t) {
 		tekhne::msg_thread *th = static_cast<tekhne::msg_thread *>(t);
-		struct app_msg_buf {
-			long int type;
-			char buf[4096];
-		} msg_buf; 
-		cout << "receive msgport: " << th->_msg_port << endl;
+		cout << "receive msgport: " << th->_socket << endl;
 		while (!th->_done) {
-			ssize_t len = msgrcv(th->_msg_port, static_cast<void *>(&msg_buf), 4096, 0, 0);
-			if (len > 0) {
-				cout << "msg len: " << len << endl;
-				VMemoryIO *mio = new VMemoryIO(&msg_buf.buf, len);
-				VMessage *msg = new VMessage();
-				msg->Unflatten(mio);
-				delete mio;
-				msg->PrintToStream();
+			// accept
+//			ssize_t len = msgrcv(th->_socket, static_cast<void *>(&msg_buf), 4096, 0, 0);
+//			if (len > 0) {
+//				cout << "msg len: " << len << endl;
+//				VMemoryIO *mio = new VMemoryIO(&msg_buf.buf, len);
+//				VMessage *msg = new VMessage();
+//				msg->Unflatten(mio);
+//				delete mio;
+//				msg->PrintToStream();
 				//be_app->PostMessage(msg);
-			}
+//			}
+sleep(1);
 		}
 		delete th;
 		return 0;
 	}
 public:
-	msg_thread(int32_t msg_port) : _done(false), _msg_port(msg_port) {
+	msg_thread(int32_t s) : _done(false), _socket(s) {
 		pthread_attr_init(&_attr);
 		pthread_create(&_thread, &_attr, loop, this);
 		pthread_detach(_thread);
@@ -81,7 +80,7 @@ public:
 };
 
 VApplication::VApplication(const char *signature) :
-	VLooper(), _pulse_thread(0), _signature(signature), _isLaunching(true), _key(0), _msgport(-1),
+	VLooper(), _pulse_thread(0), _signature(signature), _isLaunching(true), _socket(-1),
 	_msg_thread(0) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
@@ -89,15 +88,14 @@ VApplication::VApplication(const char *signature) :
 		exit(-1);
 	}
 	v_app = this;
-	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
-	open_msg_port();
+	open_server_socket();
 	InjectStartupMessages();
 }
 
 VApplication::VApplication(const char *signature, status_t *error) :
-	VLooper(), _pulse_thread(0), _signature(signature), _isLaunching(true), _key(0), _msgport(-1),
+	VLooper(), _pulse_thread(0), _signature(signature), _isLaunching(true), _socket(-1),
 	_msg_thread(0) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
@@ -105,15 +103,14 @@ VApplication::VApplication(const char *signature, status_t *error) :
 		exit(-1);
 	}
 	v_app = this;
-	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
-	open_msg_port();
+	open_server_socket();
 	InjectStartupMessages();
 }
 
 VApplication::VApplication(VMessage *archive) :
-	VLooper(archive), _pulse_thread(0), _signature(0), _isLaunching(true), _key(0), _msgport(-1),
+	VLooper(archive), _pulse_thread(0), _signature(0), _isLaunching(true), _socket(-1),
 	_msg_thread(0) {
 	if (v_app) {
 		cout << "Trying to create a second VApplication!" << endl;
@@ -122,16 +119,18 @@ VApplication::VApplication(VMessage *archive) :
 	}
 	v_app = this;
 	archive->FindString("mime_sig", &_signature);
-	_key = hash(_signature.String());
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
-	open_msg_port();
+	open_server_socket();
 	InjectStartupMessages();
 }
 
 VApplication::~VApplication() {
-	if (_msgport >= 0) {
-		msgctl( _msgport, IPC_RMID, 0);
+	if (_socket >= 0) {
+		close(_socket);
+		VString socket_name("/tmp/");
+		socket_name.Append(_signature);
+		unlink(socket_name.String());
 		if (_msg_thread) {
 			_msg_thread->done();
 		}
@@ -353,13 +352,30 @@ void VApplication::InjectStartupMessages(void) {
 	PostMessage(V_READY_TO_RUN);
 }
 
-int32_t VApplication::open_msg_port() {
-	if (_key) {
-		_msgport = msgget( _key, IPC_CREAT | 0660 );
-		cout << "msgport: " << _msgport << endl;
-		if (_msgport >= 0) {
-			_msg_thread = new msg_thread(_msgport);
+int32_t VApplication::open_server_socket() {
+	if (_signature.Length() > 0) {
+		int err;
+		// Create socket
+		_socket = socket(PF_LOCAL, SOCK_STREAM, 0);
+		cout << "_socket: " << _socket << endl;
+		// it's a server socket
+		struct sockaddr_un name;
+		name.sun_family = AF_LOCAL;
+		VString socket_name("/tmp/");
+		socket_name.Append(_signature);
+//		socket_name.ReplaceAll('/', '-', 5);
+		// limit this to 108 bytes...
+		cout << "socket_name: " << socket_name.String() << endl;
+		strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
+		err = bind(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
+		cout << "bind: " << err << endl;
+		if (err) {
+			close(_socket);
+			_socket = -1;
+		} else {
+			cout << "listen: " << listen(_socket, 5) << endl;
+			_msg_thread = new msg_thread(_socket);
 		}
 	}
-	return _msgport;
+	return _socket;
 }
