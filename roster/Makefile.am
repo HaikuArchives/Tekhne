@@ -8,10 +8,9 @@ SUBDIRS = include src
 rosterdocdir = ${prefix}/doc/roster
 rosterdoc_DATA = \
 	README\
-	COPYING\
 	AUTHORS\
 	ChangeLog\
-	INSTALL\
+	LICENSE\
 	NEWS\
 	TODO
 
