@@ -1,0 +1,13 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+
+AC_INIT([pingpong], [0.1], [baldmountain@gmail.com])
+
+AM_INIT_AUTOMAKE()
+
+AC_PROG_CXX
+AC_PROG_LIBTOOL
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
