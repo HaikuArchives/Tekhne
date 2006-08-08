@@ -48,7 +48,7 @@ inline void *allocateMemory(size_t size, uint32_t type) {
 inline void freeMemory(void *ptr, uint32_t type) {
 	if (ptr) {
 		if (type == V_OBJECT_CACHE) {
-			delete [] ptr;
+			delete [] (int8_t *)ptr;
 		} else {
 			free(ptr);
 		}

@@ -39,7 +39,6 @@ void VMessengerTest::testCreate() {
 	mgr = new VMessenger("app/x-baldmountain-roster");
 	CPPUNIT_ASSERT(mgr->IsValid());
 	CPPUNIT_ASSERT(!mgr->IsTargetLocal());
-	status_t err = mgr->SendMessage(V_QUIT_REQUESTED);
-	cout << "err " << err << endl;
+	CPPUNIT_ASSERT(mgr->SendMessage(V_QUIT_REQUESTED) == V_OK);
 	delete mgr;
 }

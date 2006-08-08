@@ -35,7 +35,8 @@ libtekhne_la_SOURCES = \
 	VStopWatch.cc\
 	VMessageRunner.cc
 
-libtekhne_la_LDFLAGS = 
+libtekhne_la_LDFLAGS = \
+	-pthread
 
 libtekhne_la_LIBADD = 
 

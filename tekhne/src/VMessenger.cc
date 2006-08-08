@@ -19,19 +19,23 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * IN THE SOFTWARE.#include <sys/socket.h>
+
  * 
  ****************************************************************************/
 
 #include "tekhne.h"
 #include <iostream>
+#include <sys/socket.h>
+#include <sys/un.h>
+
 using namespace std;
 
 using namespace tekhne;
 
 VMessenger::VMessenger(const VHandler *handler, const VLooper *looper, status_t *error) :
 	_handler(const_cast<VHandler *>(handler)), _looper(const_cast<VLooper *>(looper)),
-	_localTarget(true), _msgport(-1), _isValid(true) {
+	_localTarget(true), _isValid(true), _signature(0) {
 	if (error) *error = V_OK;
 	if (!_handler || !_looper) {
 		_isValid = false;
@@ -40,19 +44,16 @@ VMessenger::VMessenger(const VHandler *handler, const VLooper *looper, status_t 
 }
 
 VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
-	_handler(0), _looper(0), _localTarget(false), _msgport(-1), _isValid(true) {
-	// we want to open a messageport bassed on signature
-	if (error) *error = V_OK; // change this if we can't open the msgport
-	if (!_localTarget) {
+	_handler(0), _looper(0), _localTarget(false), _isValid(true), _signature(signature) {
+	if (error) *error = V_OK;
+	if (_signature.Length() == 0) {
+		if (error) *error = V_OK;
 		_isValid = false;
-	} else {
-		_isValid = false;
-		if (error) *error = V_BAD_VALUE;
 	}
 }
 
 VMessenger::VMessenger(const VMessenger &messenger) :
-	_handler(0), _looper(0), _localTarget(true), _msgport(-1), _isValid(true) {
+	_handler(0), _looper(0), _localTarget(true), _isValid(true), _signature(0) {
 	if (messenger._isValid) {
 		if (messenger._localTarget) {
 			_handler = messenger._handler;
@@ -164,13 +165,40 @@ status_t VMessenger::SendMessage(uint32_t command, VHandler *replyHandler) const
 			msg.Flatten(&mio);
 			int32_t len = mio.BufferLength();
 			const void *buf = mio.Buffer();
-			const void *msgbuf = malloc(len+sizeof(long int));
-			*((long int *)msgbuf) = 0;
-			memmove(((char *)msgbuf)+sizeof(long int), buf, len);
-			cout << "send msgport: " << _msgport << endl;
-			int count = msgsnd(_msgport, msgbuf, len+sizeof(long int), 0);
-			cout << "msgsnd: " << count << endl;
-			if (count > 0) err = V_OK;
+			int32_t _socket = socket(PF_LOCAL, SOCK_STREAM, 0);
+			if (_socket > 0) {
+				struct sockaddr_un name;
+				name.sun_family = AF_LOCAL;
+				VString socket_name("/tmp/");
+				socket_name.Append(_signature);
+				socket_name.ReplaceAll('/', '-', 5);
+				strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
+				int32_t e = connect(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
+				if (!e) {
+					e = send (_socket, buf, len, 0);
+					if (e < 0) {
+						err = e;
+					} else {
+						if (e == len) {
+							err = V_OK;
+						} else {
+							int32_t sent = e;
+							len -= e;
+							while (len > 0 && e > 0) {
+								e = send (_socket, (char *)buf+sent, len, 0);
+								if (e > 0) {
+									sent += e;
+								}
+							}
+						}
+					}
+				} else {
+					err = e;
+				}
+				close(_socket);
+			} else {
+				err = _socket;
+			}
 		}
 	}
 	return err;
@@ -201,7 +229,7 @@ VMessenger &VMessenger::operator =(const VMessenger& v) {
 	if (this != &v) {
 		_localTarget = v._localTarget;
 		_isValid = v._isValid;
-		_msgport = v._msgport;
+		_signature = v._signature;
 		_looper = v._looper;
 		_handler = v._handler;
 	}
@@ -212,7 +240,7 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 	if (_localTarget && v._localTarget) {
 		return _looper == v._looper && _handler == v._handler;
 	} else if (!_localTarget && !v._localTarget) {
-		return _msgport == v._msgport;
+		return _signature == v._signature;
 	}
 	return false;
 }

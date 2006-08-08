@@ -16,6 +16,7 @@ libtekhne_include_DATA = \
 	VDataIO.h\
 	VErrors.h\
 	VFindDirectory.h\
+	VFlattenable.h\
 	VHandler.h\
 	VList.h\
 	VLocker.h\

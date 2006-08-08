@@ -32,6 +32,8 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <signal.h>
+#include <arpa/inet.h>
 
 using namespace tekhne;
 using namespace std;
@@ -47,21 +49,55 @@ private:
 	pthread_t _thread;
 	static void* loop(void *t) {
 		tekhne::msg_thread *th = static_cast<tekhne::msg_thread *>(t);
-		cout << "receive msgport: " << th->_socket << endl;
+		void *buf = malloc(4096);
+		struct sockaddr_in clientname;
+		size_t size;
+		fd_set active_fd_set, read_fd_set;
+		FD_ZERO (&active_fd_set);
+		FD_SET (th->_socket, &active_fd_set);
+		
 		while (!th->_done) {
-			// accept
-//			ssize_t len = msgrcv(th->_socket, static_cast<void *>(&msg_buf), 4096, 0, 0);
-//			if (len > 0) {
-//				cout << "msg len: " << len << endl;
-//				VMemoryIO *mio = new VMemoryIO(&msg_buf.buf, len);
-//				VMessage *msg = new VMessage();
-//				msg->Unflatten(mio);
-//				delete mio;
-//				msg->PrintToStream();
-				//be_app->PostMessage(msg);
-//			}
-sleep(1);
+			read_fd_set = active_fd_set;
+			if (select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0) {
+				perror ("select");
+				v_app->Quit();
+				return 0;
+			}
+			for (int i = 0; i < FD_SETSIZE; ++i) {
+				if (FD_ISSET (i, &read_fd_set)) {
+					if (i == th->_socket) {
+						/* Connection request on original socket. */
+						int new_socket;
+						size = sizeof (clientname);
+						new_socket = accept (th->_socket, (struct sockaddr *) &clientname, &size);
+						if (new_socket < 0) {
+							perror ("accept");
+							v_app->Quit();
+							return 0;
+						}
+						fprintf (stderr, "Server: connect from host %s, port %hd.\n",
+							inet_ntoa (clientname.sin_addr),
+							ntohs (clientname.sin_port));
+						FD_SET (new_socket, &active_fd_set);
+					} else {
+						/* Data arriving on an already-connected socket. */
+						int32_t len = recv (i, buf, 4096, 0);
+						if (len > 0) {
+							VMemoryIO *mio = new VMemoryIO(buf, len);
+							VMessage *msg = new VMessage();
+							msg->Unflatten(mio);
+							delete mio;
+							msg->PrintToStream();
+							v_app->PostMessage(msg);
+						} else {
+							close (i);
+							FD_CLR (i, &active_fd_set);
+						}
+					}
+				}
+			}
 		}
+		free(buf);
 		delete th;
 		return 0;
 	}
@@ -79,6 +115,21 @@ public:
 	}
 };
 
+static void termination_handler (int signum) {
+	cout << "Got signal: " << strsignal(signum) << endl;
+	v_app->Quit();
+}
+static void setup_termination_handler(void) {
+	if (signal (SIGINT, termination_handler) == SIG_IGN)
+		signal (SIGINT, SIG_IGN);
+	if (signal (SIGHUP, termination_handler) == SIG_IGN)
+		signal (SIGHUP, SIG_IGN);
+	if (signal (SIGTERM, termination_handler) == SIG_IGN)
+		signal (SIGTERM, SIG_IGN);
+	if (signal (SIGPIPE, termination_handler) == SIG_IGN)
+		signal (SIGPIPE, SIG_IGN);
+}
+
 VApplication::VApplication(const char *signature) :
 	VLooper(), _pulse_thread(0), _signature(signature), _isLaunching(true), _socket(-1),
 	_msg_thread(0) {
@@ -87,6 +138,7 @@ VApplication::VApplication(const char *signature) :
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
+	setup_termination_handler();
 	v_app = this;
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
@@ -102,6 +154,7 @@ VApplication::VApplication(const char *signature, status_t *error) :
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
+	setup_termination_handler();
 	v_app = this;
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
@@ -117,6 +170,7 @@ VApplication::VApplication(VMessage *archive) :
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
+	setup_termination_handler();
 	v_app = this;
 	archive->FindString("mime_sig", &_signature);
 	int32_t err;
@@ -130,11 +184,15 @@ VApplication::~VApplication() {
 		close(_socket);
 		VString socket_name("/tmp/");
 		socket_name.Append(_signature);
+		socket_name.ReplaceAll('/', '-', 5);
 		unlink(socket_name.String());
 		if (_msg_thread) {
 			_msg_thread->done();
 		}
 	}
+	v_app = 0;
+	delete v_app_messenger;
+	v_app_messenger = 0;
 }
 
 //VResources *VApplication::AppResources(void) {
@@ -357,25 +415,42 @@ int32_t VApplication::open_server_socket() {
 		int err;
 		// Create socket
 		_socket = socket(PF_LOCAL, SOCK_STREAM, 0);
-		cout << "_socket: " << _socket << endl;
-		// it's a server socket
-		struct sockaddr_un name;
-		name.sun_family = AF_LOCAL;
-		VString socket_name("/tmp/");
-		socket_name.Append(_signature);
-//		socket_name.ReplaceAll('/', '-', 5);
-		// limit this to 108 bytes...
-		cout << "socket_name: " << socket_name.String() << endl;
-		strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
-		err = bind(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
-		cout << "bind: " << err << endl;
-		if (err) {
-			close(_socket);
-			_socket = -1;
-		} else {
-			cout << "listen: " << listen(_socket, 5) << endl;
-			_msg_thread = new msg_thread(_socket);
+		if (_socket > 0) {
+			struct linger l = { 1, 1 };
+			err = setsockopt(_socket, SOL_SOCKET, SO_LINGER, &l, sizeof(struct linger));
+			if (err) {
+				close(_socket);
+				_socket = -1;
+			} else {
+				// it's a server socket
+				struct sockaddr_un name;
+				name.sun_family = AF_LOCAL;
+				VString socket_name("/tmp/");
+				socket_name.Append(_signature);
+				socket_name.ReplaceAll('/', '-', 5);
+				// make sure this is gone
+				unlink(socket_name.String());
+				// limit this to 108 bytes...
+				strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
+				err = bind(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
+				if (err) {
+					close(_socket);
+					_socket = -1;
+				} else {
+					err = listen(_socket, 5);
+					if (err) {
+						close(_socket);
+						_socket = -1;
+					} else {
+						_msg_thread = new msg_thread(_socket);
+					}
+				}
+			}
 		}
+	}
+	if (_socket == -1) {
+		cout << "Couldn't create Server socket. Exiting..." << endl;
+		Quit();
 	}
 	return _socket;
 }

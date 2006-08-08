@@ -28,6 +28,7 @@
 
 #include "StandardDefs.h"
 #include "VErrors.h"
+#include "VString.h"
 	
 namespace tekhne {
 
@@ -40,8 +41,8 @@ private:
 	VHandler *_handler;
 	VLooper *_looper;
 	bool _localTarget;
-	int32_t _msgport;
 	bool _isValid;
+	VString _signature;
 	
 public:
 	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);

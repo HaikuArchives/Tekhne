@@ -80,6 +80,6 @@ int main (int argc, char *argv[]) {
 	VTestApplication *ta = new VTestApplication();
 	ta->Run();
 	
-	delete v_app;
+	delete ta;
 	return 0;
 }
