@@ -29,13 +29,14 @@
 using namespace tekhne;
 
 VLooper::VLooper(const char *name, int32_t priority, int32_t portCapacity) :
-	VHandler(name), _quitting(false), _currentMessage(0) {
+	VHandler(name), _quitting(false), _currentMessage(0), _preferredHandler(0) {
 	_looper = this;
 	_handlers.AddItem(this);
 	_mq = new VMessageQueue();
 }
 
-VLooper::VLooper(VMessage *archive) : VHandler(archive), _quitting(false), _currentMessage(0) {
+VLooper::VLooper(VMessage *archive) :
+	VHandler(archive), _quitting(false), _currentMessage(0), _preferredHandler(0) {
 	_looper = this;
 	_handlers.AddItem(this);
 	_mq = new VMessageQueue();
@@ -140,7 +141,7 @@ VMessageQueue *VLooper::MessageQueue(void) const {
 status_t VLooper::PostMessage(VMessage *message) {
 	status_t err = V_OK;
 	if (Lock()) {
-		_mq->AddMessage(message);
+		_mq->AddMessage(new VMessage(*message));
 		Unlock();
 	} else {
 		err = V_ERROR;
@@ -162,7 +163,7 @@ status_t VLooper::PostMessage(uint32_t command) {
 status_t VLooper::PostMessage(VMessage *message, VHandler *handler, VHandler *replyHandler) {
 	status_t err = V_OK;
 	if (Lock()) {
-		_mq->AddMessage(message);
+		_mq->AddMessage(new VMessage(*message));
 		Unlock();
 	} else {
 		err = V_ERROR;
@@ -207,6 +208,7 @@ void *tekhne::looper_thread_func(void *l) {
 		looper->Unlock();
 		delete msg;
 	}
+	delete looper;
 	return 0;
 }
 
@@ -220,10 +222,11 @@ thread_t VLooper::Run(void) {
 }
 
 void VLooper::SetPreferredHandler(VHandler *handler) const {
+	const_cast<VLooper*>(this)->_preferredHandler = handler;
 }
 
 VHandler *VLooper::PreferredHandler(void) {
-	return 0;
+	return _preferredHandler;
 }
 
 VArchivable *VLooper::Instantiate(VMessage *archive) {

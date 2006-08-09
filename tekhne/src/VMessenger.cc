@@ -147,6 +147,11 @@ status_t VMessenger::SendMessage(uint32_t command, VMessage *reply) const {
 			err = _looper->PostMessage(command);
 			_looper->Unlock();
 		} else {
+			VMessage msg(command);
+			VMallocIO mio;
+			msg.Flatten(&mio);
+			err = SendToRemoteHost(mio);
+			// need to read reply
 		}
 	}
 	return err;
@@ -163,42 +168,7 @@ status_t VMessenger::SendMessage(uint32_t command, VHandler *replyHandler) const
 			VMessage msg(command);
 			VMallocIO mio;
 			msg.Flatten(&mio);
-			int32_t len = mio.BufferLength();
-			const void *buf = mio.Buffer();
-			int32_t _socket = socket(PF_LOCAL, SOCK_STREAM, 0);
-			if (_socket > 0) {
-				struct sockaddr_un name;
-				name.sun_family = AF_LOCAL;
-				VString socket_name("/tmp/");
-				socket_name.Append(_signature);
-				socket_name.ReplaceAll('/', '-', 5);
-				strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
-				int32_t e = connect(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
-				if (!e) {
-					e = send (_socket, buf, len, 0);
-					if (e < 0) {
-						err = e;
-					} else {
-						if (e == len) {
-							err = V_OK;
-						} else {
-							int32_t sent = e;
-							len -= e;
-							while (len > 0 && e > 0) {
-								e = send (_socket, (char *)buf+sent, len, 0);
-								if (e > 0) {
-									sent += e;
-								}
-							}
-						}
-					}
-				} else {
-					err = e;
-				}
-				close(_socket);
-			} else {
-				err = _socket;
-			}
+			err = SendToRemoteHost(mio);
 		}
 	}
 	return err;
@@ -243,4 +213,46 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 		return _signature == v._signature;
 	}
 	return false;
+}
+
+// private method
+status_t VMessenger::SendToRemoteHost(VMallocIO &data) const {
+	status_t err = V_ERROR;
+	int32_t len = data.BufferLength();
+	const void *buf = data.Buffer();
+	int32_t _socket = socket(PF_LOCAL, SOCK_STREAM, 0);
+	if (_socket > 0) {
+		struct sockaddr_un name;
+		name.sun_family = AF_LOCAL;
+		VString socket_name("/tmp/");
+		socket_name.Append(_signature);
+		socket_name.ReplaceAll('/', '-', 5);
+		strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
+		int32_t e = connect(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
+		if (!e) {
+			e = send (_socket, buf, len, 0);
+			if (e < 0) {
+				err = e;
+			} else {
+				if (e == len) {
+					err = V_OK;
+				} else {
+					int32_t sent = e;
+					len -= e;
+					while (len > 0 && e > 0) {
+						e = send (_socket, (char *)buf+sent, len, 0);
+						if (e > 0) {
+							sent += e;
+						}
+					}
+				}
+			}
+		} else {
+			err = e;
+		}
+		close(_socket);
+	} else {
+		err = _socket;
+	}
+	return err;
 }

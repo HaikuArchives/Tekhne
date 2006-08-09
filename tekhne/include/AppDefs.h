@@ -90,4 +90,9 @@ const int32_t V_WINDOW_RESIZED = 1059;
 const int32_t V_WORKSPACE_ACTIVATED = 1060;
 const int32_t V_WORKSPACES_CHANGED = 1061;
 const int32_t V_ZOOM = 1062;
+
+const int32_t V_REPLY = 1063;
+const int32_t V_NO_REPLY = 1064;
+const int32_t V_MESSAGE_NOT_UNDERSTOOD = 1065;
+
 }

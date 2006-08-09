@@ -8,10 +8,11 @@ INCLUDES =\
 	 -I../include -I../../tekhne/include
 
 AM_CXXFLAGS =\
-	 -D__STDC_LIMIT_MACROS\
+	-D__STDC_LIMIT_MACROS\
+	-D_REENTRANT\
 	-pthread\
-	 -Wall\
-	 -g
+	-Wall\
+	-g
 
 bin_PROGRAMS = roster
 

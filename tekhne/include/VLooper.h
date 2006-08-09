@@ -45,6 +45,7 @@ private:
 	VMessageQueue *_mq;
 	pthread_t _thread;
 	pthread_attr_t _attr;
+	VHandler *_preferredHandler;
 public:
 	VLooper(const char *name = 0, int32_t priority = V_NORMAL_PRIORITY, int32_t portCapacity = V_LOOPER_PORT_DEFAULT_CAPACITY);
 	VLooper(VMessage *archive);

@@ -43,6 +43,7 @@ class VMessage {
 private:
 	VList l;
 	bool _isReply;
+	bool _wasDelivered;
 public:
 	uint32_t what;
 

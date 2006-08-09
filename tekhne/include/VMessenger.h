@@ -35,6 +35,7 @@ namespace tekhne {
 class VHandler;
 class VLooper;
 class VMessage;
+class VMallocIO;
 	
 class VMessenger {
 private:
@@ -44,6 +45,7 @@ private:
 	bool _isValid;
 	VString _signature;
 	
+	status_t SendToRemoteHost(VMallocIO &data) const;
 public:
 	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);
 	VMessenger(const char *signature, team_t team = -1, status_t *error = 0);

@@ -32,19 +32,6 @@ using namespace std;
 
 static VBlockCache blockCache(100, sizeof(VMessage), V_MALLOC_CACHE);
 
-VMessage::VMessage(uint32_t command) : _isReply(false), what(command) {
-}
-
-VMessage::VMessage(const VMessage &message) : _isReply(false), what(message.what) {
-}
-
-VMessage::VMessage(void) : _isReply(false), what(0) {
-}
-
-VMessage::~VMessage() {
-	MakeEmpty();
-}
-
 namespace tekhne {
 union Value {
 	bool b;
@@ -165,6 +152,44 @@ static bool deleteItem(void *item) {
 	return false;
 }
 
+}
+
+VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), what(command) {
+}
+
+VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false),
+	what(message.what) {
+	storage_item **items = static_cast<storage_item **>(message.l.Items());
+	for (int i=0;i<message.l.CountItems();i++) {
+		storage_item *si = items[i];
+		storage_item *nsi = new storage_item();
+		memmove(nsi, si, sizeof(storage_item));
+		switch(si->type) {
+			case V_BOOL_TYPE:
+			case V_INT8_TYPE:
+			case V_INT16_TYPE:
+			case V_INT32_TYPE:
+			case V_INT64_TYPE:
+			case V_FLOAT_TYPE:
+			case V_DOUBLE_TYPE:
+			case V_POINTER_TYPE:
+			case V_POINT_TYPE:
+			case V_RECT_TYPE:
+			case V_MESSAGE_TYPE:
+			case V_MESSENGER_TYPE:
+				break;
+			default:
+				nsi->data.p = copyBuffer(si->data.p, si->numBytes);
+		}
+		l.AddItem(nsi);
+	}
+}
+
+VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), what(0) {
+}
+
+VMessage::~VMessage() {
+	MakeEmpty();
 }
 
 status_t VMessage::AddData(const char *name, type_code type, const void *data,

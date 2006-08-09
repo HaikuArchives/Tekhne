@@ -89,6 +89,7 @@ private:
 							delete mio;
 							msg->PrintToStream();
 							v_app->PostMessage(msg);
+							delete msg;
 						} else {
 							close (i);
 							FD_CLR (i, &active_fd_set);
