@@ -2,17 +2,17 @@
  *            VMessage.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 
@@ -72,7 +72,7 @@ inline void *copyBuffer(const void *b, int32_t len) {
 storage_item *make_storage_item(const char *name, type_code type, const void *data,
 	ssize_t numBytes, bool fixedSize, int32_t numItems) {
 	storage_item *si = new storage_item();
-	
+
 	if ((int32_t)strlen(name) > V_NAME_LENGTH) {
 		memmove(si->name, name, V_NAME_LENGTH);
 		si->name[V_NAME_LENGTH] = 0;
@@ -154,11 +154,11 @@ static bool deleteItem(void *item) {
 
 }
 
-VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), what(command) {
+VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0), what(command) {
 }
 
-VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false),
-	what(message.what) {
+VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false), _replyHandler(message._replyHandler),
+ 	_handler(message._handler), what(message.what) {
 	storage_item **items = static_cast<storage_item **>(message.l.Items());
 	for (int i=0;i<message.l.CountItems();i++) {
 		storage_item *si = items[i];
@@ -185,7 +185,7 @@ VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(fal
 	}
 }
 
-VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), what(0) {
+VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0), what(0) {
 }
 
 VMessage::~VMessage() {
@@ -545,11 +545,11 @@ status_t VMessage::FindPointer(const char *name, void **pointer) const {
 status_t VMessage::Flatten(VDataIO *object, ssize_t *numBytes) const {
 	int32_t bc = 0;
 	if (numBytes) *numBytes = 0;
-	
+
 	int32_t rc = object->Write(&what, sizeof(int32_t));
 	if (rc != sizeof(int32_t)) return V_ERROR;
 	bc += rc;
-	
+
 	int32_t ci = l.CountItems();
 	rc = object->Write(&ci, sizeof(int32_t));
 	if (rc != sizeof(int32_t)) return V_ERROR;
@@ -635,7 +635,7 @@ status_t VMessage::Unflatten(const char *address) {
 
 ssize_t VMessage::FlattenedSize(void) const {
 	int32_t numBytes = 0;
-	
+
 	numBytes += sizeof(int32_t);
 	numBytes += sizeof(int32_t);
 
@@ -751,7 +751,7 @@ namespace tekhne {
 		type_code type;
 		int32_t count;
 	} msg_print_item;
-	
+
 	bool print_msg_item(void *i, void *c) {
 		msg_print_item *mpi = static_cast<msg_print_item *>(i);
 		cout << *(static_cast<int *>(c)) <<" "<< mpi->name<<", type = "<<mpi->type<<", count = "<<mpi->count << endl;
@@ -1015,7 +1015,32 @@ VPoint VMessage::DropPoint(VPoint *offset) const {
 VMessage &VMessage::operator =(const VMessage& msg){
 	if (this != &msg) {
 		what = msg.what;
-		l = msg.l;
+		_handler = msg._handler;
+		_replyHandler = msg._replyHandler;
+		storage_item **items = static_cast<storage_item **>(msg.l.Items());
+		for (int i=0;i<msg.l.CountItems();i++) {
+			storage_item *si = items[i];
+			storage_item *nsi = new storage_item();
+			memmove(nsi, si, sizeof(storage_item));
+			switch(si->type) {
+				case V_BOOL_TYPE:
+				case V_INT8_TYPE:
+				case V_INT16_TYPE:
+				case V_INT32_TYPE:
+				case V_INT64_TYPE:
+				case V_FLOAT_TYPE:
+				case V_DOUBLE_TYPE:
+				case V_POINTER_TYPE:
+				case V_POINT_TYPE:
+				case V_RECT_TYPE:
+				case V_MESSAGE_TYPE:
+				case V_MESSENGER_TYPE:
+					break;
+				default:
+					nsi->data.p = copyBuffer(si->data.p, si->numBytes);
+			}
+			l.AddItem(nsi);
+		}
 	}
 	return *this;
 }

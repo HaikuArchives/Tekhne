@@ -78,6 +78,8 @@ public:
 };
 
 int main (int argc, char *argv[]) {
+	// turn on debug messages
+	tekhne::print_debug_messages = true;
 
 	VTestApplication *ta = new VTestApplication();
 	ta->Run();

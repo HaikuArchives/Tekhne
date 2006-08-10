@@ -38,13 +38,20 @@ namespace tekhne {
 
 class VMessenger;
 class VHandler;
+class VLooper;
 class msg_thread;
+
+extern void *looper_thread_func(void *l);
 
 class VMessage {
 private:
 	VList l;
 	bool _isReply;
 	bool _wasDelivered;
+
+	// these are used internally by looper in PostMessage and dispatch message
+	VHandler *_replyHandler;
+	VHandler *_handler;
 public:
 	uint32_t what;
 
@@ -191,6 +198,11 @@ public:
 	VMessage &operator =(const VMessage& msg);
 	void *operator new(size_t numBytes) throw ();
 	void operator delete(void *memory, size_t numBytes);
+
+	// give VLooper access to message internals...
+	friend class VLooper;
+	friend void *looper_thread_func(void *l);
+
 };
 
 } // namespace tekhne

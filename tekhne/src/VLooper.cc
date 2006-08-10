@@ -2,17 +2,17 @@
  *            VLooper.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "tekhne.h"
@@ -93,16 +93,18 @@ VMessage *VLooper::DetachCurrentMessage(void) {
 
 void VLooper::DispatchMessage(VMessage *message, VHandler *target) {
 	_currentMessage = message;
-	VHandler *ph = PreferredHandler();
 	if (target) {
 		// 1) Specific handler
 		target->MessageReceived(message);
-	} else if (ph) {
-		// 2) preferred handler
-		ph->MessageReceived(message);
 	} else {
-		// 3) send to ourself
-		this->MessageReceived(message);
+		VHandler *ph = PreferredHandler();
+		if (ph) {
+			// 2) preferred handler
+			ph->MessageReceived(message);
+		} else {
+			// 3) send to ourself
+			this->MessageReceived(message);
+		}
 	}
 	_currentMessage = 0;
 }
@@ -163,7 +165,10 @@ status_t VLooper::PostMessage(uint32_t command) {
 status_t VLooper::PostMessage(VMessage *message, VHandler *handler, VHandler *replyHandler) {
 	status_t err = V_OK;
 	if (Lock()) {
-		_mq->AddMessage(new VMessage(*message));
+		VMessage *nmsg = new VMessage(*message);
+		nmsg->_handler = handler;
+		nmsg->_replyHandler = replyHandler;
+		_mq->AddMessage(nmsg);
 		Unlock();
 	} else {
 		err = V_ERROR;
@@ -174,7 +179,10 @@ status_t VLooper::PostMessage(VMessage *message, VHandler *handler, VHandler *re
 status_t VLooper::PostMessage(uint32_t command, VHandler *handler, VHandler *replyHandler) {
 	status_t err = V_OK;
 	if (Lock()) {
-		_mq->AddMessage(new VMessage(command));
+		VMessage *nmsg = new VMessage(command);
+		nmsg->_handler = handler;
+		nmsg->_replyHandler = replyHandler;
+		_mq->AddMessage(nmsg);
 		Unlock();
 	} else {
 		err = V_ERROR;
@@ -203,7 +211,7 @@ void *tekhne::looper_thread_func(void *l) {
 				break;
 			default:
 				// goes to the preferred handler if there is one and then ourselves
-				looper->DispatchMessage(msg, 0);
+				looper->DispatchMessage(msg, msg->_handler);
 		}
 		looper->Unlock();
 		delete msg;
@@ -213,7 +221,9 @@ void *tekhne::looper_thread_func(void *l) {
 }
 
 thread_t VLooper::Run(void) {
-	std::cout << "Run" << std::endl;
+
+	if (print_debug_messages) std::cout << "Run" << std::endl;
+
 	pthread_attr_init(&_attr);
 	pthread_create(&_thread, &_attr, looper_thread_func, this);
 	pthread_detach(_thread);

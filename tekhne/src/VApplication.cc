@@ -41,6 +41,8 @@ using namespace std;
 VApplication *tekhne::v_app = 0;
 VMessenger *tekhne::v_app_messenger = 0;
 
+bool tekhne::print_debug_messages = false;
+
 class tekhne::msg_thread {
 private:
 	bool _done;
@@ -75,7 +77,7 @@ private:
 							v_app->Quit();
 							return 0;
 						}
-						fprintf (stderr, "Server: connect from host %s, port %hd.\n",
+						if (print_debug_messages) printf ("Server: connect from host %s, port %hd.\n",
 							inet_ntoa (clientname.sin_addr),
 							ntohs (clientname.sin_port));
 						FD_SET (new_socket, &active_fd_set);
@@ -87,7 +89,7 @@ private:
 							VMessage *msg = new VMessage();
 							msg->Unflatten(mio);
 							delete mio;
-							msg->PrintToStream();
+							if (print_debug_messages) msg->PrintToStream();
 							v_app->PostMessage(msg);
 							delete msg;
 						} else {
@@ -117,7 +119,7 @@ public:
 };
 
 static void termination_handler (int signum) {
-	cout << "Got signal: " << strsignal(signum) << endl;
+	if (print_debug_messages) cout << "Got signal: " << strsignal(signum) << endl;
 	v_app->Quit();
 }
 static void setup_termination_handler(void) {
@@ -200,15 +202,15 @@ VApplication::~VApplication() {
 //}
 
 void VApplication::AboutRequested(void) {
-	cout << "AboutRequested" << endl;
+	if (print_debug_messages) cout << "AboutRequested" << endl;
 }
 
 void VApplication::AppActivated(bool active) {
-	cout << "AppActivated" << endl;
+	if (print_debug_messages) cout << "AppActivated" << endl;
 }
 
 void VApplication::ArgvReceived(int32_t argc, char **argv) {
-	cout << "ArgvReceived" << endl;
+	if (print_debug_messages) cout << "ArgvReceived" << endl;
 }
 
 status_t VApplication::GetAppInfo(app_info *theInfo) const {
@@ -236,7 +238,7 @@ bool VApplication::IsLaunching(void) const {
 }
 
 void VApplication::Pulse(void) {
-	cout << "Pulse" << endl;
+	if (print_debug_messages) cout << "Pulse" << endl;
 }
 
 class tekhne::pulse_thread {
@@ -280,20 +282,20 @@ void VApplication::SetPulseRate(bigtime_t rate) {
 }
 
 bool VApplication::QuitRequested(void) {
-	cout << "QuitRequested" << endl;
+	if (print_debug_messages) cout << "QuitRequested" << endl;
 	return true;
 }
 
 void VApplication::ReadyToRun(void) {
-	cout << "ReadyToRun" << endl;
+	if (print_debug_messages) cout << "ReadyToRun" << endl;
 }
 
 void VApplication::RefsReceived(VMessage *message) {
-	cout << "RefsReceived" << endl;
+	if (print_debug_messages) cout << "RefsReceived" << endl;
 }
 
 thread_t VApplication::Run(void) {
-	cout << "Run" << endl;
+	if (print_debug_messages) cout << "Run" << endl;
 	while (!_quitting) {
 		VMessage *msg = MessageQueue()->NextMessage();
 		{
@@ -356,7 +358,7 @@ thread_t VApplication::Run(void) {
 }
 
 void VApplication::Quit(void) {
-	cout << "Quit" << endl;
+	if (print_debug_messages) cout << "Quit" << endl;
 	PostMessage(V_QUIT_REQUESTED);
 }
 
@@ -450,7 +452,7 @@ int32_t VApplication::open_server_socket() {
 		}
 	}
 	if (_socket == -1) {
-		cout << "Couldn't create Server socket. Exiting..." << endl;
+		if (print_debug_messages) cout << "Couldn't create Server socket. Exiting..." << endl;
 		Quit();
 	}
 	return _socket;
