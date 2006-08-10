@@ -8,6 +8,7 @@ AM_CXXFLAGS =\
 	-D_REENTRANT\
 	-pthread\
 	-Wall\
+	-frepo\
 	-g
 
 
@@ -31,4 +32,4 @@ pong_LDFLAGS = \
 
 pong_LDADD = \
 	-ltekhne
-	 
+

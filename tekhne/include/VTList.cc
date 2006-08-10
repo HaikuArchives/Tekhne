@@ -1,5 +1,5 @@
 /***************************************************************************
- *            VList.cc
+ *            VTList.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
  *
@@ -23,41 +23,43 @@
  *
  ****************************************************************************/
 
-#include "tekhne.h"
-
 using namespace tekhne;
 
-VList::VList(int32_t count){
+template <class T>
+VTList<T>::VTList(int32_t count){
 	makeBuffer(count);
 	lastItem = -1;
 }
 
-VList::VList(const VList& anotherList) {
+template <class T>
+VTList<T>::VTList(const VTList<T>& anotherList) {
 	makeBuffer(anotherList.bufferLen);
 	lastItem = anotherList.lastItem;
 
-	memmove(items, &anotherList.items, sizeof(void*)*(anotherList.lastItem+1));
+	memmove(items, &anotherList.items, sizeof(T)*(anotherList.lastItem+1));
 }
 
-VList::~VList() {
+template <class T>
+VTList<T>::~VTList() {
 	delete items;
 }
 
-bool VList::AddItem(void *item, int32_t index) {
+template <class T>
+bool VTList<T>::AddItem(T item, int32_t index) {
 	if (index >= bufferLen) {
-		void ** oldItems = items;
+		T *oldItems = items;
 		int32_t oldLen =  bufferLen;
 		makeBuffer(index);
-		memmove(items, oldItems, sizeof(void*)*oldLen);
+		memmove(items, oldItems, sizeof(T)*oldLen);
 		delete [] oldItems;
 	} else if (items[index]) {
 		if (lastItem+1 > bufferLen) {
-			void ** oldItems = items;
+			T *oldItems = items;
 			int32_t oldLen =  bufferLen;
 			makeBuffer(bufferLen+1);
-			memmove(items, oldItems, sizeof(void*)*oldLen);
+			memmove(items, oldItems, sizeof(T)*oldLen);
 		}
-		memmove(items+index+1, items+index, sizeof(void*)*(lastItem-index+1));
+		memmove(items+index+1, items+index, sizeof(T)*(lastItem-index+1));
 		lastItem++;
 	}
 	items[index] = item;
@@ -67,33 +69,37 @@ bool VList::AddItem(void *item, int32_t index) {
 	return true;
 }
 
-bool VList::AddItem(void *item) {
+template <class T>
+bool VTList<T>::AddItem(T item) {
 	if (lastItem >= bufferLen) {
-		void ** oldItems = items;
+		T *oldItems = items;
 		int32_t oldLen =  bufferLen;
 		makeBuffer(bufferLen+1);
-		memmove(items, oldItems, sizeof(void*)*oldLen);
+		memmove(items, oldItems, sizeof(T)*oldLen);
 	}
 	lastItem++;
 	items[lastItem] = item;
 	return true;
 }
 
-bool VList::AddList(VList *list, int32_t index) {
+template <class T>
+bool VTList<T>::AddList(VTList<T> *list, int32_t index) {
 	for (int32_t i=0;i<=list->lastItem;i++) {
 		AddItem(list->items[i], index+i);
 	}
 	return true;
 }
 
-bool VList::AddList(VList *list) {
+template <class T>
+bool VTList<T>::AddList(VTList<T> *list) {
 	for (int32_t i=0;i<=list->lastItem;i++) {
 		AddItem(list->items[i]);
 	}
 	return true;
 }
 
-int32_t VList::CountItems(void) const {
+template <class T>
+int32_t VTList<T>::CountItems(void) const {
 	int count = 0;
 	for (int32_t i=0;i<=lastItem;i++) {
 		if (items[i]) {
@@ -103,7 +109,8 @@ int32_t VList::CountItems(void) const {
 	return count;
 }
 
-void VList::DoForEach(bool (*func)(void *))  {
+template <class T>
+void VTList<T>::DoForEach(bool (*func)(T))  {
 	if (func) {
 		for (int32_t i=0;i<=lastItem;i++) {
 			if (items[i]) {
@@ -115,7 +122,8 @@ void VList::DoForEach(bool (*func)(void *))  {
 	}
 }
 
-void VList::DoForEach(bool (*func)(void *, void *), void *arg2) {
+template <class T>
+void VTList<T>::DoForEach(bool (*func)(T, void *), void *arg2) {
 	if (func) {
 		for (int32_t i=0;i<=lastItem;i++) {
 			if (items[i]) {
@@ -125,7 +133,8 @@ void VList::DoForEach(bool (*func)(void *, void *), void *arg2) {
 	}
 }
 
-void *VList::FirstItem(void) const {
+template <class T>
+T VTList<T>::FirstItem(void) const {
 	int32_t i = 0;
 	while (i <= lastItem) {
 		if (items[i]) {
@@ -135,12 +144,14 @@ void *VList::FirstItem(void) const {
 	return 0;
 }
 
-void *VList::GetItem(int32_t index) const {
+template <class T>
+T VTList<T>::GetItem(int32_t index) const {
 	if (index > bufferLen || index < 0) return 0;
 	return items[index];
 }
 
-bool VList::HasItem(void *item) const {
+template <class T>
+bool VTList<T>::HasItem(T item) const {
 	for (int32_t i=0;i<=lastItem;i++) {
 		if (items[i] == item) {
 			return true;
@@ -149,7 +160,8 @@ bool VList::HasItem(void *item) const {
 	return false;
 }
 
-int32_t VList::IndexOf(void *item) const {
+template <class T>
+int32_t VTList<T>::IndexOf(T item) const {
 	for (int32_t i=0;i<=lastItem;i++) {
 		if (items[i] == item) {
 			return i;
@@ -158,7 +170,8 @@ int32_t VList::IndexOf(void *item) const {
 	return -1;
 }
 
-bool VList::IsEmpty(void) const{
+template <class T>
+bool VTList<T>::IsEmpty(void) const{
 	for (int32_t i=0;i<=lastItem;i++) {
 		if (items[i]) {
 			return false;
@@ -167,11 +180,13 @@ bool VList::IsEmpty(void) const{
 	return true;
 }
 
-void *VList::Items(void) const {
+template <class T>
+T* VTList<T>::Items(void) const {
 	return items;
 }
 
-void *VList::LastItem(void) const {
+template <class T>
+T VTList<T>::LastItem(void) const {
 	for (int32_t i=lastItem;i>=0;i--) {
 		if (items[i]) {
 			return items[i];
@@ -180,12 +195,14 @@ void *VList::LastItem(void) const {
 	return 0;
 }
 
-void VList::MakeEmpty(void) {
+template <class T>
+void VTList<T>::MakeEmpty(void) {
 	lastItem = -1;
-	bzero(items, sizeof(void*)*bufferLen);
+	bzero(items, sizeof(T)*bufferLen);
 }
 
-bool VList::RemoveItem(void *item) {
+template <class T>
+bool VTList<T>::RemoveItem(T item) {
 	int32_t idx = IndexOf(item);
 	if (idx >= 0) {
 		RemoveItem(idx);
@@ -194,17 +211,19 @@ bool VList::RemoveItem(void *item) {
 	return false;
 }
 
-void *VList::RemoveItem(int32_t index) {
+template <class T>
+T VTList<T>::RemoveItem(int32_t index) {
 	if (index <= lastItem) {
-		void *ans = items[index];
-		memmove(items, items+1, sizeof(void*)*(lastItem-index));
+		T ans = items[index];
+		memmove(items, items+1, sizeof(T)*(lastItem-index));
 		lastItem--;
 		return ans;
 	}
 	return 0;
 }
 
-bool VList::RemoveItems(int32_t index, int32_t count) {
+template <class T>
+bool VTList<T>::RemoveItems(int32_t index, int32_t count) {
 	for(int i=0;i<count;i++) {
 		if (!RemoveItem(index)) {
 			return false;
@@ -213,16 +232,17 @@ bool VList::RemoveItems(int32_t index, int32_t count) {
 	return true;
 }
 
-void *VList::ReplaceItem(int32_t index, void *item) {
-	void *reply = 0;
+template <class T>
+T VTList<T>::ReplaceItem(int32_t index, T item) {
+	T reply = 0;
 	if (index >= 0 && index < bufferLen) {
 		reply = items[index];
 	}
 	if (index >= bufferLen) {
-		void ** oldItems = items;
+		T * oldItems = items;
 		int32_t oldLen =  bufferLen;
 		makeBuffer(index);
-		memmove(items, oldItems, sizeof(void*)*oldLen);
+		memmove(items, oldItems, sizeof(T)*oldLen);
 		delete [] oldItems;
 	}
 	items[index] = item;
@@ -232,17 +252,19 @@ void *VList::ReplaceItem(int32_t index, void *item) {
 	return reply;
 }
 
-void VList::SortItems(int (*compareFunc)(const void *, const void *)) {
+template <class T>
+void VTList<T>::SortItems(int (*compareFunc)(const void *, const void *)) {
 	int32_t count = CountItems();
 	if (count > 1) {
-		qsort(items, count, sizeof(void*), compareFunc);
+		qsort(items, count, sizeof(T), compareFunc);
 	}
 }
 
-VList& VList::operator =(const VList& l) {
+template <class T>
+VTList<T>& VTList<T>::operator =(const VTList<T> &l) {
 	makeBuffer(l.bufferLen);
 	lastItem = l.lastItem;
 
-	memmove(items, &l.items, sizeof(void*)*(l.lastItem+1));
+	memmove(items, &l.items, sizeof(T)*(l.lastItem+1));
 	return *this;
 }

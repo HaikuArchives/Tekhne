@@ -12,6 +12,7 @@ AM_CXXFLAGS =\
 	-D_REENTRANT\
 	-pthread\
 	-Wall\
+	-frepo\
 	-g
 
 bin_PROGRAMS = roster

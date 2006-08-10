@@ -22,80 +22,83 @@
  * IN THE SOFTWARE.
  *
  ***************************************************************************/
-#ifndef VLIST_H_
-#define VLIST_H_
+#ifndef VTLIST_H_
+#define VTLIST_H_
 
 #include <VErrors.h>
 #include <string.h>
 
 namespace tekhne {
 
-class VList {
+template <class T>
+class VTList {
 	private:
 
 	// the items
-		void **items;
+	T *items;
 	// the length of the buffer
-		int32_t bufferLen;
+	int32_t bufferLen;
 	// the index of the last item in the buffer or -1 if there are no items
-		int32_t lastItem;
+	int32_t lastItem;
 
 	// allocate a buffer at least as big as asked for. (Usually 2^x where 2^x is
 	// the smallest 2^x larger than count)
-		inline void makeBuffer(int32_t count) {
-			int32_t len = 16;
-			while(len < count) len *=2;
+	inline void makeBuffer(int32_t count) {
+		int32_t len = 16;
+		while(len < count) len *=2;
 
-			bufferLen = len;
-			items = new void*[len];
-			bzero(items, sizeof(void*)*bufferLen);
-		}
+		bufferLen = len;
+		items = new T[len];
+		bzero(items, sizeof(T)*bufferLen);
+	}
 
 	public:
 
-		VList(int32_t count = 20);
-		VList(const VList& anotherList);
-		virtual ~VList();
+		VTList(int32_t count = 20);
+		VTList(const VTList<T>& anotherList);
+		virtual ~VTList();
 
-		bool AddItem(void *item, int32_t index);
-		bool AddItem(void *item);
+		bool AddItem(T item, int32_t index);
+		bool AddItem(T item);
 
-		bool AddList(VList *list, int32_t index);
-		bool AddList(VList *list);
+		bool AddList(VTList<T> *list, int32_t index);
+		bool AddList(VTList<T> *list);
 
 		int32_t CountItems(void) const;
 
-		void DoForEach(bool (*func)(void *));
-		void DoForEach(bool (*func)(void *, void *), void *arg2);
+		void DoForEach(bool (*func)(T));
+		void DoForEach(bool (*func)(T, void *), void *arg2);
 
-		void *FirstItem(void) const;
+		T FirstItem(void) const;
 
-		void *GetItem(int32_t index) const;
+		T GetItem(int32_t index) const;
 
-		bool HasItem(void *item) const;
+		bool HasItem(T item) const;
 
-		int32_t IndexOf(void *item) const;
+		int32_t IndexOf(T item) const;
 
 		bool IsEmpty(void) const;
 
-		void *Items(void) const;
+		T* Items(void) const;
 
-		void *LastItem(void) const;
+		T LastItem(void) const;
 
 		void MakeEmpty(void);
 
-		bool RemoveItem(void *item);
-		void *RemoveItem(int32_t index);
+		bool RemoveItem(T item);
+		T RemoveItem(int32_t index);
 		bool RemoveItems(int32_t index, int32_t count);
 
-		void *ReplaceItem(int32_t index, void *item);
+		T ReplaceItem(int32_t index, T item);
 
 		void SortItems(int (*compareFunc)(const void *, const void *));
 
-		VList& operator=(const VList&);
+		VTList<T>& operator=(const VTList<T> &l);
 
 };
 
 } // namespace tekhne
 
-#endif /*VLIST_H_*/
+#include "VTList.cc"
+
+#endif /*VTLIST_H_*/

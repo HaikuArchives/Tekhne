@@ -39,5 +39,5 @@ libtekhne_la_SOURCES = \
 libtekhne_la_LDFLAGS = \
 	-pthread
 
-libtekhne_la_LIBADD = 
+libtekhne_la_LIBADD =
 

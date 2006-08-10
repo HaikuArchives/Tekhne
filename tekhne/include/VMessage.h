@@ -2,17 +2,17 @@
  *            VMessage.h
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #ifndef _VMESSAGE_H
@@ -38,6 +38,7 @@ namespace tekhne {
 
 class VMessenger;
 class VHandler;
+class msg_thread;
 
 class VMessage {
 private:
@@ -50,7 +51,7 @@ public:
 	VMessage(uint32_t command);
 	VMessage(const VMessage &message);
 	VMessage(void);
-	
+
 	virtual ~VMessage();
 
 	status_t AddData(const char *name, type_code type,
@@ -73,7 +74,7 @@ public:
 	status_t AddMessage(const char *name, const VMessage *message);
 	status_t AddMessenger(const char *name, VMessenger *messenger);
 	status_t AddPointer(const char *name, const void *pointer);
-	
+
 	status_t AddSpecifier(const VMessage *message);
 	status_t AddSpecifier(const char *property);
 	status_t AddSpecifier(const char *property, int32_t index);
@@ -81,7 +82,7 @@ public:
 	status_t AddSpecifier(const char *property, const char *name);
 
 	int32_t CountNames(type_code type) const;
-	
+
 	status_t FindData(const char *name, type_code type, int32_t index, const void **data, ssize_t *numBytes) const;
 	status_t FindData(const char *name, type_code type, const void **data, ssize_t *numBytes) const;
 	status_t FindBool(const char *name, int32_t index,  bool *aBool) const;
@@ -120,26 +121,26 @@ public:
 	status_t Unflatten(VDataIO *object);
 	status_t Unflatten(const char *address);
 	ssize_t FlattenedSize(void) const;
-	
+
 	status_t GetCurrentSpecifier(int32_t *index, VMessage *specifier = 0, int32_t *what = 0, const char **property = 0) const;
 	status_t PopSpecifier(void);
-	
+
 	status_t GetInfo(const char *name, type_code *typeFound, int32_t *countFound = 0) const;
 	status_t GetInfo(const char *name, type_code *typeFound, bool *fixedSize) const;
 	status_t GetInfo(type_code type, int32_t index, char **nameFound, type_code *typeFound, int32_t *countFound = 0) const;
-	
+
 	bool HasSpecifiers(void) const;
-	
+
 	bool IsSystem(void) const;
-	
+
 	status_t MakeEmpty(void);
 	bool IsEmpty(void) const;
-	
+
 	void PrintToStream(void) const;
-	
+
 	status_t RemoveName(const char *name);
 	status_t RemoveData(const char *name, int32_t index = 0);
-	
+
 	status_t ReplaceData(const char *name, type_code type, const void *data, ssize_t numBytes);
 	status_t ReplaceData(const char *name, type_code type, int32_t index, const void *data, ssize_t numBytes);
 	status_t ReplaceBool(const char *name, bool aBool);
@@ -170,23 +171,23 @@ public:
 	status_t ReplaceMessenger(const char *name, int32_t index, VMessenger *messenger);
 	status_t ReplacePointer(const char *name, const void *pointer);
 	status_t ReplacePointer(const char *name, int32_t index, const void *pointer);
-	
+
 	VMessenger *ReturnAddress(void);
-	
+
 	status_t SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout = V_INFINITE_TIMEOUT, bigtime_t replyTimeout = V_INFINITE_TIMEOUT);
 	status_t SendReply(VMessage *message, VHandler *replyHandler = 0, bigtime_t sendTimeout = V_INFINITE_TIMEOUT);
 	status_t SendReply(uint32_t command, VMessage *reply);
 	status_t SendReply(uint32_t command, VHandler *replyHandler = 0);
-	
+
 	bool WasDelivered(void) const;
 	bool IsSourceRemote(void) const;
 	bool IsSourceWaiting(void) const;
 	bool IsReply(void) const;
 	const VMessage *Previous(void) const;
-	
+
 	bool WasDropped(void) const;
 	VPoint DropPoint(VPoint *offset = 0) const;
-	
+
 	VMessage &operator =(const VMessage& msg);
 	void *operator new(size_t numBytes) throw ();
 	void operator delete(void *memory, size_t numBytes);

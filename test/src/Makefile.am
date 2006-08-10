@@ -25,9 +25,11 @@ test_SOURCES = \
 	VPointTest.cc\
 	VStringTest.cc\
 	VListTest.cc \
+	VTListTest.cc \
 	VMessengerTest.cc
 
 test_LDFLAGS = \
+	-pthread\
 	 -L../../tekhne/src
 
 test_LDADD = \

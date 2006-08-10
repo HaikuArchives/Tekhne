@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VTListTest.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,30 +23,41 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef VTLISTTESTCASE_H_
+#define VTLISTTESTCASE_H_
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VTList.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VStopWatch.h"
+#include "tekhne.h"
+#include <cppunit/TestCase.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/TestCaller.h>
 
-#endif /* _TEKHNE_H */
+using namespace tekhne;
+
+class VTListTest : public CppUnit::TestFixture {
+private:
+	VTList<char*> *l;
+public:
+static CppUnit::Test *VTListTest::suite() {
+	CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VTListTest" );
+	suiteOfTests->addTest( new CppUnit::TestCaller<VTListTest>("testAddItem",
+								&VTListTest::testAddItem ) );
+	suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testSortItems",
+								&VTListTest::testSortItems ) );
+	suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testInsertItem",
+								&VTListTest::testInsertItem ) );
+	suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testOperator",
+								&VTListTest::testOperator ) );
+	return suiteOfTests;
+}
+
+	void setUp();
+	void tearDown();
+
+	void testAddItem();
+	void testSortItems();
+	void testInsertItem();
+	void testOperator();
+};
+
+
+#endif /*VTLISTTESTCASE_H_*/
