@@ -29,7 +29,6 @@
 
 using namespace std;
 
-template class tekhne::VTList<char*>;
 
 void VTListTest::setUp() {
 	l = new VTList<char *>();

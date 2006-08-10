@@ -30,6 +30,7 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
+#include "VTList.h"
 
 using namespace tekhne;
 

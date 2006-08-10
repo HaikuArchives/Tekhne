@@ -30,7 +30,6 @@
 #include "VBlockCache.h"
 #include "VString.h"
 #include "VList.h"
-#include "VTList.h"
 #include "VMallocIO.h"
 #include "VMemoryIO.h"
 #include "VArchivable.h"
