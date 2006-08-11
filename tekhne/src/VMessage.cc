@@ -154,11 +154,12 @@ static bool deleteItem(void *item) {
 
 }
 
-VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0), what(command) {
+VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0),
+	_replyMessage(0), _returnAddress(0), what(command) {
 }
 
 VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false), _replyHandler(message._replyHandler),
- 	_handler(message._handler), _replyMessage(message._replyMessage), what(message.what) {
+ 	_handler(message._handler), _replyMessage(message._replyMessage), _returnAddress(0), what(message.what) {
 	storage_item **items = static_cast<storage_item **>(message.l.Items());
 	for (int i=0;i<message.l.CountItems();i++) {
 		storage_item *si = items[i];
@@ -185,7 +186,8 @@ VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(fal
 	}
 }
 
-VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0), what(0) {
+VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0),
+	_replyMessage(0), _returnAddress(0), what(0) {
 }
 
 VMessage::~VMessage() {
@@ -964,7 +966,7 @@ status_t VMessage::ReplacePointer(const char *name, int32_t index, const void *p
 }
 
 VMessenger *VMessage::ReturnAddress(void) {
-	return 0;
+	return _returnAddress;
 }
 
 status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout, bigtime_t replyTimeout) {

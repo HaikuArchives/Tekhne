@@ -57,6 +57,9 @@ private:
 	// _replyMessage. The first is asynchronous, the second synchronous.
 	VMessage *_replyMessage;
 
+	// the messenger return address,created from the _handler and It's VLooper?
+	VMessenger *_returnAddress;
+
 	public:
 	uint32_t what;
 
@@ -207,6 +210,7 @@ private:
 	// give VLooper access to message internals...
 	friend class VLooper;
 	friend void *looper_thread_func(void *l);
+	friend class VMessenger;
 
 };
 
