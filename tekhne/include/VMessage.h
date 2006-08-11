@@ -52,7 +52,12 @@ private:
 	// these are used internally by looper in PostMessage and dispatch message
 	VHandler *_replyHandler;
 	VHandler *_handler;
-public:
+	// there are 2 sematics for passing replies. 1) throu a reply handler in which
+	// case you post a message to post it to the _replyHandler. 2) you fill in the
+	// _replyMessage. The first is asynchronous, the second synchronous.
+	VMessage *_replyMessage;
+
+	public:
 	uint32_t what;
 
 	VMessage(uint32_t command);

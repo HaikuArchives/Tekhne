@@ -47,7 +47,7 @@ private:
 public:
 	VTestApplication() : VApplication("app/v-test-app") {
 		// send pulse every half a second, we quit on the first one
-		SetPulseRate(500000);
+		SetPulseRate(500*V_MILLISECOND);
 	}
 
 	virtual void ReadyToRun(void) {

@@ -158,7 +158,7 @@ VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _r
 }
 
 VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false), _replyHandler(message._replyHandler),
- 	_handler(message._handler), what(message.what) {
+ 	_handler(message._handler), _replyMessage(message._replyMessage), what(message.what) {
 	storage_item **items = static_cast<storage_item **>(message.l.Items());
 	for (int i=0;i<message.l.CountItems();i++) {
 		storage_item *si = items[i];
@@ -968,24 +968,72 @@ VMessenger *VMessage::ReturnAddress(void) {
 }
 
 status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout, bigtime_t replyTimeout) {
-	return V_ERROR;
+	status_t err = V_ERROR;
+	if (_replyHandler && _replyHandler->Looper()) {
+		if (_replyHandler->LockLooperWithTimeout(sendTimeout)) {
+			message->_replyMessage = reply;
+			// becasue we are delivering the message ourselves we don't need the replyTimeout?
+			_replyHandler->MessageReceived(message);
+			_replyHandler->UnlockLooper( );
+			err = V_OK;
+		}
+	}
+	return err;
 }
 
 status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_t sendTimeout) {
-	return V_ERROR;
+	status_t err = V_ERROR;
+	if (_replyHandler && _replyHandler->Looper()) {
+		if (_replyHandler->LockLooperWithTimeout(sendTimeout)) {
+			message->_replyHandler = replyHandler;
+			err = _replyHandler->Looper()->PostMessage(message);
+			_replyHandler->UnlockLooper( );
+			err = V_OK;
+		}
+	} else if (_replyMessage) {
+		*_replyMessage = *message;
+		err = V_OK;
+	}
+	return err;
 }
 
 status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
-	return V_ERROR;
+	status_t err = V_ERROR;
+	if (_replyHandler && _replyHandler->Looper()) {
+		if (_replyHandler->LockLooper( )) {
+			VMessage *msg = new VMessage(command);
+			msg->_replyMessage = reply;
+			_replyHandler->MessageReceived(msg);
+			delete msg;
+			_replyHandler->UnlockLooper( );
+			err = V_OK;
+		}
+	}
+	return err;
 }
 
 status_t VMessage::SendReply(uint32_t command, VHandler *replyHandler) {
-	return V_ERROR;
+	status_t err = V_ERROR;
+	if (_replyHandler && _replyHandler->Looper()) {
+		if (_replyHandler->LockLooper( )) {
+			VMessage *msg = new VMessage(command);
+			msg->_replyHandler = replyHandler;
+			err = _replyHandler->Looper()->PostMessage(msg);
+			delete msg;
+			_replyHandler->UnlockLooper( );
+			err = V_OK;
+		}
+	} else if (_replyMessage) {
+		_replyMessage->MakeEmpty( );
+		_replyMessage->what = command;
+		err = V_OK;
+	}
+	return err;
 }
 
 
 bool VMessage::WasDelivered(void) const {
-	return false;
+	return _wasDelivered;
 }
 
 bool VMessage::IsSourceRemote(void) const {
@@ -1017,6 +1065,7 @@ VMessage &VMessage::operator =(const VMessage& msg){
 		what = msg.what;
 		_handler = msg._handler;
 		_replyHandler = msg._replyHandler;
+		_replyMessage = msg._replyMessage;
 		storage_item **items = static_cast<storage_item **>(msg.l.Items());
 		for (int i=0;i<msg.l.CountItems();i++) {
 			storage_item *si = items[i];

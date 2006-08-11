@@ -141,53 +141,29 @@ VMessageQueue *VLooper::MessageQueue(void) const {
 }
 
 status_t VLooper::PostMessage(VMessage *message) {
-	status_t err = V_OK;
-	if (Lock()) {
-		_mq->AddMessage(new VMessage(*message));
-		Unlock();
-	} else {
-		err = V_ERROR;
-	}
-	return err;
+	_mq->AddMessage(new VMessage(*message));
+	return V_OK;
 }
 
 status_t VLooper::PostMessage(uint32_t command) {
-	status_t err = V_OK;
-	if (Lock()) {
-		_mq->AddMessage(new VMessage(command));
-		Unlock();
-	} else {
-		err = V_ERROR;
-	}
-	return err;
+	_mq->AddMessage(new VMessage(command));
+	return V_OK;
 }
 
 status_t VLooper::PostMessage(VMessage *message, VHandler *handler, VHandler *replyHandler) {
-	status_t err = V_OK;
-	if (Lock()) {
-		VMessage *nmsg = new VMessage(*message);
-		nmsg->_handler = handler;
-		nmsg->_replyHandler = replyHandler;
-		_mq->AddMessage(nmsg);
-		Unlock();
-	} else {
-		err = V_ERROR;
-	}
-	return err;
+	VMessage *nmsg = new VMessage(*message);
+	nmsg->_handler = handler;
+	nmsg->_replyHandler = replyHandler;
+	_mq->AddMessage(nmsg);
+	return V_OK;
 }
 
 status_t VLooper::PostMessage(uint32_t command, VHandler *handler, VHandler *replyHandler) {
-	status_t err = V_OK;
-	if (Lock()) {
-		VMessage *nmsg = new VMessage(command);
-		nmsg->_handler = handler;
-		nmsg->_replyHandler = replyHandler;
-		_mq->AddMessage(nmsg);
-		Unlock();
-	} else {
-		err = V_ERROR;
-	}
-	return err;
+	VMessage *nmsg = new VMessage(command);
+	nmsg->_handler = handler;
+	nmsg->_replyHandler = replyHandler;
+	_mq->AddMessage(nmsg);
+	return V_OK;
 }
 
 void VLooper::Quit(void) {
