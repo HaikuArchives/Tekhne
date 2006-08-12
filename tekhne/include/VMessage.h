@@ -48,6 +48,7 @@ private:
 	VList l;
 	bool _isReply;
 	bool _wasDelivered;
+	bool _isSourceWaiting;
 
 	// these are used internally by looper in PostMessage and dispatch message
 	VHandler *_replyHandler;
@@ -211,7 +212,9 @@ private:
 	friend class VLooper;
 	friend void *looper_thread_func(void *l);
 	friend class VMessenger;
-
+	friend class msg_thread;
+	friend class VApplication;
+	friend class ReplyHandler;
 };
 
 } // namespace tekhne

@@ -154,12 +154,13 @@ static bool deleteItem(void *item) {
 
 }
 
-VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0),
-	_replyMessage(0), _returnAddress(0), what(command) {
+VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true),
+	_replyHandler(0), _handler(0), _replyMessage(0), _returnAddress(0), what(command) {
 }
 
-VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false), _replyHandler(message._replyHandler),
- 	_handler(message._handler), _replyMessage(message._replyMessage), _returnAddress(0), what(message.what) {
+VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true),
+	_replyHandler(message._replyHandler), _handler(message._handler), _replyMessage(message._replyMessage),
+	_returnAddress(0), what(message.what) {
 	storage_item **items = static_cast<storage_item **>(message.l.Items());
 	for (int i=0;i<message.l.CountItems();i++) {
 		storage_item *si = items[i];
@@ -186,8 +187,8 @@ VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(fal
 	}
 }
 
-VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _replyHandler(0), _handler(0),
-	_replyMessage(0), _returnAddress(0), what(0) {
+VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true), _replyHandler(0),
+ _handler(0), _replyMessage(0), _returnAddress(0), what(0) {
 }
 
 VMessage::~VMessage() {
@@ -626,6 +627,7 @@ status_t VMessage::Unflatten(VDataIO *object) {
 			default:
 				return V_ERROR;
 		}
+		l.AddItem(si);
 	}
 	return V_OK;
 }
@@ -786,7 +788,7 @@ void VMessage::PrintToStream(void) const {
 			pi.AddItem(mpi);
 		}
 	}
-	int32_t count = 0;
+	int32_t count = 1;
 	pi.DoForEach(tekhne::print_msg_item, &count);
 
 }
@@ -971,8 +973,9 @@ VMessenger *VMessage::ReturnAddress(void) {
 
 status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout, bigtime_t replyTimeout) {
 	status_t err = V_ERROR;
+	_isSourceWaiting = false;
 	if (_replyHandler && _replyHandler->Looper()) {
-		if (_replyHandler->LockLooperWithTimeout(sendTimeout)) {
+		if (_replyHandler->LockLooperWithTimeout(sendTimeout) == V_OK) {
 			message->_replyMessage = reply;
 			// becasue we are delivering the message ourselves we don't need the replyTimeout?
 			_replyHandler->MessageReceived(message);
@@ -985,8 +988,9 @@ status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendT
 
 status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_t sendTimeout) {
 	status_t err = V_ERROR;
+	_isSourceWaiting = false;
 	if (_replyHandler && _replyHandler->Looper()) {
-		if (_replyHandler->LockLooperWithTimeout(sendTimeout)) {
+		if (_replyHandler->LockLooperWithTimeout(sendTimeout) == V_OK) {
 			message->_replyHandler = replyHandler;
 			err = _replyHandler->Looper()->PostMessage(message);
 			_replyHandler->UnlockLooper( );
@@ -1001,8 +1005,9 @@ status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_
 
 status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 	status_t err = V_ERROR;
+	_isSourceWaiting = false;
 	if (_replyHandler && _replyHandler->Looper()) {
-		if (_replyHandler->LockLooper( )) {
+		if (_replyHandler->LockLooper( ) == V_OK) {
 			VMessage *msg = new VMessage(command);
 			msg->_replyMessage = reply;
 			_replyHandler->MessageReceived(msg);
@@ -1016,6 +1021,7 @@ status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 
 status_t VMessage::SendReply(uint32_t command, VHandler *replyHandler) {
 	status_t err = V_ERROR;
+	_isSourceWaiting = false;
 	if (_replyHandler && _replyHandler->Looper()) {
 		if (_replyHandler->LockLooper( )) {
 			VMessage *msg = new VMessage(command);
@@ -1043,7 +1049,7 @@ bool VMessage::IsSourceRemote(void) const {
 }
 
 bool VMessage::IsSourceWaiting(void) const {
-	return false;
+	return _isSourceWaiting;
 }
 
 bool VMessage::IsReply(void) const {

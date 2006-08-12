@@ -27,6 +27,7 @@
 #include <iostream>
 
 using namespace tekhne;
+using namespace std;
 
 VLooper::VLooper(const char *name, int32_t priority, int32_t portCapacity) :
 	VHandler(name), _quitting(false), _currentMessage(0), _preferredHandler(0) {
@@ -178,18 +179,34 @@ void *tekhne::looper_thread_func(void *l) {
 	VLooper *looper = (VLooper *)l;
 	while (!looper->_quitting) {
 		VMessage *msg = looper->MessageQueue()->NextMessage();
-		looper->Lock();
-		switch(msg->what) {
-			case V_QUIT_REQUESTED:
-				if (looper->QuitRequested()) {
-					looper->_quitting = true;
-				}
-				break;
-			default:
-				// goes to the preferred handler if there is one and then ourselves
-				looper->DispatchMessage(msg, msg->_handler);
+		if (msg->_replyMessage == 0) {
+			msg->_replyMessage = new VMessage(V_NO_REPLY);
 		}
-		looper->Unlock();
+		{
+			VAutoLock lock(looper);
+			switch(msg->what) {
+				case V_QUIT_REQUESTED:
+					if (looper->QuitRequested()) {
+						looper->_quitting = true;
+					}
+					break;
+				default:
+					// goes to the preferred handler if there is one and then ourselves
+					looper->DispatchMessage(msg, msg->_handler);
+			}
+		}
+		// don't reply to a no reply
+		if (msg->what != V_NO_REPLY && msg->IsSourceWaiting( )) {
+			// send some kind of message
+			if (msg->_replyMessage) {
+				VString replySignature;
+				msg->FindString("_replySignature", &replySignature);
+				if (replySignature.Length() > 0) {
+					msg->_replyMessage->AddString("_replySignature", replySignature);
+				}
+			}
+			msg->SendReply(msg->_replyMessage, static_cast<VHandler*>(0));
+		}
 		delete msg;
 	}
 	delete looper;
@@ -198,7 +215,7 @@ void *tekhne::looper_thread_func(void *l) {
 
 thread_t VLooper::Run(void) {
 
-	if (print_debug_messages) std::cout << "Run" << std::endl;
+	if (print_debug_messages) cout << "Run" << endl;
 
 	pthread_attr_init(&_attr);
 	pthread_create(&_thread, &_attr, looper_thread_func, this);

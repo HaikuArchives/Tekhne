@@ -29,6 +29,7 @@
 #include "VMessageQueue.h"
 #include "VAutoLock.h"
 #include "VMemoryIO.h"
+#include "VMallocIO.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -41,14 +42,34 @@ using namespace std;
 VApplication *tekhne::v_app = 0;
 VMessenger *tekhne::v_app_messenger = 0;
 
-bool tekhne::print_debug_messages = false;
+namespace tekhne {
 
-class tekhne::msg_thread {
+bool print_debug_messages = false;
+
+class ReplyHandler : public VLooper {
+	// this handler is used to get replies to send back to originating app
+	const char *_signature;
+public:
+	ReplyHandler(const char *sig) : VLooper("app reply handler"), _signature(sig) {}
+	void MessageReceived(VMessage *msg) {
+		VString replySignature;
+		msg->FindString("_replySignature", &replySignature);
+		if (replySignature.Length( )) {
+			msg->AddString("_replySignature", _signature);
+			VMallocIO mio;
+			msg->Flatten(&mio);
+			SendToRemoteHost(replySignature.String(), mio);
+		}
+	}
+};
+
+class msg_thread {
 private:
 	bool _done;
 	int32_t _socket;
 	pthread_attr_t _attr;
 	pthread_t _thread;
+	ReplyHandler *_replyHandler;
 	static void* loop(void *t) {
 		tekhne::msg_thread *th = static_cast<tekhne::msg_thread *>(t);
 		void *buf = malloc(4096);
@@ -90,7 +111,7 @@ private:
 							msg->Unflatten(mio);
 							delete mio;
 							if (print_debug_messages) msg->PrintToStream();
-							v_app->PostMessage(msg);
+							v_app->PostMessage(msg, 0, th->_replyHandler);
 							delete msg;
 						} else {
 							close (i);
@@ -105,7 +126,10 @@ private:
 		return 0;
 	}
 public:
-	msg_thread(int32_t s) : _done(false), _socket(s) {
+	msg_thread(int32_t s, const char *sig) : _done(false), _socket(s) {
+		// start the app message reply Handler
+		_replyHandler = new ReplyHandler(sig);
+		_replyHandler->Run();
 		pthread_attr_init(&_attr);
 		pthread_create(&_thread, &_attr, loop, this);
 		pthread_detach(_thread);
@@ -123,14 +147,15 @@ static void termination_handler (int signum) {
 	v_app->Quit();
 }
 static void setup_termination_handler(void) {
-	if (signal (SIGINT, termination_handler) == SIG_IGN)
+	if (signal (SIGINT, tekhne::termination_handler) == SIG_IGN)
 		signal (SIGINT, SIG_IGN);
-	if (signal (SIGHUP, termination_handler) == SIG_IGN)
+	if (signal (SIGHUP, tekhne::termination_handler) == SIG_IGN)
 		signal (SIGHUP, SIG_IGN);
-	if (signal (SIGTERM, termination_handler) == SIG_IGN)
+	if (signal (SIGTERM, tekhne::termination_handler) == SIG_IGN)
 		signal (SIGTERM, SIG_IGN);
-	if (signal (SIGPIPE, termination_handler) == SIG_IGN)
+	if (signal (SIGPIPE, tekhne::termination_handler) == SIG_IGN)
 		signal (SIGPIPE, SIG_IGN);
+}
 }
 
 VApplication::VApplication(const char *signature) :
@@ -298,8 +323,11 @@ thread_t VApplication::Run(void) {
 	if (print_debug_messages) cout << "Run" << endl;
 	while (!_quitting) {
 		VMessage *msg = MessageQueue()->NextMessage();
+		if (msg->_replyMessage == 0) {
+			msg->_replyMessage = new VMessage(V_NO_REPLY);
+		}
 		{
-			VAutoLock(this);
+			VAutoLock lock(this);
 			switch(msg->what) {
 				case V_ABOUT_REQUESTED:
 					AboutRequested();
@@ -352,6 +380,12 @@ thread_t VApplication::Run(void) {
 					DispatchMessage(msg, 0);
 			}
 		} // delete AutoLock before message
+		// don't reply to a no reply
+		if (msg->what != V_NO_REPLY && msg->IsSourceWaiting( )) {
+			// send some kind of message
+			copyReplySignature(msg);
+			msg->SendReply(msg->_replyMessage, static_cast<VHandler*>(0));
+		}
 		delete msg;
 	}
 	return 0;
@@ -445,7 +479,7 @@ int32_t VApplication::open_server_socket() {
 						close(_socket);
 						_socket = -1;
 					} else {
-						_msg_thread = new msg_thread(_socket);
+						_msg_thread = new msg_thread(_socket, _signature.String());
 					}
 				}
 			}

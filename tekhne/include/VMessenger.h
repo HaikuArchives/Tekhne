@@ -2,17 +2,17 @@
  *            VMessenger.h
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #ifndef _VMESSENGER_H
@@ -29,14 +29,14 @@
 #include "StandardDefs.h"
 #include "VErrors.h"
 #include "VString.h"
-	
+
 namespace tekhne {
 
 class VHandler;
 class VLooper;
 class VMessage;
 class VMallocIO;
-	
+
 class VMessenger {
 private:
 	VHandler *_handler;
@@ -44,8 +44,7 @@ private:
 	bool _localTarget;
 	bool _isValid;
 	VString _signature;
-	
-	status_t SendToRemoteHost(VMallocIO &data) const;
+
 public:
 	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);
 	VMessenger(const char *signature, team_t team = -1, status_t *error = 0);
@@ -68,10 +67,11 @@ public:
 	VHandler *Target(VLooper **looper) const;
 	bool IsTargetLocal(void) const;
 	inline team_t Team(void) const;
-	
+
 	VMessenger &operator =(const VMessenger& v);
 	bool operator ==(const VMessenger& v) const;
 };
 
+extern status_t SendToRemoteHost(const char *signature, VMallocIO &data);
 }
 #endif /* _VMESSENGER_H */

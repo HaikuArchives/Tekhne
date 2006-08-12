@@ -2,17 +2,17 @@
  *            VMessenger.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,7 +21,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.#include <sys/socket.h>
 
- * 
+ *
  ****************************************************************************/
 
 #include "tekhne.h"
@@ -98,7 +98,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t d
 		if (_localTarget) {
 			err = _looper->LockWithTimeout(deliveryTimeout);
 			if (err == V_OK) {
-				// not sure what to do with reply, need to fill it in somehow
+				message->_replyMessage = reply;
 				err = _looper->PostMessage(message, _handler);
 				_looper->Unlock();
 			}
@@ -141,18 +141,20 @@ status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, 
 status_t VMessenger::SendMessage(uint32_t command, VMessage *reply) const {
 	status_t err = V_ERROR;
 	if (_isValid) {
+		VMessage *msg = new VMessage(command);
 		if (_localTarget) {
 			_looper->Lock();
-			// not sure what to do with reply, need to fill it in somehow
-			err = _looper->PostMessage(command);
+			msg->_replyMessage = reply;
+			err = _looper->PostMessage(msg);
 			_looper->Unlock();
 		} else {
-			VMessage msg(command);
 			VMallocIO mio;
-			msg.Flatten(&mio);
-			err = SendToRemoteHost(mio);
+			msg->AddString("_replySignature", v_app->Signature());
+			msg->Flatten(&mio);
+			err = SendToRemoteHost(_signature.String(), mio);
 			// need to read reply
 		}
+		delete msg;
 	}
 	return err;
 }
@@ -166,9 +168,10 @@ status_t VMessenger::SendMessage(uint32_t command, VHandler *replyHandler) const
 			_looper->Unlock();
 		} else {
 			VMessage msg(command);
+			msg.AddString("_replySignature", v_app->Signature());
 			VMallocIO mio;
 			msg.Flatten(&mio);
-			err = SendToRemoteHost(mio);
+			err = SendToRemoteHost(_signature.String(), mio);
 		}
 	}
 	return err;
@@ -215,8 +218,7 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 	return false;
 }
 
-// private method
-status_t VMessenger::SendToRemoteHost(VMallocIO &data) const {
+status_t tekhne::SendToRemoteHost(const char *signature, VMallocIO &data) {
 	status_t err = V_ERROR;
 	int32_t len = data.BufferLength();
 	const void *buf = data.Buffer();
@@ -225,7 +227,7 @@ status_t VMessenger::SendToRemoteHost(VMallocIO &data) const {
 		struct sockaddr_un name;
 		name.sun_family = AF_LOCAL;
 		VString socket_name("/tmp/");
-		socket_name.Append(_signature);
+		socket_name.Append(signature);
 		socket_name.ReplaceAll('/', '-', 5);
 		strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
 		int32_t e = connect(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
