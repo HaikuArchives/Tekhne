@@ -14,6 +14,7 @@ bin_PROGRAMS = roster
 
 roster_SOURCES = \
 	main.cc\
+	ApplicationInfo.cc\
 	Roster.cc
 
 roster_LDFLAGS = \

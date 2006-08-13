@@ -32,6 +32,7 @@ libtekhne_include_DATA = \
 	VPositionIO.h\
 	VQuery.h\
 	VRect.h\
+	VRoster.h\
 	VStopWatch.h\
 	VString.h\
 	VTList.cc\

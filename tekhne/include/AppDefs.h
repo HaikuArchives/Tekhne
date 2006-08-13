@@ -25,6 +25,9 @@
 
 #include <stdint.h>
 
+#ifndef _APPDEFS_H
+#define _APPDEFS_H
+
 namespace tekhne {
 
 const int32_t V_ABOUT_REQUESTED = 1000;
@@ -95,7 +98,13 @@ const int32_t V_REPLY = 1063;
 const int32_t V_NO_REPLY = 1064;
 const int32_t V_MESSAGE_NOT_UNDERSTOOD = 1065;
 
+const int32_t V_REQUEST_LAUNCHED = 1066;
+const int32_t V_REQUEST_QUIT = 1067;
+
 const int32_t V_MILLISECOND = 1000;
 const int32_t V_SECOND = 1000*V_MILLISECOND;
 const int32_t V_MINUTE = 60*V_SECOND;
 }
+
+#endif /* _APPDEFS_H */
+

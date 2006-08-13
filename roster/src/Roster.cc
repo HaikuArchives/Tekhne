@@ -24,8 +24,10 @@
 
 #include "Roster.h"
 #include "IRoster.h"
+#include <iostream>
 
 using namespace tekhne;
+using namespace std;
 
 Roster::Roster() : VApplication("app/x-baldmountain-roster") {
 }
@@ -37,8 +39,16 @@ void Roster::ReadyToRun(void) {
 }
 
 void Roster::MessageReceived(VMessage *message) {
+	VString sig;
+
 	switch(message->what) {
 		case V_ROSTER_REGISTER:
+			message->FindString("_signature", &sig);
+			cout << "register " << sig.String() << endl;
+			break;
+		case V_ROSTER_UNREGISTER:
+			message->FindString("_signature", &sig);
+			cout << "unregister " << sig.String() << endl;
 			break;
 		case V_ROSTER_ACTIVATE:
 			break;

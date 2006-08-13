@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
 INCLUDES =\
-	 -I../include
+	 -I../include\
 	 -I../internal
 
 AM_CXXFLAGS =\
@@ -29,6 +29,7 @@ libtekhne_la_SOURCES = \
 	VMessenger.cc\
 	VPoint.cc\
 	VRect.cc\
+	VRoster.cc\
 	VString.cc\
 	VStopWatch.cc\
 	VMessageRunner.cc

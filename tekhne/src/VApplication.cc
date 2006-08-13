@@ -23,13 +23,7 @@
  *
  ****************************************************************************/
 
-#include "AppDefs.h"
-#include "VMessenger.h"
-#include "VApplication.h"
-#include "VMessageQueue.h"
-#include "VAutoLock.h"
-#include "VMemoryIO.h"
-#include "VMallocIO.h"
+#include "tekhne.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -41,6 +35,7 @@ using namespace std;
 
 VApplication *tekhne::v_app = 0;
 VMessenger *tekhne::v_app_messenger = 0;
+VRoster *tekhne::v_roster = 0;
 
 namespace tekhne {
 
@@ -170,6 +165,8 @@ VApplication::VApplication(const char *signature) :
 	v_app = this;
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
+	// this will resgister with the roster app
+	v_roster = new VRoster();
 	open_server_socket();
 	InjectStartupMessages();
 }
@@ -186,6 +183,8 @@ VApplication::VApplication(const char *signature, status_t *error) :
 	v_app = this;
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
+	// this will resgister with the roster app
+	v_roster = new VRoster();
 	open_server_socket();
 	InjectStartupMessages();
 }
@@ -203,11 +202,15 @@ VApplication::VApplication(VMessage *archive) :
 	archive->FindString("mime_sig", &_signature);
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
+	// this will resgister with the roster app
+	v_roster = new VRoster();
 	open_server_socket();
 	InjectStartupMessages();
 }
 
 VApplication::~VApplication() {
+	// this will unresgister from the roster app
+	delete v_roster;
 	if (_socket >= 0) {
 		close(_socket);
 		VString socket_name("/tmp/");

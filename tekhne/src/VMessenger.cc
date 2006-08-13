@@ -47,6 +47,13 @@ VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 	_handler(0), _looper(0), _localTarget(false), _isValid(true), _signature(signature) {
 	if (error) *error = V_OK;
 	if (_signature.Length() == 0) {
+		// if we are making a remote messenger to ourself just turn it into a local messenger
+		if (_signature == v_app->Signature()) {
+			_looper = v_app;
+			_handler = v_app;
+			_signature.Clear();
+			_localTarget = true;
+		}
 		if (error) *error = V_OK;
 		_isValid = false;
 	}
@@ -55,12 +62,10 @@ VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 VMessenger::VMessenger(const VMessenger &messenger) :
 	_handler(0), _looper(0), _localTarget(true), _isValid(true), _signature(0) {
 	if (messenger._isValid) {
-		if (messenger._localTarget) {
-			_handler = messenger._handler;
-			_looper = messenger._looper;
-		} else {
-			// initialize connection to remote target
-		}
+		_handler = messenger._handler;
+		_looper = messenger._looper;
+		_localTarget = messenger._localTarget;
+		_signature = messenger._signature;
 	} else {
 		_isValid = false;
 	}
@@ -118,6 +123,10 @@ status_t VMessenger::SendMessage(VMessage *message, VHandler *replyHandler, bigt
 				_looper->Unlock();
 			}
 		} else {
+			message->AddString("_replySignature", v_app->Signature());
+			VMallocIO mio;
+			message->Flatten(&mio);
+			err = SendToRemoteHost(_signature.String(), mio);
 		}
 	}
 	return err;
@@ -133,6 +142,10 @@ status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, 
 				_looper->Unlock();
 			}
 		} else {
+			message->AddString("_replySignature", v_app->Signature());
+			VMallocIO mio;
+			message->Flatten(&mio);
+			err = SendToRemoteHost(_signature.String(), mio);
 		}
 	}
 	return err;

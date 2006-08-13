@@ -32,6 +32,7 @@
 namespace tekhne {
 
 class VMessage;
+class VRoster;
 class pulse_thread;
 class msg_thread;
 
@@ -108,6 +109,7 @@ public:
 
 extern VApplication *v_app;
 extern VMessenger *v_app_messenger;
+extern VRoster *v_roster;
 
 }
 
