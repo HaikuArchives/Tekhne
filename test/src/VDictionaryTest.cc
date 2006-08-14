@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VDictionaryTest.cc
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,31 +23,23 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#include "VDictionaryTest.h"
+#include <iostream>
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VStopWatch.h"
+using namespace std;
 
-#endif /* _TEKHNE_H */
+void VDictionaryTest::setUp() {
+	bc = new VDictionary();
+}
+
+void VDictionaryTest::tearDown() {
+	delete bc;
+}
+
+void VDictionaryTest::testCreate() {
+	VString s("foo");
+	char *x = "bar";
+
+	CPPUNIT_ASSERT(bc->AddItem(s, x) == V_OK);
+	CPPUNIT_ASSERT(bc->FindItem(s) == x);
+}

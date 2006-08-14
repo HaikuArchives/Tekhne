@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VDictionary.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,31 +23,29 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VDICTIONARY_H
+#define _VDICTIONARY_H
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
 #include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VStopWatch.h"
+#include "VHashable.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VDictionary {
+private:
+	VList items;
+public:
+	VDictionary();
+	virtual ~VDictionary();
+
+	// copy the key, save the value
+	status_t AddItem(VHashable &key, void *item);
+	void *FindItem(VHashable &key);
+	void *RemoveItem(VHashable &key);
+
+	void Items(VList &itemList);
+};
+
+}
+
+#endif /* _VDICTIONARY_H */

@@ -2,17 +2,17 @@
  *            VString.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "tekhne.h"
@@ -195,11 +195,11 @@ VString &VString::Insert(const char *source, int32_t insertAt) {
 		int32_t newLen = oldLen + sourceLen + 1;
 		char* oldBuf = buf;
 		makeBuffer(newLen, false);
-		
+
 		memmove(buf, oldBuf, insertAt);
 		memmove(buf+sourceLen+insertAt, oldBuf+insertAt, oldLen-insertAt);
 		memmove(buf+insertAt, source, sourceLen);
-		
+
 		delete [] oldBuf;
 	}
 	return *this;
@@ -217,15 +217,15 @@ VString &VString::Insert(const char *source, int32_t charCount, int32_t insertAt
 		int32_t sourceLen = strlen(source);
 		if (sourceLen > charCount) {
 			sourceLen = charCount;
-		}			
+		}
 		int32_t newLen = oldLen + sourceLen + 1;
 		char* oldBuf = buf;
 		makeBuffer(newLen, false);
-		
+
 		memmove(buf, oldBuf, insertAt);
 		memmove(buf+sourceLen+insertAt, oldBuf+insertAt, oldLen-insertAt);
 		memmove(buf+insertAt, source, sourceLen);
-		
+
 		delete [] oldBuf;
 	}
 	return *this;
@@ -259,7 +259,7 @@ VString &VString::Insert(char c, int32_t charCount, int32_t insertAt) {
 		int32_t newLen = oldLen + charCount + 1;
 		char* oldBuf = buf;
 		makeBuffer(newLen, false);
-		
+
 		memmove(buf, oldBuf, insertAt);
 		memmove(buf+charCount+insertAt, oldBuf+insertAt, oldLen-insertAt);
 		for (int i=0;i<charCount;i++) {
@@ -684,7 +684,7 @@ VString &VString::RemoveSet(const char *charSet) {
 				}
 			}
 		}
-	}		
+	}
 	return *this;
 }
 
@@ -943,7 +943,7 @@ VString &VString::SetTo(const char *source, int32_t charCount) {
 		if (charCount > len) charCount = len;
 		makeBuffer(charCount+1);
 		memmove(buf, source, charCount);
-		
+
 	} else {
 		makeBuffer(1);
 	}
@@ -962,7 +962,7 @@ VString &VString::SetTo(char c, int32_t charCount) {
 	if (charCount > 0) {
 		makeBuffer(charCount+1);
 		memset(buf, c, charCount);
-		
+
 	} else {
 		makeBuffer(1);
 	}
@@ -1167,4 +1167,17 @@ bool VString::operator>=(const char *string) const {
 		return strcmp(buf, string) >= 0;
 	}
 	return true;
+}
+
+
+uint32_t VString::hash(void) {
+	const uint32_t shift = 6;
+	const uint32_t mask = ~0 << (32 - shift);
+	uint32_t result = 0;
+
+	int pos = 0;
+	while (pos < bufferLen) {
+		result = (result & mask) ^ (result << shift) ^ buf[pos++];
+	}
+	return result;
 }

@@ -13,9 +13,11 @@ libtekhne_include_DATA = \
 	VAutoLock.h\
 	VBlockCache.h\
 	VDataIO.h\
+	VDictionary.h\
 	VErrors.h\
 	VFindDirectory.h\
 	VHandler.h\
+	VHashable.h\
 	VList.h\
 	VLocker.h\
 	VLooper.h\

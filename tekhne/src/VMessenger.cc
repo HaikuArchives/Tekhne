@@ -154,20 +154,20 @@ status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, 
 status_t VMessenger::SendMessage(uint32_t command, VMessage *reply) const {
 	status_t err = V_ERROR;
 	if (_isValid) {
-		VMessage *msg = new VMessage(command);
 		if (_localTarget) {
 			_looper->Lock();
-			msg->_replyMessage = reply;
-			err = _looper->PostMessage(msg);
+			VMessage msg(command);
+			msg._replyMessage = reply;
+			err = _looper->PostMessage(&msg);
 			_looper->Unlock();
 		} else {
+			VMessage msg(command);
 			VMallocIO mio;
-			msg->AddString("_replySignature", v_app->Signature());
-			msg->Flatten(&mio);
+			msg.AddString("_replySignature", v_app->Signature());
+			msg.Flatten(&mio);
 			err = SendToRemoteHost(_signature.String(), mio);
 			// need to read reply
 		}
-		delete msg;
 	}
 	return err;
 }
@@ -231,27 +231,62 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 	return false;
 }
 
+namespace tekhne {
+	VDictionary socketDictionary;
+}
+
+int32_t tekhne::getSocketForSignature(const char *signature) {
+	VString sig(signature);
+	int32_t *sock = static_cast<int32_t*>(socketDictionary.FindItem(sig));
+	if (sock) {
+		return *sock;
+	} else {
+		int32_t _socket = socket(PF_LOCAL, SOCK_STREAM, 0);
+		if (_socket > 0) {
+			struct sockaddr_un name;
+			name.sun_family = AF_LOCAL;
+			VString socket_name("/tmp/");
+			socket_name.Append(signature);
+			socket_name.ReplaceAll('/', '-', 5);
+			strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
+			int32_t e = connect(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
+			if (!e) {
+				sock = static_cast<int32_t*>(malloc(sizeof(int32_t)));
+				*sock = _socket;
+				socketDictionary.AddItem(sig, sock);
+				return _socket;
+			}
+		}
+	}
+	return -1;
+}
+
 status_t tekhne::SendToRemoteHost(const char *signature, VMallocIO &data) {
 	status_t err = V_ERROR;
 	int32_t len = data.BufferLength();
 	const void *buf = data.Buffer();
-	int32_t _socket = socket(PF_LOCAL, SOCK_STREAM, 0);
-	if (_socket > 0) {
-		struct sockaddr_un name;
-		name.sun_family = AF_LOCAL;
-		VString socket_name("/tmp/");
-		socket_name.Append(signature);
-		socket_name.ReplaceAll('/', '-', 5);
-		strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
-		int32_t e = connect(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
-		if (!e) {
-			e = send (_socket, buf, len, 0);
-			if (e < 0) {
-				err = e;
+	int32_t _socket = getSocketForSignature(signature);
+	if (_socket < 0) {
+		return err;
+	} else {
+		int32_t e = send (_socket, buf, len, 0);
+		if (e < 0) {
+			VString key(signature);
+			void *p = socketDictionary.RemoveItem(key);
+			if (p) free (p);
+			// try one more time
+			_socket = getSocketForSignature(signature);
+			if (_socket < 0) {
+				return err;
 			} else {
-				if (e == len) {
+				e = send (_socket, buf, len, 0);
+				if (e < 0) {
+					void *p = socketDictionary.RemoveItem(key);
+					if (p) free (p);
+					err = e;
+				}else if (e == len) {
 					err = V_OK;
-				} else {
+				} else { // this probably should never happen
 					int32_t sent = e;
 					len -= e;
 					while (len > 0 && e > 0) {
@@ -262,12 +297,18 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMallocIO &data) {
 					}
 				}
 			}
-		} else {
-			err = e;
+		} else if (e == len) {
+			err = V_OK;
+		} else { // this probably should never happen
+			int32_t sent = e;
+			len -= e;
+			while (len > 0 && e > 0) {
+				e = send (_socket, (char *)buf+sent, len, 0);
+				if (e > 0) {
+					sent += e;
+				}
+			}
 		}
-		close(_socket);
-	} else {
-		err = _socket;
 	}
 	return err;
 }

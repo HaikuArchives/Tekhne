@@ -35,20 +35,18 @@ VRoster::VRoster(void) {
 	_rosterMgr = new VMessenger("app/x-baldmountain-roster");
 	VString s = v_app->Signature();
 	if (s.Length()) {
-		VMessage *msg = new VMessage(V_ROSTER_REGISTER);
-		msg->AddString("_signature", v_app->Signature());
-		_rosterMgr->SendMessage(msg, static_cast<VHandler*>(0));
-		delete msg;
+		VMessage msg(V_ROSTER_REGISTER);
+		msg.AddString("_signature", v_app->Signature());
+		_rosterMgr->SendMessage(&msg, static_cast<VHandler*>(0));
 	}
 }
 
 VRoster::~VRoster() {
 	VString s = v_app->Signature();
 	if (s.Length()) {
-		VMessage *msg = new VMessage(V_ROSTER_UNREGISTER);
-		msg->AddString("_signature", v_app->Signature());
-		_rosterMgr->SendMessage(msg, static_cast<VHandler*>(0));
-		delete msg;
+		VMessage msg(V_ROSTER_UNREGISTER);
+		msg.AddString("_signature", v_app->Signature());
+		_rosterMgr->SendMessage(&msg, static_cast<VHandler*>(0));
 	}
 	delete _rosterMgr;
 }

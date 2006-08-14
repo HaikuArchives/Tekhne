@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VDictionaryTest.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,31 +23,32 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef VDICTIONARYTEST_H_
+#define VDICTIONARYTEST_H_
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VStopWatch.h"
+#include "tekhne.h"
+#include <cppunit/TestCase.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/TestCaller.h>
 
-#endif /* _TEKHNE_H */
+using namespace tekhne;
+
+class VDictionaryTest : public CppUnit::TestFixture {
+	private:
+		VDictionary *bc;
+	public:
+		static CppUnit::Test *VDictionaryTest::suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VDictionaryTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VDictionaryTest>("testCreate",
+								   &VDictionaryTest::testCreate ) );
+			return suiteOfTests;
+		}
+
+		void setUp();
+		void tearDown();
+
+		void testCreate();
+};
+
+
+#endif /*VDICTIONARYTEST_H_*/

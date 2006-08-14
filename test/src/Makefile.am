@@ -16,6 +16,7 @@ test_SOURCES = \
 	main.cc\
 	ThreadTest.cc\
 	VBlockCacheTest.cc\
+	VDictionaryTest.cc\
 	VMallocIOTest.cc\
 	VMessageTest.cc\
 	VPointTest.cc\

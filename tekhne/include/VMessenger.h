@@ -72,6 +72,8 @@ public:
 	bool operator ==(const VMessenger& v) const;
 };
 
+// don't use these they are mine need to move them to internal
+extern int32_t getSocketForSignature(const char *signature);
 extern status_t SendToRemoteHost(const char *signature, VMallocIO &data);
 }
 #endif /* _VMESSENGER_H */

@@ -158,9 +158,9 @@ VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _i
 	_replyHandler(0), _handler(0), _replyMessage(0), _returnAddress(0), what(command) {
 }
 
-VMessage::VMessage(const VMessage &message) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true),
-	_replyHandler(message._replyHandler), _handler(message._handler), _replyMessage(message._replyMessage),
-	_returnAddress(0), what(message.what) {
+VMessage::VMessage(const VMessage &message) : _isReply(message._isReply), _wasDelivered(message._wasDelivered),
+	_isSourceWaiting(message._isSourceWaiting), _replyHandler(message._replyHandler), _handler(message._handler),
+	_replyMessage(message._replyMessage), _returnAddress(message._returnAddress), what(message.what) {
 	storage_item **items = static_cast<storage_item **>(message.l.Items());
 	for (int i=0;i<message.l.CountItems();i++) {
 		storage_item *si = items[i];
@@ -193,6 +193,8 @@ VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _isSourceWaiti
 
 VMessage::~VMessage() {
 	MakeEmpty();
+	delete _replyMessage;
+	delete _returnAddress;
 }
 
 status_t VMessage::AddData(const char *name, type_code type, const void *data,

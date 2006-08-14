@@ -27,6 +27,7 @@
 #include "VTListTest.h"
 #include "VStringTest.h"
 #include "VBlockCacheTest.h"
+#include "VDictionaryTest.h"
 #include "VMallocIOTest.h"
 #include "VPointTest.h"
 #include "ThreadTest.h"
@@ -60,6 +61,7 @@ public:
 		runner.addTest( VTListTest::suite() );
 		runner.addTest( VStringTest::suite() );
 		runner.addTest( VBlockCacheTest::suite() );
+		runner.addTest( VDictionaryTest::suite() );
 		runner.addTest( VMallocIOTest::suite() );
 		runner.addTest( VPointTest::suite() );
 		runner.addTest( VRectTest::suite() );

@@ -76,7 +76,7 @@ inline void freeCacheItem(CacheItem *ci, uint32_t type) {
 
 VBlockCache::VBlockCache(size_t count, size_t size, uint32_t type) {
 	_lock = new VLocker();
-	if (count <= 0) count = 256;
+	if (count <= 0) count = 32;
 	this->type = type;
 	this->size = size;
 	memoryList = new VList(count);
@@ -99,12 +99,8 @@ VBlockCache::~VBlockCache() {
 	}
 }
 
-long out = 0;
-
 void *VBlockCache::Get(size_t size) {
 	VAutoLock l(_lock);
-	out++;
-	cout << "get:" << out << endl;
 	if (size == this->size) {
 		CacheItem **items = (CacheItem **)memoryList->Items();
 		for (int i=0;i<memoryList->CountItems(); i++) {
@@ -124,8 +120,6 @@ void *VBlockCache::Get(size_t size) {
 
 void VBlockCache::Save(void *pointer, size_t size) {
 	VAutoLock l(_lock);
-	out--;
-	cout << "save:" << out << endl;
 	CacheItem **items = (CacheItem **)memoryList->Items();
 	for (int i=0;i<memoryList->CountItems(); i++) {
 		CacheItem *ci = items[i];

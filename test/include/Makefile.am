@@ -5,6 +5,7 @@ test_includedir = $(pkgincludedir)
 test_include_DATA = \
 	ThreadTest.h\
 	VBlockCacheTest.h\
+	VDictionaryTest.h\
 	VMallocIOTest.h\
 	VMessageTest.h\
 	VPointTest.h\

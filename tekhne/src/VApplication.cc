@@ -102,13 +102,12 @@ private:
 						int32_t len = recv (i, buf, 4096, 0);
 						if (len > 0) {
 							VMemoryIO *mio = new VMemoryIO(buf, len);
-							VMessage *msg = new VMessage();
-							msg->Unflatten(mio);
+							VMessage msg;
+							msg.Unflatten(mio);
 							delete mio;
-							if (print_debug_messages) msg->PrintToStream();
-							v_app->PostMessage(msg, 0, th->_replyHandler);
-							delete msg;
-						} else {
+							if (print_debug_messages) msg.PrintToStream();
+							v_app->PostMessage(&msg, 0, th->_replyHandler);
+						} else if (len < 0) {
 							close (i);
 							FD_CLR (i, &active_fd_set);
 						}
@@ -138,8 +137,13 @@ public:
 };
 
 static void termination_handler (int signum) {
-	if (print_debug_messages) cout << "Got signal: " << strsignal(signum) << endl;
-	v_app->Quit();
+	if (signum == SIGPIPE) {
+		// don't do anything so the send call returns -1 and we give up
+		if (print_debug_messages) cout << "Ignored signal: " << strsignal(signum) << endl;
+	} else {
+		if (print_debug_messages) cout << "Got signal: " << strsignal(signum) << endl;
+		v_app->Quit();
+	}
 }
 static void setup_termination_handler(void) {
 	if (signal (SIGINT, tekhne::termination_handler) == SIG_IGN)

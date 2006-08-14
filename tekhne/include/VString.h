@@ -2,17 +2,17 @@
  *            VString.h
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,11 +20,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #ifndef VSTRING_H_
 #define VSTRING_H_
+
+#include "VHashable.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -32,8 +34,8 @@
 #include <assert.h>
 
 namespace tekhne {
-	
-class VString {
+
+class VString : public VHashable {
 private:
 	char *buf;
 	int32_t bufferLen;
@@ -73,7 +75,7 @@ public:
 	}
 	VString &Append(const char *source, int32_t charCount);
 	VString &Append(char c, int32_t charCount);
-	
+
 	VString &Prepend(const VString &source);
 	VString &Prepend(const VString &source, int32_t charCount);
 	VString &Prepend(const char *source);
@@ -87,7 +89,7 @@ public:
 	VString &Insert(const char *source, int32_t charCount, int32_t insertAt);
 	VString &Insert(const char *source, int32_t sourceOffset, int32_t charCount, int32_t insertAt);
 	VString &Insert(char c, int32_t charCount, int32_t insertAt);
-	
+
 	VString &CharacterEscape(const char *original, const char *setOfCharsToEscape, char escapeWithChar);
 	VString &CharacterEscape(const char *setOfCharsToEscape, char escapeWithChar);
 	VString &CharacterDeescape(const char *original, char escapeWithChar);
@@ -204,7 +206,7 @@ public:
 	VString &CapitalizeEachWord(void);
 
 	VString &Truncate(int32_t charCount, bool lazy = true);
-	
+
 	VString& operator=(const VString &string);
 	VString& operator=(const char *string);
 	VString& operator=(const char character);
@@ -232,7 +234,7 @@ public:
 		cp[0] = ByteAt(index);
 		return *cp;
 	}
-	
+
 	inline bool operator==(const VString &string) const {
 		return Length() == string.Length() && memcmp(buf, string.buf, Length()) == 0;
 	}
@@ -275,22 +277,26 @@ public:
 		memmove(s->buf, buf+start, end-start);
 		return *s;
 	}
-	
+
 	inline VString& Substring(int32_t start) const {
 		return Substring(start, bufferLen);
 	}
-	
+
 	inline VString &Clear() {
 		assert(!bufferLocked);
 		makeBuffer(1);
 		return *this;
 	}
+
+	// friends
 	friend bool operator==(const char *string1, const VString &string2);
 	friend bool operator!=(const char *string1, const VString &string2);
 	friend bool operator<(const char *string1, const VString &string2);
 	friend bool operator<=(const char *string1, const VString &string2);
 	friend bool operator>(const char *string1, const VString &string2);
 	friend bool operator>=(const char *string1, const VString &string2);
+	// hashable
+	virtual uint32_t hash(void);
 };
 
 inline bool operator==(const char *string1, const VString &string2) {
