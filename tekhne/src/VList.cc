@@ -68,13 +68,13 @@ bool VList::AddItem(void *item, int32_t index) {
 }
 
 bool VList::AddItem(void *item) {
+	lastItem++;
 	if (lastItem >= bufferLen) {
 		void ** oldItems = items;
 		int32_t oldLen =  bufferLen;
 		makeBuffer(bufferLen+1);
 		memmove(items, oldItems, sizeof(void*)*oldLen);
 	}
-	lastItem++;
 	items[lastItem] = item;
 	return true;
 }

@@ -179,35 +179,39 @@ void *tekhne::looper_thread_func(void *l) {
 	VLooper *looper = (VLooper *)l;
 	while (!looper->_quitting) {
 		VMessage *msg = looper->MessageQueue()->NextMessage();
-		if (msg->_replyMessage == 0) {
-			msg->_replyMessage = new VMessage(V_NO_REPLY);
-		}
-		{
-			VAutoLock lock(looper);
-			switch(msg->what) {
-				case V_QUIT_REQUESTED:
-					if (looper->QuitRequested()) {
-						looper->_quitting = true;
-					}
-					break;
-				default:
-					// goes to the preferred handler if there is one and then ourselves
-					looper->DispatchMessage(msg, msg->_handler);
+		if (msg) {
+			if (msg->_replyMessage == 0) {
+				msg->_replyMessage = new VMessage(V_NO_REPLY);
 			}
-		}
-		// don't reply to a no reply
-		if (msg->what != V_NO_REPLY && msg->IsSourceWaiting( )) {
-			// send some kind of message
-			if (msg->_replyMessage) {
-				VString replySignature;
-				msg->FindString("_replySignature", &replySignature);
-				if (replySignature.Length() > 0) {
-					msg->_replyMessage->AddString("_replySignature", replySignature);
+			{
+				VAutoLock lock(looper);
+				switch(msg->what) {
+					case V_QUIT_REQUESTED:
+						if (looper->QuitRequested()) {
+							looper->_quitting = true;
+						}
+						break;
+					default:
+						// goes to the preferred handler if there is one and then ourselves
+						looper->DispatchMessage(msg, msg->_handler);
 				}
 			}
-			msg->SendReply(msg->_replyMessage, static_cast<VHandler*>(0));
+			// don't reply to a no reply
+			if (msg->what != V_NO_REPLY && msg->IsSourceWaiting( )) {
+				// send some kind of message
+				if (msg->_replyMessage) {
+					VString replySignature;
+					msg->FindString("_replySignature", &replySignature);
+					if (replySignature.Length() > 0) {
+						msg->_replyMessage->AddString("_replySignature", replySignature);
+					}
+				}
+				msg->SendReply(msg->_replyMessage, static_cast<VHandler*>(0));
+			}
+			delete msg;
+		} else {
+			if (tekhne::print_debug_messages) cout << "Got a null message in loop message thread\n";
 		}
-		delete msg;
 	}
 	delete looper;
 	return 0;

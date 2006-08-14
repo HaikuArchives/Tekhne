@@ -62,7 +62,7 @@ private:
 	VMessenger *_returnAddress;
 
 	public:
-	uint32_t what;
+	int32_t what;
 
 	VMessage(uint32_t command);
 	VMessage(const VMessage &message);

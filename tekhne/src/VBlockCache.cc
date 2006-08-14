@@ -2,17 +2,17 @@
  *            VBlockCache.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,12 +20,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "tekhne.h"
+#include <iostream>
 
 using namespace tekhne;
+using namespace std;
 
 typedef struct CacheItem {
 	void *ptr;
@@ -35,7 +37,7 @@ typedef struct CacheItem {
 
 inline void *allocateMemory(size_t size, uint32_t type) {
 	void *ptr;
-	
+
 	if (type == V_OBJECT_CACHE) {
 		ptr = new int8_t[size];
 	} else {
@@ -73,7 +75,8 @@ inline void freeCacheItem(CacheItem *ci, uint32_t type) {
 }
 
 VBlockCache::VBlockCache(size_t count, size_t size, uint32_t type) {
-	if (count < 0) count = 0;
+	_lock = new VLocker();
+	if (count <= 0) count = 256;
 	this->type = type;
 	this->size = size;
 	memoryList = new VList(count);
@@ -83,14 +86,25 @@ VBlockCache::VBlockCache(size_t count, size_t size, uint32_t type) {
 }
 
 VBlockCache::~VBlockCache() {
-	CacheItem **items = (CacheItem **)memoryList->Items();
-	for (int i=0;i<memoryList->CountItems(); i++) {
-		freeCacheItem(items[i], type);
+	_lock->Lock( );
+	if (_lock) {
+		CacheItem **items = (CacheItem **)memoryList->Items();
+		for (int i=0;i<memoryList->CountItems(); i++) {
+			freeCacheItem(items[i], type);
+		}
+		delete memoryList;
+		_lock->Unlock();
+		_lock = 0;
+		delete _lock;
 	}
-	delete memoryList;
 }
 
+long out = 0;
+
 void *VBlockCache::Get(size_t size) {
+	VAutoLock l(_lock);
+	out++;
+	cout << "get:" << out << endl;
 	if (size == this->size) {
 		CacheItem **items = (CacheItem **)memoryList->Items();
 		for (int i=0;i<memoryList->CountItems(); i++) {
@@ -109,6 +123,9 @@ void *VBlockCache::Get(size_t size) {
 }
 
 void VBlockCache::Save(void *pointer, size_t size) {
+	VAutoLock l(_lock);
+	out--;
+	cout << "save:" << out << endl;
 	CacheItem **items = (CacheItem **)memoryList->Items();
 	for (int i=0;i<memoryList->CountItems(); i++) {
 		CacheItem *ci = items[i];
