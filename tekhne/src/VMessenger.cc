@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include "IMessenger.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -185,6 +186,14 @@ status_t VMessenger::SendMessage(uint32_t command, VHandler *replyHandler) const
 			VMallocIO mio;
 			msg.Flatten(&mio);
 			err = SendToRemoteHost(_signature.String(), mio);
+			if (replyHandler) {
+				VMessage replyMessage(V_NO_REPLY);
+				ReadReply(_signature.String(), replyMessage);
+				if (replyHandler->LockLooper()) {
+					replyHandler->MessageReceived(&replyMessage);
+					replyHandler->UnlockLooper();
+				}
+			}
 		}
 	}
 	return err;
@@ -311,4 +320,8 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMallocIO &data) {
 		}
 	}
 	return err;
+}
+
+status_t tekhne::ReadReply(const char *signature, VMessage& replyMessage) {
+	return V_OK;
 }

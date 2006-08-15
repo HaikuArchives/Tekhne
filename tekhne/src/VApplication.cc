@@ -24,6 +24,7 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include "IMessenger.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
