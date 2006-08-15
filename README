@@ -1,0 +1,57 @@
+INTRODUCTION
+
+Tekhne means to be a relatively compatable version of the Be API for Linux. It
+is not a complete replacement and I'm only implementing the pieces that I like.
+I'm not going to replace pervasive Linux APIs. For instance I'm going to 
+completely skip the network and filesystem kits.
+
+There are still huge gaping holes in the semantice of the APIS, but there is a
+good amount of code that is functional. There is a working application object
+and remote messages for the most part work. Although in limited ways.
+
+All of the APIs are in a namespace called 'tekhne'. The Be API classes all start
+with B. In tekhne all classes start with V. Constants also start with V. Almost
+all header files begin with V also.
+
+WHERE TO START
+
+Start a shell and change directory into each of the subdirectories in this
+directory starting with tekhne and enter the command:
+
+./bootstrap
+
+This script runs all the autoconf and automake tools, configure and then make to
+build each part of the project. You start with tekhne since it is the shared
+library all other pieces depend on.
+
+roster is a Be roster like application that maintains status about running
+applications. When a tekhne based application starts it registers with the roster
+application. It deregisters when the application exits (The application calls 
+v_app->Quit())
+
+test is a good number of unit tests for the various parts of the API. The tests
+are based on cppunit. cppunit is just about the only extra item beyond the
+standard development tools you many need to install. 
+
+samples has some sample applications. Currently this is limited to just a basic
+ping/pong application that sends messages back and forth using remote messaging.
+
+
+PARTICULARS
+
+Rather than trying to implement the threading API I'm just going to use pthreads.
+Again, I'm not going to replace pervasive APIs. Classes like VLocker and VLooper
+are implemented in terms of pthreads. Because of this there are a few semantics
+changes. The timeout values to locking functions are ignored since there isn't a
+way to get a mutex with a timeout in pthreads.
+
+All of the remote messaging is implemented using pipes. Once a pipe is opened to
+an application it stays open until the application quits. This is mainly for
+performance.
+
+The application object installs a signal handler for SIGINT, SIGHUP, SIGTERM, and
+SIGPIPE. SIGPIPE is ignored so send will return -1 rather than causing the
+application to exit. All of the other signals cause the application to exit by
+calling v_app->Quit().
+
+I guess that is enough to get started...
