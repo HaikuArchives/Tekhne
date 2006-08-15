@@ -103,3 +103,22 @@ void VListTest::testOperator() {
 	CPPUNIT_ASSERT( strcmp(items[3], "baz") == 0 );
 	CPPUNIT_ASSERT( strcmp(items[4], "tic") == 0 );
 }
+
+void VListTest::testBigList() {
+	int loops = 100;
+	for (int i=0;i<loops;i++) {
+		l->AddItem((void*)"ball");
+		l->AddItem((void*)"foo");
+		l->AddItem((void*)"bar");
+		l->AddItem((void*)"baz");
+		l->AddItem((void*)"tic", 4);
+	}
+	CPPUNIT_ASSERT( l->CountItems() == 5*loops );
+
+	char **items = (char **)l->Items();
+	CPPUNIT_ASSERT( strcmp(items[0], "ball") == 0 );
+	CPPUNIT_ASSERT( strcmp(items[1], "foo") == 0 );
+	CPPUNIT_ASSERT( strcmp(items[2], "bar") == 0 );
+	CPPUNIT_ASSERT( strcmp(items[3], "baz") == 0 );
+	CPPUNIT_ASSERT( strcmp(items[4], "tic") == 0 );
+}

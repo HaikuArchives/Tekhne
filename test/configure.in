@@ -18,12 +18,6 @@ AC_PROG_CXX
 
 AM_PROG_LIBTOOL
 
-
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-CXX="ccache g++"
-
-
 dnl Set PACKAGE SOURCE DIR in config.h.
 packagesrcdir=`cd $srcdir && pwd`
 

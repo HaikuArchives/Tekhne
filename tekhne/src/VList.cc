@@ -27,23 +27,24 @@
 
 using namespace tekhne;
 
-VList::VList(int32_t count){
-	makeBuffer(count);
-	lastItem = -1;
+VList::VList(int32_t cnt) : items(0), bufferLen(0), lastItem(-1), count(cnt) {
 }
 
-VList::VList(const VList& anotherList) {
-	makeBuffer(anotherList.bufferLen);
-	lastItem = anotherList.lastItem;
-
-	memmove(items, &anotherList.items, sizeof(void*)*(anotherList.lastItem+1));
+VList::VList(const VList& anotherList) : items(0), bufferLen(0), lastItem(-1), count(anotherList.count) {
+	if (anotherList.items) {
+		makeBuffer(anotherList.bufferLen);
+		lastItem = anotherList.lastItem;
+	
+		memmove(items, &anotherList.items, sizeof(void*)*(anotherList.lastItem+1));
+	}
 }
 
 VList::~VList() {
-	delete items;
+	delete [] items;
 }
 
 bool VList::AddItem(void *item, int32_t index) {
+	checkBuffer();
 	if (index >= bufferLen) {
 		void ** oldItems = items;
 		int32_t oldLen =  bufferLen;
@@ -51,11 +52,12 @@ bool VList::AddItem(void *item, int32_t index) {
 		memmove(items, oldItems, sizeof(void*)*oldLen);
 		delete [] oldItems;
 	} else if (items[index]) {
-		if (lastItem+1 > bufferLen) {
+		if (lastItem+1 >= bufferLen) {
 			void ** oldItems = items;
 			int32_t oldLen =  bufferLen;
 			makeBuffer(bufferLen+1);
 			memmove(items, oldItems, sizeof(void*)*oldLen);
+			delete [] oldItems;
 		}
 		memmove(items+index+1, items+index, sizeof(void*)*(lastItem-index+1));
 		lastItem++;
@@ -68,6 +70,7 @@ bool VList::AddItem(void *item, int32_t index) {
 }
 
 bool VList::AddItem(void *item) {
+	checkBuffer();
 	lastItem++;
 	if (lastItem >= bufferLen) {
 		void ** oldItems = items;
@@ -80,8 +83,10 @@ bool VList::AddItem(void *item) {
 }
 
 bool VList::AddList(VList *list, int32_t index) {
-	for (int32_t i=0;i<=list->lastItem;i++) {
-		AddItem(list->items[i], index+i);
+	if (list->items) {
+		for (int32_t i=0;i<=list->lastItem;i++) {
+			AddItem(list->items[i], index+i);
+		}
 	}
 	return true;
 }
@@ -94,17 +99,19 @@ bool VList::AddList(VList *list) {
 }
 
 int32_t VList::CountItems(void) const {
-	int count = 0;
-	for (int32_t i=0;i<=lastItem;i++) {
-		if (items[i]) {
-			count++;
+	int cnt = 0;
+	if (items) {
+		for (int32_t i=0;i<=lastItem;i++) {
+			if (items[i]) {
+				cnt++;
+			}
 		}
 	}
-	return count;
+	return cnt;
 }
 
 void VList::DoForEach(bool (*func)(void *))  {
-	if (func) {
+	if (items && func) {
 		for (int32_t i=0;i<=lastItem;i++) {
 			if (items[i]) {
 				if (func(items[i])) {
@@ -116,7 +123,7 @@ void VList::DoForEach(bool (*func)(void *))  {
 }
 
 void VList::DoForEach(bool (*func)(void *, void *), void *arg2) {
-	if (func) {
+	if (items && func) {
 		for (int32_t i=0;i<=lastItem;i++) {
 			if (items[i]) {
 				func(items[i], arg2);
@@ -136,8 +143,8 @@ void *VList::FirstItem(void) const {
 }
 
 void *VList::GetItem(int32_t index) const {
-	if (index > bufferLen || index < 0) return 0;
-	return items[index];
+	if (items && (index < bufferLen || index >= 0)) return items[index];
+	return 0;
 }
 
 bool VList::HasItem(void *item) const {
@@ -182,7 +189,9 @@ void *VList::LastItem(void) const {
 
 void VList::MakeEmpty(void) {
 	lastItem = -1;
-	bzero(items, sizeof(void*)*bufferLen);
+	bufferLen = 0;
+	delete [] items;
+	items = 0;
 }
 
 bool VList::RemoveItem(void *item) {
@@ -195,7 +204,8 @@ bool VList::RemoveItem(void *item) {
 }
 
 void *VList::RemoveItem(int32_t index) {
-	if (index <= lastItem) {
+
+	if (items && index <= lastItem && index >= 0) {
 		void *ans = items[index];
 		memmove(items, items+1, sizeof(void*)*(lastItem-index));
 		lastItem--;
@@ -204,8 +214,8 @@ void *VList::RemoveItem(int32_t index) {
 	return 0;
 }
 
-bool VList::RemoveItems(int32_t index, int32_t count) {
-	for(int i=0;i<count;i++) {
+bool VList::RemoveItems(int32_t index, int32_t cnt) {
+	for(int i=0;i<cnt;i++) {
 		if (!RemoveItem(index)) {
 			return false;
 		}
@@ -214,6 +224,7 @@ bool VList::RemoveItems(int32_t index, int32_t count) {
 }
 
 void *VList::ReplaceItem(int32_t index, void *item) {
+	checkBuffer();
 	void *reply = 0;
 	if (index >= 0 && index < bufferLen) {
 		reply = items[index];
@@ -233,16 +244,22 @@ void *VList::ReplaceItem(int32_t index, void *item) {
 }
 
 void VList::SortItems(int (*compareFunc)(const void *, const void *)) {
-	int32_t count = CountItems();
-	if (count > 1) {
-		qsort(items, count, sizeof(void*), compareFunc);
+	if (items) {
+		int32_t cnt = CountItems();
+		if (cnt > 1) {
+			qsort(items, cnt, sizeof(void*), compareFunc);
+		}
 	}
 }
 
 VList& VList::operator =(const VList& l) {
-	makeBuffer(l.bufferLen);
-	lastItem = l.lastItem;
-
-	memmove(items, &l.items, sizeof(void*)*(l.lastItem+1));
+	if (l.items) {
+		makeBuffer(l.bufferLen);
+		lastItem = l.lastItem;
+	
+		memmove(items, &l.items, sizeof(void*)*(l.lastItem+1));
+	} else {
+		MakeEmpty();
+	}
 	return *this;
 }

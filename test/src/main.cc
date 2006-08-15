@@ -48,13 +48,11 @@ private:
 public:
 	VTestApplication() : VApplication("app/v-test-app") {
 		// send pulse every half a second, we quit on the first one
-		SetPulseRate(500*V_MILLISECOND);
+		SetPulseRate(900*V_MILLISECOND);
 	}
 
 	virtual void ReadyToRun(void) {
 		VStopWatch sw("me");
-		std::cout << "ReadyToRun" << std::endl;
-		std::cout << "IsLaunching " << (IsLaunching()?"true":"false") << std::endl;
 
 		CppUnit::TextUi::TestRunner runner;
 		runner.addTest( VListTest::suite() );
@@ -72,17 +70,12 @@ public:
 	}
 
 	virtual void Pulse(void) {
-		std::cout << "Pulse" << std::endl;
-		std::cout << "IsLaunching " << (IsLaunching()?"true":"false") << std::endl;
 		Quit();
 	}
 
 };
 
 int main (int argc, char *argv[]) {
-	// turn on debug messages
-	tekhne::print_debug_messages = true;
-
 	VTestApplication *ta = new VTestApplication();
 	ta->Run();
 

@@ -42,7 +42,7 @@ private:
 	bool bufferLocked;
 	inline void makeBuffer(int32_t count, bool deleteBuffer=true) {
 		bufferLen = count;
-		if (deleteBuffer && buf != 0) delete [] buf;
+		if (deleteBuffer) delete [] buf;
 		buf = new char[count];
 		bzero(buf, count);
 	}
@@ -175,7 +175,7 @@ public:
 		if (source != 0) {
 			int32_t len = strlen(source);
 			if (len > 0) {
-				makeBuffer(len+1, false);
+				makeBuffer(len+1);
 				memmove(buf, source, len);
 				return *this;
 			}

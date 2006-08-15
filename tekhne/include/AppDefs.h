@@ -107,4 +107,3 @@ const int32_t V_MINUTE = 60*V_SECOND;
 }
 
 #endif /* _APPDEFS_H */
-

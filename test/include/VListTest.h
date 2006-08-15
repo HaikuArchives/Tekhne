@@ -47,6 +47,8 @@ static CppUnit::Test *VListTest::suite() {
 								&VListTest::testInsertItem ) );
 	suiteOfTests->addTest(	new CppUnit::TestCaller<VListTest>("testOperator",
 								&VListTest::testOperator ) );
+	suiteOfTests->addTest(	new CppUnit::TestCaller<VListTest>("testBigList",
+								&VListTest::testBigList ) );
 	return suiteOfTests;
 }
 
@@ -57,6 +59,7 @@ static CppUnit::Test *VListTest::suite() {
 	void testSortItems();
 	void testInsertItem();
 	void testOperator();
+	void testBigList();
 };
 
 

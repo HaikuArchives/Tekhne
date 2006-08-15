@@ -51,7 +51,7 @@ public:
 	bool IsEmpty(void) const;
 
 	VMessage *FindMessage(int32_t index) const;
-	VMessage *FindMessage(uint32_t what, int32_t index = 0) const;
+	VMessage *FindMessage(int32_t what, int32_t index = 0) const;
 
 	bool Lock(void);
 	status_t LockWithTimeout(bigtime_t timeout);

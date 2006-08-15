@@ -31,68 +31,71 @@
 namespace tekhne {
 
 class VList {
-	private:
+private:
 
 	// the items
-		void **items;
+	void **items;
 	// the length of the buffer
-		int32_t bufferLen;
+	int32_t bufferLen;
 	// the index of the last item in the buffer or -1 if there are no items
-		int32_t lastItem;
-
+	int32_t lastItem;
+	// if items is null then we need  create a buffer count items long
+	int32_t count;
 	// allocate a buffer at least as big as asked for. (Usually 2^x where 2^x is
 	// the smallest 2^x larger than count)
-		inline void makeBuffer(int32_t count) {
-			int32_t len = 16;
-			while(len < count) len *=2;
 
-			bufferLen = len;
-			items = new void*[len];
-			bzero(items, sizeof(void*)*bufferLen);
-		}
+	inline void checkBuffer(void) { if (!items) makeBuffer(count); }
+	inline void makeBuffer(int32_t cnt) {
+		int32_t len = 16;
+		while(len < cnt) len *=2;
 
-	public:
+		bufferLen = len;
+		items = new void*[len];
+		bzero(items, sizeof(void*)*bufferLen);
+	}
 
-		VList(int32_t count = 20);
-		VList(const VList& anotherList);
-		virtual ~VList();
+public:
 
-		bool AddItem(void *item, int32_t index);
-		bool AddItem(void *item);
+	VList(int32_t cnt = 16);
+	VList(const VList& anotherList);
+	virtual ~VList();
 
-		bool AddList(VList *list, int32_t index);
-		bool AddList(VList *list);
+	bool AddItem(void *item, int32_t index);
+	bool AddItem(void *item);
 
-		int32_t CountItems(void) const;
+	bool AddList(VList *list, int32_t index);
+	bool AddList(VList *list);
 
-		void DoForEach(bool (*func)(void *));
-		void DoForEach(bool (*func)(void *, void *), void *arg2);
+	int32_t CountItems(void) const;
 
-		void *FirstItem(void) const;
+	void DoForEach(bool (*func)(void *));
+	void DoForEach(bool (*func)(void *, void *), void *arg2);
 
-		void *GetItem(int32_t index) const;
+	void *FirstItem(void) const;
 
-		bool HasItem(void *item) const;
+	void *GetItem(int32_t index) const;
 
-		int32_t IndexOf(void *item) const;
+	bool HasItem(void *item) const;
 
-		bool IsEmpty(void) const;
+	int32_t IndexOf(void *item) const;
 
-		void *Items(void) const;
+	bool IsEmpty(void) const;
 
-		void *LastItem(void) const;
+	void *Items(void) const;
 
-		void MakeEmpty(void);
+	void *LastItem(void) const;
 
-		bool RemoveItem(void *item);
-		void *RemoveItem(int32_t index);
-		bool RemoveItems(int32_t index, int32_t count);
+	void MakeEmpty(void);
 
-		void *ReplaceItem(int32_t index, void *item);
+	bool RemoveItem(void *item);
+	void *RemoveItem(int32_t index);
+	bool RemoveItems(int32_t index, int32_t count);
 
-		void SortItems(int (*compareFunc)(const void *, const void *));
+	void *ReplaceItem(int32_t index, void *item);
 
-		VList& operator=(const VList&);
+	void SortItems(int (*compareFunc)(const void *, const void *));
+
+	VList& operator=(const VList&);
 
 };
 

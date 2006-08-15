@@ -407,8 +407,7 @@ int VString::ICompare(const VString *astring, const VString *bstring) { // globa
 
 VString &VString::CopyInto(VString &destination, int32_t sourceOffset, int32_t charCount) const {
 	assert(!bufferLocked);
-	VString s = Substring(sourceOffset, sourceOffset+charCount);
-	destination.SetTo(s);
+	destination = Substring(sourceOffset, sourceOffset+charCount);
 	return destination;
 }
 
@@ -603,6 +602,7 @@ VString &VString::Remove(int32_t startingAt, int32_t charCount) {
 		makeBuffer(bufferLen - charCount, false);
 		memmove(buf, oldBuf, startingAt);
 		memmove(buf+startingAt, oldBuf+startingAt+charCount, oldLen-startingAt-charCount-1);
+		delete [] oldBuf;
 	}
 	return *this;
 }

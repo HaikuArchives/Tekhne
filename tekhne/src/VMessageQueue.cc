@@ -56,7 +56,7 @@ VMessage *VMessageQueue::FindMessage(int32_t index) const {
 	return (VMessage *)_list.GetItem(index);
 }
 
-VMessage *VMessageQueue::FindMessage(uint32_t what, int32_t index) const {
+VMessage *VMessageQueue::FindMessage(int32_t what, int32_t index) const {
 	VMessage **items = (VMessage **)_list.Items();
 	for (int i=0;i<_list.CountItems();i++) {
 		VMessage *m = items[i];
