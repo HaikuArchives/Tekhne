@@ -2,17 +2,17 @@
  *            VStopWatch.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "tekhne.h"
@@ -44,7 +44,7 @@ inline bigtime_t now() {
 	struct timeval ts;
 	gettimeofday(&ts, 0);
 	return convertTimeval(ts);
-}	
+}
 
 }
 
@@ -59,9 +59,11 @@ VStopWatch::~VStopWatch() {
 		if (_laps.CountItems() > 0) {
 			tekhne::lap *_lap = static_cast<tekhne::lap*>(_laps.LastItem());
 			_lap->_endtime = endtime;
-			for (int i=0; i<_laps.CountItems(); i++) {
-				_lap = static_cast<tekhne::lap*>(_laps.GetItem(i));
-				cout << "["<< i+1 << ": " << _lap->elapsed() << "] ";
+			VListIterator iter(_laps);
+			int32_t i = 1;
+			while(iter.HasNext()) {
+				_lap = static_cast<tekhne::lap*>(iter.Next());
+				cout << "["<< i++ << ": " << _lap->elapsed() << "] ";
 			}
 			cout << endl;
 		}
@@ -94,7 +96,7 @@ bigtime_t VStopWatch::Lap() {
 const char *VStopWatch::Name(void) const {
 	return _name;
 }
-	
+
 void VStopWatch::Suspend(void) {
 	// don't suspend again if we are already suspended
 	if (!_suspendtime) {

@@ -129,7 +129,7 @@ void VListTest::testIterator() {
 	l->AddItem((void*)"bar");
 	l->AddItem((void*)"baz");
 	l->AddItem((void*)"tic", 4);
-	VListIterator iter(l);
+	VListIterator iter(*l);
 	CPPUNIT_ASSERT( iter.HasNext() );
 	CPPUNIT_ASSERT( strcmp((char*)iter.Next(), "ball") == 0 );
 	CPPUNIT_ASSERT( iter.HasNext() );

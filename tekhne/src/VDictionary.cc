@@ -55,9 +55,9 @@ status_t VDictionary::AddItem(VHashable &key, void *item) {
 
 void *VDictionary::FindItem(VHashable &k) {
 	uint32_t key = k.hash();
-	dict_item **di = static_cast<dict_item **>(items.Items());
-	for (int i=0;i<items.CountItems(); i++) {
-		dict_item *item = di[i];
+	VListIterator iter(items);
+	while(iter.HasNext()) {
+		dict_item *item = static_cast<dict_item *>(iter.Next());
 		if (item) {
 			if (item->key == key) {
 				return item->value;
@@ -69,12 +69,12 @@ void *VDictionary::FindItem(VHashable &k) {
 
 void *VDictionary::RemoveItem(VHashable &k) {
 	uint32_t key = k.hash();
-	dict_item **di = static_cast<dict_item **>(items.Items());
-	for (int i=0;i<items.CountItems(); i++) {
-		dict_item *item = di[i];
+	VListIterator iter(items);
+	while(iter.HasNext()) {
+		dict_item *item = static_cast<dict_item *>(iter.Next());
 		if (item) {
 			if (item->key == key) {
-				return items.RemoveItem(i);
+				if (items.RemoveItem(item)) return item;
 			}
 		}
 	}
@@ -83,9 +83,9 @@ void *VDictionary::RemoveItem(VHashable &k) {
 
 void VDictionary::Items(VList &itemList) {
 	itemList.MakeEmpty();
-	dict_item **di = static_cast<dict_item **>(items.Items());
-	for (int i=0;i<items.CountItems(); i++) {
-		dict_item *item = di[i];
+	VListIterator iter(items);
+	while(iter.HasNext()) {
+		dict_item *item = static_cast<dict_item *>(iter.Next());
 		if (item) {
 			itemList.AddItem(item->value);
 		}

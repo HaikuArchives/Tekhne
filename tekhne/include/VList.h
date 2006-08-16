@@ -108,7 +108,7 @@ private:
 	bool _forward;
 	VListIterator() {}
 public:
-	VListIterator(VList *list, bool forward=true) : _items(list->items), _lastItem(list->lastItem) {
+	VListIterator(const VList &list, bool forward=true) : _items(list.items), _lastItem(list.lastItem) {
 		if (!_items || _lastItem < 0) _currentItem = -1;
 		else if (forward) _currentItem = 0;
 		else _currentItem = _lastItem;

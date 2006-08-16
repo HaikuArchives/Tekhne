@@ -161,9 +161,9 @@ VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _i
 VMessage::VMessage(const VMessage &message) : _isReply(message._isReply), _wasDelivered(message._wasDelivered),
 	_isSourceWaiting(message._isSourceWaiting), _isSourceRemote(message._isSourceRemote), _replyHandler(message._replyHandler), _handler(message._handler),
 	_replyMessage(message._replyMessage), _returnAddress(message._returnAddress), what(message.what) {
-	storage_item **items = static_cast<storage_item **>(message.l.Items());
-	for (int i=0;i<message.l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(message.l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		storage_item *nsi = new storage_item();
 		memmove(nsi, si, sizeof(storage_item));
 		switch(si->type) {
@@ -295,9 +295,9 @@ status_t VMessage::FindData(const char *name, type_code type, int32_t index, con
 	if (index < 0) {
 		return V_BAD_INDEX;
 	}
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0;i<l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			switch(type) {
 				case V_BOOL_TYPE:
@@ -346,9 +346,9 @@ status_t VMessage::FindData(const char *name, type_code type, int32_t index, con
 }
 
 status_t VMessage::FindData(const char *name, type_code type, const void **data, ssize_t *numBytes) const {
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0;i<l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			switch(type) {
 				case V_BOOL_TYPE:
@@ -577,9 +577,9 @@ status_t VMessage::Flatten(VDataIO *object, ssize_t *numBytes) const {
 	if (rc != sizeof(int32_t)) return V_ERROR;
 	bc += rc;
 
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for(int i=0;i<ci;i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		switch(si->type) {
 			case V_BOOL_TYPE:
 			case V_INT8_TYPE:
@@ -679,8 +679,9 @@ ssize_t VMessage::FlattenedSize(void) const {
 	// count of list items
 	numBytes += sizeof(int32_t);
 
-	for(int i=0;i<l.CountItems();i++) {
-		storage_item *si = static_cast<storage_item*>(l.GetItem(i));
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		switch(si->type) {
 			case V_BOOL_TYPE:
 			case V_INT8_TYPE:
@@ -715,9 +716,9 @@ status_t VMessage::PopSpecifier(void) {
 status_t VMessage::GetInfo(const char *name, type_code *typeFound, int32_t *countFound) const {
 	*countFound = 0;
 	*typeFound = 0;
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0;i<l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		if (strcmp(name, si->name) == 0) {
 			if (*typeFound == 0) {
 				*typeFound++;
@@ -733,9 +734,9 @@ status_t VMessage::GetInfo(const char *name, type_code *typeFound, int32_t *coun
 status_t VMessage::GetInfo(const char *name, type_code *typeFound, bool *fixedSize) const {
 	*fixedSize = false;
 	*typeFound = 0;
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0;i<l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		if (strcmp(name, si->name) == 0) {
 			*typeFound = si->type;
 			*fixedSize = si->fixedSize;
@@ -749,9 +750,9 @@ status_t VMessage::GetInfo(type_code type, int32_t index, char **nameFound, type
 	if (index < 0) {
 		return V_BAD_INDEX;
 	}
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0;i<l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		if (type == V_ANY_TYPE || type == si->type) {
 			if (index == 0) {
 				*nameFound = si->name;
@@ -805,12 +806,13 @@ namespace tekhne {
 void VMessage::PrintToStream(void) const {
 	cout << "VMessage: "<<what<< endl;
 	VList pi;
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0; i<l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		bool found = false;
-		for (int j=0; j<pi.CountItems();j++) {
-			msg_print_item *mpi = static_cast<msg_print_item *>(pi.GetItem(j));
+		VListIterator piIter(pi);
+		while(piIter.HasNext()) {
+			msg_print_item *mpi = static_cast<msg_print_item *>(piIter.Next());
 			if (strcmp(mpi->name, si->name) == 0) {
 				found = true;
 				mpi->count++;
@@ -832,11 +834,11 @@ void VMessage::PrintToStream(void) const {
 
 
 status_t VMessage::RemoveName(const char *name) {
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=l.CountItems()-1;i>0;i--) {
-		storage_item *si = items[i];
+	VListIterator iter(l, false);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		if (strcmp(name, si->name) == 0) {
-			l.RemoveItem(i);
+			l.RemoveItem(si);
 			delete si;
 		}
 	}
@@ -847,12 +849,12 @@ status_t VMessage::RemoveData(const char *name, int32_t index) {
 	if (index < 0) {
 		return V_BAD_INDEX;
 	}
-	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0; i<l.CountItems();i++) {
-		storage_item *si = items[i];
+	VListIterator iter(l);
+	while(iter.HasNext()) {
+		storage_item *si = static_cast<storage_item *>(iter.Next());
 		if (strcmp(name, si->name) == 0) {
 			if (index == 0) {
-				l.RemoveItem(i);
+				l.RemoveItem(si);
 				delete si;
 				return V_OK;
 			} else {
@@ -865,7 +867,7 @@ status_t VMessage::RemoveData(const char *name, int32_t index) {
 
 status_t VMessage::ReplaceData(const char *name, type_code type, const void *data, ssize_t numBytes) {
 	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0; i<l.CountItems();i++) {
+	for (int i=0;i<l.CountItems();i++) {
 		storage_item *si = items[i];
 		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			l.ReplaceItem(i, make_storage_item(name, type, data, numBytes, false, 1));
@@ -881,7 +883,7 @@ status_t VMessage::ReplaceData(const char *name, type_code type, int32_t index, 
 		return V_BAD_INDEX;
 	}
 	storage_item **items = static_cast<storage_item **>(l.Items());
-	for (int i=0; i<l.CountItems();i++) {
+	for (int i=0;i<l.CountItems();i++) {
 		storage_item *si = items[i];
 		if ((type == V_ANY_TYPE || type == si->type) && strcmp(name, si->name) == 0) {
 			if (index == 0) {
@@ -1111,9 +1113,9 @@ VMessage &VMessage::operator =(const VMessage& msg){
 		_handler = msg._handler;
 		_replyHandler = msg._replyHandler;
 		_replyMessage = msg._replyMessage;
-		storage_item **items = static_cast<storage_item **>(msg.l.Items());
-		for (int i=0;i<msg.l.CountItems();i++) {
-			storage_item *si = items[i];
+		VListIterator iter(msg.l);
+		while(iter.HasNext()) {
+			storage_item *si = static_cast<storage_item *>(iter.Next());
 			storage_item *nsi = new storage_item();
 			memmove(nsi, si, sizeof(storage_item));
 			switch(si->type) {

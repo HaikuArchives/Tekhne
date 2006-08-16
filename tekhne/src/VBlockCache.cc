@@ -88,7 +88,7 @@ VBlockCache::VBlockCache(size_t count, size_t size, uint32_t type) {
 VBlockCache::~VBlockCache() {
 	_lock->Lock( );
 	if (_lock) {
-		VListIterator iter(memoryList);
+		VListIterator iter(*memoryList);
 		while(iter.HasNext()) {
 			freeCacheItem(static_cast<CacheItem *>(iter.Next()), type);
 		}
@@ -102,7 +102,7 @@ VBlockCache::~VBlockCache() {
 void *VBlockCache::Get(size_t size) {
 	VAutoLock l(_lock);
 	if (size == this->size) {
-		VListIterator iter(memoryList);
+		VListIterator iter(*memoryList);
 		while(iter.HasNext()) {
 			CacheItem *ci = static_cast<CacheItem *>(iter.Next());
 			if (!ci->used && ci->size == size) {
@@ -120,7 +120,7 @@ void *VBlockCache::Get(size_t size) {
 
 void VBlockCache::Save(void *pointer, size_t size) {
 	VAutoLock l(_lock);
-	VListIterator iter(memoryList);
+	VListIterator iter(*memoryList);
 	while(iter.HasNext()) {
 		CacheItem *ci = static_cast<CacheItem *>(iter.Next());
 		// Clear even if not in use. Is someone wrote to it who wasn't supposed

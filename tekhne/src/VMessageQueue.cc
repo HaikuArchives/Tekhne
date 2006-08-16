@@ -57,9 +57,9 @@ VMessage *VMessageQueue::FindMessage(int32_t index) const {
 }
 
 VMessage *VMessageQueue::FindMessage(int32_t what, int32_t index) const {
-	VMessage **items = (VMessage **)_list.Items();
-	for (int i=0;i<_list.CountItems();i++) {
-		VMessage *m = items[i];
+	VListIterator iter(_list);
+	while(iter.HasNext()) {
+		VMessage *m = static_cast<VMessage*>(iter.Next());
 		if (m->what == what) {
 			if (index == 0) {
 				return m;
