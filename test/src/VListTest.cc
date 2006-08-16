@@ -2,17 +2,17 @@
  *            VListTest.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "VListTest.h"
@@ -64,7 +64,7 @@ void VListTest::testSortItems() {
 	l->AddItem((void*)"ball");
 	CPPUNIT_ASSERT( l->CountItems() == 5 );
 	l->SortItems(my_strcmp);
-	
+
 	char **items = (char **)l->Items();
 	CPPUNIT_ASSERT( strcmp(items[0], "ball") == 0 );
 	CPPUNIT_ASSERT( strcmp(items[1], "bar") == 0 );
@@ -93,7 +93,7 @@ void VListTest::testOperator() {
 	l->AddItem((void*)"bar");
 	l->AddItem((void*)"baz");
 	l->AddItem((void*)"tic", 4);
-	
+
 	VList &nl = *this->l;
 
 	char **items = (char **)nl.Items();
@@ -121,4 +121,24 @@ void VListTest::testBigList() {
 	CPPUNIT_ASSERT( strcmp(items[2], "bar") == 0 );
 	CPPUNIT_ASSERT( strcmp(items[3], "baz") == 0 );
 	CPPUNIT_ASSERT( strcmp(items[4], "tic") == 0 );
+}
+
+void VListTest::testIterator() {
+	l->AddItem((void*)"ball");
+	l->AddItem((void*)"foo");
+	l->AddItem((void*)"bar");
+	l->AddItem((void*)"baz");
+	l->AddItem((void*)"tic", 4);
+	VListIterator iter(l);
+	CPPUNIT_ASSERT( iter.HasNext() );
+	CPPUNIT_ASSERT( strcmp((char*)iter.Next(), "ball") == 0 );
+	CPPUNIT_ASSERT( iter.HasNext() );
+	CPPUNIT_ASSERT( strcmp((char*)iter.Next(), "foo") == 0 );
+	CPPUNIT_ASSERT( iter.HasNext() );
+	CPPUNIT_ASSERT( strcmp((char*)iter.Next(), "bar") == 0 );
+	CPPUNIT_ASSERT( iter.HasNext() );
+	CPPUNIT_ASSERT( strcmp((char*)iter.Next(), "baz") == 0 );
+	CPPUNIT_ASSERT( iter.HasNext() );
+	CPPUNIT_ASSERT( strcmp((char*)iter.Next(), "tic") == 0 );
+	CPPUNIT_ASSERT( !iter.HasNext() );
 }

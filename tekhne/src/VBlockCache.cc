@@ -88,9 +88,9 @@ VBlockCache::VBlockCache(size_t count, size_t size, uint32_t type) {
 VBlockCache::~VBlockCache() {
 	_lock->Lock( );
 	if (_lock) {
-		CacheItem **items = (CacheItem **)memoryList->Items();
-		for (int i=0;i<memoryList->CountItems(); i++) {
-			freeCacheItem(items[i], type);
+		VListIterator iter(memoryList);
+		while(iter.HasNext()) {
+			freeCacheItem(static_cast<CacheItem *>(iter.Next()), type);
 		}
 		delete memoryList;
 		_lock->Unlock();
@@ -102,9 +102,9 @@ VBlockCache::~VBlockCache() {
 void *VBlockCache::Get(size_t size) {
 	VAutoLock l(_lock);
 	if (size == this->size) {
-		CacheItem **items = (CacheItem **)memoryList->Items();
-		for (int i=0;i<memoryList->CountItems(); i++) {
-			CacheItem *ci = items[i];
+		VListIterator iter(memoryList);
+		while(iter.HasNext()) {
+			CacheItem *ci = static_cast<CacheItem *>(iter.Next());
 			if (!ci->used && ci->size == size) {
 				ci->used = true;
 				return ci->ptr;
@@ -120,9 +120,9 @@ void *VBlockCache::Get(size_t size) {
 
 void VBlockCache::Save(void *pointer, size_t size) {
 	VAutoLock l(_lock);
-	CacheItem **items = (CacheItem **)memoryList->Items();
-	for (int i=0;i<memoryList->CountItems(); i++) {
-		CacheItem *ci = items[i];
+	VListIterator iter(memoryList);
+	while(iter.HasNext()) {
+		CacheItem *ci = static_cast<CacheItem *>(iter.Next());
 		// Clear even if not in use. Is someone wrote to it who wasn't supposed
 		// to then we need to guarantee that the buffer is zeroed
 		if (ci->ptr == pointer) {

@@ -154,12 +154,12 @@ static bool deleteItem(void *item) {
 
 }
 
-VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true),
+VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true), _isSourceRemote(false),
 	_replyHandler(0), _handler(0), _replyMessage(0), _returnAddress(0), what(command) {
 }
 
 VMessage::VMessage(const VMessage &message) : _isReply(message._isReply), _wasDelivered(message._wasDelivered),
-	_isSourceWaiting(message._isSourceWaiting), _replyHandler(message._replyHandler), _handler(message._handler),
+	_isSourceWaiting(message._isSourceWaiting), _isSourceRemote(message._isSourceRemote), _replyHandler(message._replyHandler), _handler(message._handler),
 	_replyMessage(message._replyMessage), _returnAddress(message._returnAddress), what(message.what) {
 	storage_item **items = static_cast<storage_item **>(message.l.Items());
 	for (int i=0;i<message.l.CountItems();i++) {
@@ -187,8 +187,8 @@ VMessage::VMessage(const VMessage &message) : _isReply(message._isReply), _wasDe
 	}
 }
 
-VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true), _replyHandler(0),
- _handler(0), _replyMessage(0), _returnAddress(0), what(0) {
+VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true), _isSourceRemote(false),
+ _replyHandler(0), _handler(0), _replyMessage(0), _returnAddress(0), what(0) {
 }
 
 VMessage::~VMessage() {
@@ -551,10 +551,27 @@ status_t VMessage::Flatten(VDataIO *object, ssize_t *numBytes) const {
 	int32_t bc = 0;
 	if (numBytes) *numBytes = 0;
 
-	int32_t rc = object->Write(&what, sizeof(int32_t));
+	// _isReply;
+	int32_t rc = object->Write(&_isReply, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	bc += rc;
+	//bool _wasDelivered;
+	rc = object->Write(&_wasDelivered, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	bc += rc;
+	// bool _isSourceWaiting;
+	rc = object->Write(&_isSourceWaiting, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	bc += rc;
+	// bool _isSourceRemote;
+	rc = object->Write(&_isSourceRemote, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	bc += rc;
+	// what
+	rc = object->Write(&what, sizeof(int32_t));
 	if (rc != sizeof(int32_t)) return V_ERROR;
 	bc += rc;
-
+	// count number of items
 	int32_t ci = l.CountItems();
 	rc = object->Write(&ci, sizeof(int32_t));
 	if (rc != sizeof(int32_t)) return V_ERROR;
@@ -600,7 +617,15 @@ status_t VMessage::Flatten(char *address, ssize_t numBytes) const {
 }
 
 status_t VMessage::Unflatten(VDataIO *object) {
-	int32_t rc = object->Read(&what, sizeof(int32_t));
+	int32_t rc = object->Read(&_isReply, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	rc = object->Read(&_wasDelivered, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	rc = object->Read(&_isSourceWaiting, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	rc = object->Read(&_isSourceRemote, sizeof(bool));
+	if (rc != sizeof(bool)) return V_ERROR;
+	rc = object->Read(&what, sizeof(int32_t));
 	if (rc != sizeof(int32_t)) return V_ERROR;
 	int32_t ci;
 	rc = object->Read(&ci, sizeof(int32_t));
@@ -641,8 +666,17 @@ status_t VMessage::Unflatten(const char *address) {
 
 ssize_t VMessage::FlattenedSize(void) const {
 	int32_t numBytes = 0;
-
+	// _isReply
+	numBytes += sizeof(bool);
+	// _wasDelivered
+	numBytes += sizeof(bool);
+	// _isSourceWaiting
+	numBytes += sizeof(bool);
+	// _isSourceRemote
+	numBytes += sizeof(bool);
+	// what
 	numBytes += sizeof(int32_t);
+	// count of list items
 	numBytes += sizeof(int32_t);
 
 	for(int i=0;i<l.CountItems();i++) {
@@ -744,11 +778,12 @@ bool VMessage::IsSystem(void) const {
 status_t VMessage::MakeEmpty(void) {
 	l.DoForEach(deleteItem);
 	l.MakeEmpty();
+	what = 0;
 	return V_OK;
 }
 
 bool VMessage::IsEmpty(void) const {
-	return l.IsEmpty();
+	return l.IsEmpty() && what != 0;
 }
 
 namespace tekhne {

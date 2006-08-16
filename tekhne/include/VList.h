@@ -97,6 +97,36 @@ public:
 
 	VList& operator=(const VList&);
 
+	friend class VListIterator;
+};
+
+class VListIterator {
+private:
+	void **_items;
+	int32_t _lastItem;
+	int32_t _currentItem;
+	bool _forward;
+	VListIterator() {}
+public:
+	VListIterator(VList *list, bool forward=true) : _items(list->items), _lastItem(list->lastItem) {
+		if (!_items || _lastItem < 0) _currentItem = -1;
+		else if (forward) _currentItem = 0;
+		else _currentItem = _lastItem;
+		_forward = forward;
+	}
+	virtual ~VListIterator() {
+	}
+
+	bool HasNext() {
+		if (_currentItem < 0) return false;
+		if (_forward &&  _currentItem > _lastItem) return false;
+		return true;
+	}
+
+	void *Next() {
+		if (_forward) return _items[_currentItem++];
+		return _items[_currentItem--];
+	}
 };
 
 } // namespace tekhne

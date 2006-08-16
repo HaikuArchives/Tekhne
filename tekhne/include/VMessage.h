@@ -49,6 +49,7 @@ private:
 	bool _isReply;
 	bool _wasDelivered;
 	bool _isSourceWaiting;
+	bool _isSourceRemote;
 
 	// these are used internally by looper in PostMessage and dispatch message
 	VHandler *_replyHandler;
