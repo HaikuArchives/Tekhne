@@ -157,9 +157,11 @@ bool VList::HasItem(void *item) const {
 }
 
 int32_t VList::IndexOf(void *item) const {
-	for (int32_t i=0;i<=lastItem;i++) {
-		if (items[i] == item) {
-			return i;
+	if (item) {
+		for (int32_t i=0;i<=lastItem;i++) {
+			if (items[i] == item) {
+				return i;
+			}
 		}
 	}
 	return -1;
@@ -204,7 +206,6 @@ bool VList::RemoveItem(void *item) {
 }
 
 void *VList::RemoveItem(int32_t index) {
-
 	if (items && index <= lastItem && index >= 0) {
 		void *ans = items[index];
 		memmove(items, items+1, sizeof(void*)*(lastItem-index));

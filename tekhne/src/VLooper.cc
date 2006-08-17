@@ -30,7 +30,8 @@ using namespace tekhne;
 using namespace std;
 
 VLooper::VLooper(const char *name, int32_t priority, int32_t portCapacity) :
-	VHandler(name), _quitting(false), _currentMessage(0), _preferredHandler(0) {
+	VHandler(name), _quitting(false), _currentMessage(0), _preferredHandler(0),
+	_filterList(0) {
 	_looper = this;
 	_handlers.AddItem(this);
 	_mq = new VMessageQueue();
@@ -51,17 +52,30 @@ VLooper *VLooper::LooperForThread(thread_t thread) {
 }
 
 void VLooper::AddCommonFilter(VMessageFilter *filter) {
+	if (!_filterList) {
+		_filterList = new VList();
+		_filterList->AddItem(filter);
+	} else if(!_filterList->HasItem(filter)) {
+		_filterList->AddItem(filter);
+	}
 }
 
 bool VLooper::RemoveCommonFilter(VMessageFilter *filter) {
+	if (_filterList) {
+		return _filterList->RemoveItem(filter);
+	}
 	return false;
 }
 
 void VLooper::SetCommonFilterList(VList *filters) {
+	if (filters != _filterList) {
+		delete _filterList;
+		_filterList = filters;
+	}
 }
 
 VList *VLooper::CommonFilterList(void) const {
-	return 0;
+	return _filterList;
 }
 
 void VLooper::AddHandler(VHandler *handler) {
@@ -89,25 +103,23 @@ VMessage *VLooper::CurrentMessage(void) const {
 }
 
 VMessage *VLooper::DetachCurrentMessage(void) {
-	return 0;
+	return _currentMessage;
 }
 
 void VLooper::DispatchMessage(VMessage *message, VHandler *target) {
-	_currentMessage = message;
 	if (target) {
 		// 1) Specific handler
-		target->MessageReceived(message);
+		target->MessageReceived(_currentMessage);
 	} else {
 		VHandler *ph = PreferredHandler();
 		if (ph) {
 			// 2) preferred handler
-			ph->MessageReceived(message);
+			ph->MessageReceived(_currentMessage);
 		} else {
 			// 3) send to ourself
-			this->MessageReceived(message);
+			this->MessageReceived(_currentMessage);
 		}
 	}
-	_currentMessage = 0;
 }
 
 bool VLooper::Lock(void) {
@@ -178,37 +190,36 @@ bool VLooper::QuitRequested(void) {
 void *tekhne::looper_thread_func(void *l) {
 	VLooper *looper = (VLooper *)l;
 	while (!looper->_quitting) {
-		VMessage *msg = looper->MessageQueue()->NextMessage();
-		if (msg) {
-			if (msg->_replyMessage == 0) {
-				msg->_replyMessage = new VMessage(V_NO_REPLY);
+		looper->_currentMessage = looper->MessageQueue()->NextMessage();
+		if (looper->_currentMessage) {
+			VAutoLock lock(looper);
+			if (looper->_currentMessage->_replyMessage == 0) {
+				looper->_currentMessage->_replyMessage = new VMessage(V_NO_REPLY);
 			}
-			{
-				VAutoLock lock(looper);
-				switch(msg->what) {
-					case V_QUIT_REQUESTED:
-						if (looper->QuitRequested()) {
-							looper->_quitting = true;
-						}
-						break;
-					default:
-						// goes to the preferred handler if there is one and then ourselves
-						looper->DispatchMessage(msg, msg->_handler);
-				}
+			switch(looper->_currentMessage->what) {
+				case V_QUIT_REQUESTED:
+					if (looper->QuitRequested()) {
+						looper->_quitting = true;
+					}
+					break;
+				default:
+					// goes to the preferred handler if there is one and then ourselves
+					looper->DispatchMessage(looper->_currentMessage, looper->_currentMessage->_handler);
 			}
 			// don't reply to a no reply
-			if (msg->what != V_NO_REPLY && msg->IsSourceWaiting( )) {
+			if (looper->_currentMessage->what != V_NO_REPLY && looper->_currentMessage->IsSourceWaiting( )) {
 				// send some kind of message
-				if (msg->_replyMessage) {
+				if (looper->_currentMessage->_replyMessage) {
 					VString replySignature;
-					msg->FindString("_replySignature", &replySignature);
+					looper->_currentMessage->FindString("_replySignature", &replySignature);
 					if (replySignature.Length() > 0) {
-						msg->_replyMessage->AddString("_replySignature", replySignature);
+						looper->_currentMessage->_replyMessage->AddString("_replySignature", replySignature);
 					}
 				}
-				msg->SendReply(msg->_replyMessage, static_cast<VHandler*>(0));
+				looper->_currentMessage->SendReply(looper->_currentMessage->_replyMessage, static_cast<VHandler*>(0));
 			}
-			delete msg;
+			delete looper->_currentMessage;
+			looper->_currentMessage = 0;
 		} else {
 			if (tekhne::print_debug_messages) cout << "Got a null message in loop message thread\n";
 		}

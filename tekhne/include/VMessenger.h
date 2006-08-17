@@ -61,8 +61,8 @@ public:
 	status_t SendMessage(VMessage *message, VMessage *reply, bigtime_t deliveryTimeout = V_INFINITE_TIMEOUT, bigtime_t replyTimeout = V_INFINITE_TIMEOUT) const;
 	status_t SendMessage(VMessage *message, VHandler *replyHandler = 0, bigtime_t deliveryTimeout = V_INFINITE_TIMEOUT) const;
 	status_t SendMessage(VMessage *message, VMessenger *replyMessenger, bigtime_t deliveryTimeout = V_INFINITE_TIMEOUT) const;
-	status_t SendMessage(uint32_t command, VMessage *reply) const;
-	status_t SendMessage(uint32_t command, VHandler *replyHandler = 0) const;
+	status_t SendMessage(int32_t command, VMessage *reply) const;
+	status_t SendMessage(int32_t command, VHandler *replyHandler = 0) const;
 
 	VHandler *Target(VLooper **looper) const;
 	bool IsTargetLocal(void) const;

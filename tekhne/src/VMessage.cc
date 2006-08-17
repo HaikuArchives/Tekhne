@@ -154,7 +154,7 @@ static bool deleteItem(void *item) {
 
 }
 
-VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true), _isSourceRemote(false),
+VMessage::VMessage(uint32_t command) : _isReply(false), _wasDelivered(false), _isSourceWaiting(false), _isSourceRemote(false),
 	_replyHandler(0), _handler(0), _replyMessage(0), _returnAddress(0), what(command) {
 }
 
@@ -187,7 +187,7 @@ VMessage::VMessage(const VMessage &message) : _isReply(message._isReply), _wasDe
 	}
 }
 
-VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _isSourceWaiting(true), _isSourceRemote(false),
+VMessage::VMessage(void) : _isReply(false), _wasDelivered(false), _isSourceWaiting(false), _isSourceRemote(false),
  _replyHandler(0), _handler(0), _replyMessage(0), _returnAddress(0), what(0) {
 }
 

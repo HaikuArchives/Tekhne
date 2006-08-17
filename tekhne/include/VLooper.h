@@ -32,6 +32,7 @@
 namespace tekhne {
 
 class VMessageQueue;
+class VApplication;
 
 void *looper_thread_func(void *l);
 
@@ -45,6 +46,7 @@ private:
 	pthread_t _thread;
 	pthread_attr_t _attr;
 	VHandler *_preferredHandler;
+	VList *_filterList;
 protected:
 	inline void copyReplySignature (VMessage *msg) {
 		if (msg && msg->_replyMessage) {
@@ -108,6 +110,7 @@ public:
 	team_t Team(void) const;
 
 	friend void *looper_thread_func(void *l);
+	friend class VApplication;
 
 	// VArchivable methods
 	static VArchivable *Instantiate(VMessage *archive);

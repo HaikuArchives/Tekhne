@@ -10,7 +10,7 @@ AM_CXXFLAGS =\
 	-Wall\
 	-g
 
-bin_PROGRAMS = roster
+bin_PROGRAMS = roster roster.dbg
 
 roster_SOURCES = \
 	main.cc\
@@ -22,5 +22,18 @@ roster_LDFLAGS = \
 	 -L../../tekhne/src
 
 roster_LDADD = \
+	 -ltekhne
+
+roster_dbg_SOURCES = \
+	main.cc\
+	ApplicationInfo.cc\
+	Roster.cc
+
+roster_dbg_LDFLAGS = \
+	-pthread\
+	-static\
+	 -L../../tekhne/src
+
+roster_dbg_LDADD = \
 	 -ltekhne
 
