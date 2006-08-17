@@ -327,77 +327,82 @@ void VApplication::RefsReceived(VMessage *message) {
 	if (print_debug_messages) cout << "RefsReceived" << endl;
 }
 
+void VApplication::ProcessMessage(VMessage *msg) {
+	VAutoLock lock(this);
+	_currentMessage = msg;
+	switch(_currentMessage->what) {
+		case V_ABOUT_REQUESTED:
+			AboutRequested();
+			break;
+		case V_APP_ACTIVATED:
+			{
+				bool active = true;
+				_currentMessage->FindBool("active", &active);
+				AppActivated(active);
+			}
+			break;
+		case V_ARGV_RECEIVED:
+			{
+				int32_t argc;
+				const char *argv[argc];
+				const char *cwd;
+				_currentMessage->FindInt32("argc", &argc);
+				for(int i=0; i<argc;i++) {
+					_currentMessage->FindString("argv", &argv[i]);
+				}
+				_currentMessage->FindString("cwd", &cwd);
+				ArgvReceived(argc, (char **)argv);
+			}
+			break;
+		case V_OPEN_IN_WORKSPACE:
+			{
+				int32_t workspace;
+				_currentMessage->FindInt32("v:workspace", &workspace);
+			}
+			break;
+		case V_PULSE:
+			Pulse();
+			break;
+		case V_QUIT_REQUESTED:
+			if (QuitRequested()) {
+				_quitting = true;
+			}
+			break;
+		case V_READY_TO_RUN:
+			ReadyToRun();
+			_isLaunching = false;
+			break;
+		case V_REFS_RECEIVED:
+			// we'll never get this...
+			break;
+		case V_SILENT_RELAUNCH:
+			// not sure what to do about this
+			break;
+		default:
+			DispatchMessage(_currentMessage, 0);
+	}
+	// don't reply to a no reply
+	if (_currentMessage) {
+		if (_currentMessage->what != V_NO_REPLY && _currentMessage->IsSourceWaiting()) {
+			if (_currentMessage->_replyMessage) {
+				// send some kind of message
+				copyReplySignature(_currentMessage);
+				_currentMessage->SendReply(_currentMessage->_replyMessage, static_cast<VHandler*>(0));
+			} else {
+				_currentMessage->SendReply(V_NO_REPLY, static_cast<VHandler*>(0));
+			}
+		}
+		delete _currentMessage;
+		_currentMessage = 0;
+	}
+}
+
 thread_t VApplication::Run(void) {
 	if (print_debug_messages) cout << "Run" << endl;
 	while (!_quitting) {
-		_currentMessage = MessageQueue()->NextMessage();
-		if (_currentMessage) {
-			VAutoLock lock(this);
-			switch(_currentMessage->what) {
-				case V_ABOUT_REQUESTED:
-					AboutRequested();
-					break;
-				case V_APP_ACTIVATED:
-					{
-						bool active = true;
-						_currentMessage->FindBool("active", &active);
-						AppActivated(active);
-					}
-					break;
-				case V_ARGV_RECEIVED:
-					{
-						int32_t argc;
-						const char *argv[argc];
-						const char *cwd;
-						_currentMessage->FindInt32("argc", &argc);
-						for(int i=0; i<argc;i++) {
-							_currentMessage->FindString("argv", &argv[i]);
-						}
-						_currentMessage->FindString("cwd", &cwd);
-						ArgvReceived(argc, (char **)argv);
-					}
-					break;
-				case V_OPEN_IN_WORKSPACE:
-					{
-						int32_t workspace;
-						_currentMessage->FindInt32("v:workspace", &workspace);
-					}
-					break;
-				case V_PULSE:
-					Pulse();
-					break;
-				case V_QUIT_REQUESTED:
-					if (QuitRequested()) {
-						_quitting = true;
-					}
-					break;
-				case V_READY_TO_RUN:
-					ReadyToRun();
-					_isLaunching = false;
-					break;
-				case V_REFS_RECEIVED:
-					// we'll never get this...
-					break;
-				case V_SILENT_RELAUNCH:
-					// not sure what to do about this
-					break;
-				default:
-					DispatchMessage(_currentMessage, 0);
-			}
-			// don't reply to a no reply
-			if (_currentMessage) {
-				if (_currentMessage->what != V_NO_REPLY && _currentMessage->IsSourceWaiting()) {
-					if (_currentMessage->_replyMessage) {
-						// send some kind of message
-						copyReplySignature(_currentMessage);
-						_currentMessage->SendReply(_currentMessage->_replyMessage, static_cast<VHandler*>(0));
-					} else {
-						_currentMessage->SendReply(V_NO_REPLY, static_cast<VHandler*>(0));
-					}
-				}
-				delete _currentMessage;
-				_currentMessage = 0;
-			}
+		VMessage *msg = MessageQueue()->NextMessage();
+		if (msg) {
+			ProcessMessage(msg);
 		} else {
 			if (tekhne::print_debug_messages) cout << "Got null message in application message loop\n";
 		}

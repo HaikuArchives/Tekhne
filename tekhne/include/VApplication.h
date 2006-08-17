@@ -57,6 +57,7 @@ private:
 
 	void InjectStartupMessages(void);
 	int32_t open_server_socket();
+	void ProcessMessage(VMessage *msg);
 public:
 	VApplication(const char *signature);
 	VApplication(const char *signature, status_t *error);
