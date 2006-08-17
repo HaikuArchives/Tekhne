@@ -106,6 +106,10 @@ public:
 	// VArchivable methods
 	static VArchivable *Instantiate(VMessage *archive);
 	virtual status_t Archive(VMessage *archive, bool deep = true) const;
+
+	// give msg_thread access to ProcessMessage
+	friend class msg_thread;
+	friend status_t SendToRemoteHost(const char *, VMessage *, VMessage *);
 };
 
 extern VApplication *v_app;

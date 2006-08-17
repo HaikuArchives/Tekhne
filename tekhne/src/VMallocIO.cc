@@ -27,96 +27,98 @@
 
 using namespace tekhne;
 
-VMallocIO::VMallocIO() {
-	curPosition = 0;
-	buf = 0;
-	bufferLen = 0;
+VMallocIO::VMallocIO() : _buf(0), _bufferLen(0), _curPosition(0), _blockSize(0), _lastUsed(0) {
 	SetBlockSize(256);
-	SetSize(blockSize);
+	SetSize(_blockSize);
 }
 
 VMallocIO::~VMallocIO() {
-	free(buf);
+	if (_buf) free(_buf);
 }
 
 const void *VMallocIO::Buffer(void) const {
-	return buf;
+	return _buf;
+}
+
+size_t VMallocIO::Length(void) const {
+	return _lastUsed;
 }
 
 size_t VMallocIO::BufferLength(void) const {
-	return bufferLen;
+	return _bufferLen;
 }
 
 ssize_t VMallocIO::Read(void *buffer, size_t numBytes) {
-	return ReadAt(curPosition, buffer, numBytes);
+	return ReadAt(_curPosition, buffer, numBytes);
 }
 
 ssize_t VMallocIO::ReadAt(off_t position, void *buffer, size_t numBytes) {
 
-	if (position > (off_t)bufferLen) {
+	if (position > (off_t)_bufferLen) {
 		return 0;
 	}
-	if (position+numBytes > bufferLen) {
-		numBytes = bufferLen - position;
+	if (position+numBytes > _bufferLen) {
+		numBytes = _bufferLen - position;
 	}
 	if (numBytes > 0) {
-		memmove(buffer, buf+curPosition, numBytes);
+		memmove(buffer, _buf+_curPosition, numBytes);
 	}
-	curPosition = position+numBytes;
+	_curPosition = position+numBytes;
 	return numBytes;
 }
 
 off_t VMallocIO::Seek(off_t position, int32_t mode) {
 	if (mode == SEEK_SET) {
 		SetSize(position);
-		curPosition = position;
+		_curPosition = position;
 	} else if (mode == SEEK_CUR) {
-		SetSize(curPosition+position);
-		curPosition += position;
+		SetSize(_curPosition+position);
+		_curPosition += position;
 	} else if (mode == SEEK_END) {
-		off_t oldBufLen = bufferLen;
-		SetSize(bufferLen+position);
-		curPosition = oldBufLen+position;
+		off_t oldBufLen = _bufferLen;
+		SetSize(_bufferLen+position);
+		_curPosition = oldBufLen+position;
 	}
-	if (curPosition < 0) curPosition = 0;
+	if (_curPosition < 0) _curPosition = 0;
 	return Position();
 }
 
 off_t VMallocIO::Position(void) const {
-	return curPosition;
+	return _curPosition;
 }
 
 void VMallocIO::SetBlockSize(size_t blockSize) {
 	if (blockSize >= 256) {
-		this->blockSize = blockSize;
+		this->_blockSize = blockSize;
 	}
 }
 
 status_t VMallocIO::SetSize(off_t numBytes) {
-	if (numBytes < (off_t)bufferLen) return bufferLen;
+	if (numBytes < (off_t)_bufferLen) return _bufferLen;
 
-	off_t newBufferLen = blockSize;
+	off_t newBufferLen = _blockSize;
 	while (newBufferLen < numBytes) {
-		newBufferLen += blockSize;
+		newBufferLen += _blockSize;
 	}
 	uint8_t *newBuf = (uint8_t *)malloc(newBufferLen);
 	bzero(newBuf, newBufferLen);
-	if (buf) {
-		memmove(newBuf, buf, bufferLen);
-		free(buf);
+	if (_buf) {
+		memmove(newBuf, _buf, _bufferLen);
+		free(_buf);
 	}
-	buf = newBuf;
-	bufferLen = newBufferLen;
+	_buf = newBuf;
+	_bufferLen = newBufferLen;
 	return BufferLength();
 }
 
 ssize_t VMallocIO::Write(const void *buffer, size_t numBytes) {
-	return WriteAt(curPosition, buffer, numBytes);
+	return WriteAt(_curPosition, buffer, numBytes);
 }
 
 ssize_t VMallocIO::WriteAt(off_t position, const void *buffer, size_t numBytes) {
 	SetSize(position+numBytes);
-	memmove(buf+position, buffer, numBytes);
-	curPosition = position+numBytes;
+	memmove(_buf+position, buffer, numBytes);
+	_curPosition = position+numBytes;
+	if ((size_t)_curPosition > _lastUsed) _lastUsed = _curPosition;
 	return numBytes;
 }

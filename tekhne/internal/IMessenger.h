@@ -1,5 +1,5 @@
 /***************************************************************************
- *            IRoster.h
+ *            IMessenger.h
  *
  * Copyright (c) 2006 Geoffrey Clements
  *
@@ -29,10 +29,7 @@ namespace tekhne {
 
 // don't use these they are mine need to move them to internal
 extern int32_t getSocketForSignature(const char *signature);
-extern status_t SendToRemoteHost(const char *signature, VMallocIO &data);
-extern status_t ReadReply(const char *signature, VMessage& replyMessage);
-
-
+extern status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply);
 }
 
 #endif /* _IMESSENGER_H */

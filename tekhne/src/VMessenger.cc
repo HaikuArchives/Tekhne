@@ -113,10 +113,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t d
 			message->AddString("_replySignature", v_app->Signature());
 			message->_isSourceWaiting = true;
 			message->_isSourceRemote = true;
-			VMallocIO mio;
-			message->Flatten(&mio);
-			err = SendToRemoteHost(_signature.String(), mio);
-			// read reply
+			err = SendToRemoteHost(_signature.String(), message, reply);
 		}
 	}
 	return err;
@@ -133,9 +130,7 @@ status_t VMessenger::SendMessage(VMessage *message, VHandler *replyHandler, bigt
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
-			VMallocIO mio;
-			message->Flatten(&mio);
-			err = SendToRemoteHost(_signature.String(), mio);
+			err = SendToRemoteHost(_signature.String(), message, static_cast<VMessage*>(0));
 		}
 	}
 	return err;
@@ -152,9 +147,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, 
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
-			VMallocIO mio;
-			message->Flatten(&mio);
-			err = SendToRemoteHost(_signature.String(), mio);
+			err = SendToRemoteHost(_signature.String(), message, static_cast<VMessage*>(0));
 		}
 	}
 	return err;
@@ -173,12 +166,10 @@ status_t VMessenger::SendMessage(int32_t command, VMessage *reply) const {
 			_looper->Unlock();
 		} else {
 			VMessage msg(command);
-			VMallocIO mio;
 			msg._isSourceRemote = true;
 			msg._isSourceWaiting = true;
 			msg.AddString("_replySignature", v_app->Signature());
-			msg.Flatten(&mio);
-			err = SendToRemoteHost(_signature.String(), mio);
+			err = SendToRemoteHost(_signature.String(), &msg, reply);
 			// need to read reply
 		}
 	}
@@ -195,17 +186,8 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 		} else {
 			VMessage msg(command);
 			msg.AddString("_replySignature", v_app->Signature());
-			VMallocIO mio;
-			msg.Flatten(&mio);
-			err = SendToRemoteHost(_signature.String(), mio);
-			if (replyHandler) {
-				VMessage replyMessage;
-				ReadReply(_signature.String(), replyMessage);
-				if (replyHandler->LockLooper()) {
-					replyHandler->MessageReceived(&replyMessage);
-					replyHandler->UnlockLooper();
-				}
-			}
+			msg._isSourceRemote = true;
+			err = SendToRemoteHost(_signature.String(), &msg, static_cast<VMessage*>(0));
 		}
 	}
 	return err;
@@ -282,11 +264,14 @@ int32_t tekhne::getSocketForSignature(const char *signature) {
 	return -1;
 }
 
-status_t tekhne::SendToRemoteHost(const char *signature, VMallocIO &data) {
+status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply) {
 	status_t err = V_ERROR;
-	int32_t len = data.BufferLength();
-	const void *buf = data.Buffer();
 	int32_t _socket = getSocketForSignature(signature);
+	VMallocIO data;
+	message->Flatten(&data);
+	int32_t len = data.Length();
+	const void *buf = data.Buffer();
+
 	if (_socket < 0) {
 		return err;
 	} else {
@@ -302,6 +287,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMallocIO &data) {
 			} else {
 				e = send (_socket, buf, len, 0);
 				if (e < 0) {
+					close(_socket);
 					void *p = socketDictionary.RemoveItem(key);
 					if (p) free (p);
 					err = e;
@@ -330,10 +316,28 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMallocIO &data) {
 				}
 			}
 		}
+		if (err == V_OK && message->IsSourceWaiting()) {
+			void *buf = malloc(4096);
+			/* Data arriving on an already-connected socket. */
+			int32_t len = recv (_socket, buf, 4096, 0);
+			if (len > 0) {
+				VMemoryIO mio(buf, len);
+				VMessage msg;
+				msg.Unflatten(&mio);
+				if (print_debug_messages) msg.PrintToStream();
+							// short circuit here to Process message directly if source is waiting
+				if (msg.IsSourceWaiting()) {
+					v_app->ProcessMessage(&msg);
+					if (msg._replyMessage) {
+						// recursive so be careful!
+						SendToRemoteHost(signature, msg._replyMessage, 0);
+					}
+				} else {
+					v_app->PostMessage(&msg);
+				}
+			}
+			free(buf);
+		}
 	}
 	return err;
-}
-
-status_t tekhne::ReadReply(const char *signature, VMessage& replyMessage) {
-	return V_OK;
 }

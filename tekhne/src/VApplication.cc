@@ -52,9 +52,9 @@ public:
 		msg->FindString("_replySignature", &replySignature);
 		if (replySignature.Length( )) {
 			msg->AddString("_replySignature", _signature);
-			VMallocIO mio;
-			msg->Flatten(&mio);
-			SendToRemoteHost(replySignature.String(), mio);
+			msg->_isSourceWaiting = false;
+			msg->_isSourceRemote = true;
+			SendToRemoteHost(replySignature.String(), msg, static_cast<VMessage*>(0));
 		}
 	}
 };
@@ -102,12 +102,25 @@ private:
 						/* Data arriving on an already-connected socket. */
 						int32_t len = recv (i, buf, 4096, 0);
 						if (len > 0) {
-							VMemoryIO *mio = new VMemoryIO(buf, len);
+							VMemoryIO mio(buf, len);
 							VMessage msg;
-							msg.Unflatten(mio);
-							delete mio;
+							msg.Unflatten(&mio);
 							if (print_debug_messages) msg.PrintToStream();
-							v_app->PostMessage(&msg, 0, th->_replyHandler);
+							// short circuit here to Process message directly if source is waiting
+							if (msg.IsSourceWaiting()) {
+								v_app->ProcessMessage(&msg);
+								if (msg._replyMessage) {
+									// send a reply message
+									VMallocIO buf;
+									msg._replyMessage->Flatten(&buf);
+									if (send (i, buf.Buffer(), buf.Length(), 0) < 0) {
+										close (i);
+										FD_CLR (i, &active_fd_set);
+									}
+								}
+							} else {
+								v_app->PostMessage(&msg, 0, th->_replyHandler);
+							}
 						} else if (len < 0) {
 							close (i);
 							FD_CLR (i, &active_fd_set);

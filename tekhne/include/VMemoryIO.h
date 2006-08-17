@@ -2,17 +2,17 @@
  *            VMemoryIO.h
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #ifndef _VMEMORYIO_H
@@ -34,10 +34,11 @@ namespace tekhne {
 class VMemoryIO : public VPositionIO {
 	// size is 256 bytes
 private:
-	uint8_t *buf;
-	const uint8_t *constBuf;
-	size_t bufferLen;
-	off_t curPosition;
+	uint8_t *_buf;
+	const uint8_t *_constBuf;
+	size_t _bufferLen;
+	off_t _curPosition;
+	size_t _lastUsed;
 
 public:
 	VMemoryIO(void *buffer, size_t numBytes);
@@ -46,6 +47,7 @@ public:
 
 	const void *Buffer(void) const;
 	size_t BufferLength(void) const;
+	size_t Length(void) const;
 	virtual ssize_t Read(void *buffer, size_t numBytes);
 	virtual ssize_t ReadAt(off_t position, void *buffer, size_t numBytes);
 	virtual off_t Seek(off_t position, int32_t mode);

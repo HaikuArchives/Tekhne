@@ -216,6 +216,7 @@ private:
 	friend class msg_thread;
 	friend class VApplication;
 	friend class ReplyHandler;
+	friend status_t SendToRemoteHost(const char *, VMessage *, VMessage *);
 };
 
 } // namespace tekhne
