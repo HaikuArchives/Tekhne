@@ -103,7 +103,9 @@ VMessage *VLooper::CurrentMessage(void) const {
 }
 
 VMessage *VLooper::DetachCurrentMessage(void) {
-	return _currentMessage;
+	VMessage *msg = _currentMessage;
+	_currentMessage = 0;
+	return msg;
 }
 
 void VLooper::DispatchMessage(VMessage *message, VHandler *target) {
@@ -193,9 +195,6 @@ void *tekhne::looper_thread_func(void *l) {
 		looper->_currentMessage = looper->MessageQueue()->NextMessage();
 		if (looper->_currentMessage) {
 			VAutoLock lock(looper);
-			if (looper->_currentMessage->_replyMessage == 0) {
-				looper->_currentMessage->_replyMessage = new VMessage(V_NO_REPLY);
-			}
 			switch(looper->_currentMessage->what) {
 				case V_QUIT_REQUESTED:
 					if (looper->QuitRequested()) {
@@ -207,19 +206,19 @@ void *tekhne::looper_thread_func(void *l) {
 					looper->DispatchMessage(looper->_currentMessage, looper->_currentMessage->_handler);
 			}
 			// don't reply to a no reply
-			if (looper->_currentMessage->what != V_NO_REPLY && looper->_currentMessage->IsSourceWaiting( )) {
-				// send some kind of message
-				if (looper->_currentMessage->_replyMessage) {
-					VString replySignature;
-					looper->_currentMessage->FindString("_replySignature", &replySignature);
-					if (replySignature.Length() > 0) {
-						looper->_currentMessage->_replyMessage->AddString("_replySignature", replySignature);
+			if (looper->_currentMessage) {
+				if (looper->_currentMessage->what != V_NO_REPLY && looper->_currentMessage->IsSourceWaiting()) {
+					// send some kind of message
+					if (looper->_currentMessage->_replyMessage) {
+						looper->copyReplySignature(looper->_currentMessage);
+						looper->_currentMessage->SendReply(looper->_currentMessage->_replyMessage, static_cast<VHandler*>(0));
+					} else {
+						looper->_currentMessage->SendReply(V_NO_REPLY, static_cast<VHandler*>(0));
 					}
 				}
-				looper->_currentMessage->SendReply(looper->_currentMessage->_replyMessage, static_cast<VHandler*>(0));
+				delete looper->_currentMessage;
+				looper->_currentMessage = 0;
 			}
-			delete looper->_currentMessage;
-			looper->_currentMessage = 0;
 		} else {
 			if (tekhne::print_debug_messages) cout << "Got a null message in loop message thread\n";
 		}

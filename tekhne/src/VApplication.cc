@@ -333,9 +333,6 @@ thread_t VApplication::Run(void) {
 		_currentMessage = MessageQueue()->NextMessage();
 		if (_currentMessage) {
 			VAutoLock lock(this);
-			if (_currentMessage->_replyMessage == 0) {
-				_currentMessage->_replyMessage = new VMessage(V_NO_REPLY);
-			}
 			switch(_currentMessage->what) {
 				case V_ABOUT_REQUESTED:
 					AboutRequested();
@@ -388,13 +385,19 @@ thread_t VApplication::Run(void) {
 					DispatchMessage(_currentMessage, 0);
 			}
 			// don't reply to a no reply
-			if (_currentMessage->what != V_NO_REPLY && _currentMessage->IsSourceWaiting( )) {
-				// send some kind of message
-				copyReplySignature(_currentMessage);
-				_currentMessage->SendReply(_currentMessage->_replyMessage, static_cast<VHandler*>(0));
+			if (_currentMessage) {
+				if (_currentMessage->what != V_NO_REPLY && _currentMessage->IsSourceWaiting()) {
+					if (_currentMessage->_replyMessage) {
+						// send some kind of message
+						copyReplySignature(_currentMessage);
+						_currentMessage->SendReply(_currentMessage->_replyMessage, static_cast<VHandler*>(0));
+					} else {
+						_currentMessage->SendReply(V_NO_REPLY, static_cast<VHandler*>(0));
+					}
+				}
+				delete _currentMessage;
+				_currentMessage = 0;
 			}
-			delete _currentMessage;
-			_currentMessage = 0;
 		} else {
 			if (tekhne::print_debug_messages) cout << "Got null message in application message loop\n";
 		}

@@ -172,16 +172,14 @@ status_t VMessenger::SendMessage(int32_t command, VMessage *reply) const {
 			err = _looper->PostMessage(&msg);
 			_looper->Unlock();
 		} else {
-			if (command != V_NO_REPLY) {
-				VMessage msg(command);
-				VMallocIO mio;
-				msg._isSourceRemote = true;
-				msg._isSourceWaiting = true;
-				msg.AddString("_replySignature", v_app->Signature());
-				msg.Flatten(&mio);
-				err = SendToRemoteHost(_signature.String(), mio);
-				// need to read reply
-			}
+			VMessage msg(command);
+			VMallocIO mio;
+			msg._isSourceRemote = true;
+			msg._isSourceWaiting = true;
+			msg.AddString("_replySignature", v_app->Signature());
+			msg.Flatten(&mio);
+			err = SendToRemoteHost(_signature.String(), mio);
+			// need to read reply
 		}
 	}
 	return err;
@@ -195,19 +193,17 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 			err = _looper->PostMessage(command, _handler, replyHandler);
 			_looper->Unlock();
 		} else {
-			if (command != V_NO_REPLY) {
-				VMessage msg(command);
-				msg.AddString("_replySignature", v_app->Signature());
-				VMallocIO mio;
-				msg.Flatten(&mio);
-				err = SendToRemoteHost(_signature.String(), mio);
-				if (replyHandler) {
-					VMessage replyMessage(V_NO_REPLY);
-					ReadReply(_signature.String(), replyMessage);
-					if (replyHandler->LockLooper()) {
-						replyHandler->MessageReceived(&replyMessage);
-						replyHandler->UnlockLooper();
-					}
+			VMessage msg(command);
+			msg.AddString("_replySignature", v_app->Signature());
+			VMallocIO mio;
+			msg.Flatten(&mio);
+			err = SendToRemoteHost(_signature.String(), mio);
+			if (replyHandler) {
+				VMessage replyMessage;
+				ReadReply(_signature.String(), replyMessage);
+				if (replyHandler->LockLooper()) {
+					replyHandler->MessageReceived(&replyMessage);
+					replyHandler->UnlockLooper();
 				}
 			}
 		}
