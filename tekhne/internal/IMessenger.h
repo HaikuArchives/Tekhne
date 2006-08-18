@@ -29,7 +29,7 @@ namespace tekhne {
 
 // don't use these they are mine need to move them to internal
 extern int32_t getSocketForSignature(const char *signature);
-extern status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply);
+extern status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply=0, VHandler *replyHandler=0);
 }
 
 #endif /* _IMESSENGER_H */

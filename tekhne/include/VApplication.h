@@ -109,7 +109,7 @@ public:
 
 	// give msg_thread access to ProcessMessage
 	friend class msg_thread;
-	friend status_t SendToRemoteHost(const char *, VMessage *, VMessage *);
+	friend status_t SendToRemoteHost(const char *, VMessage *, VMessage *, VHandler*);
 };
 
 extern VApplication *v_app;

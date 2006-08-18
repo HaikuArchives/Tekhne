@@ -264,7 +264,7 @@ int32_t tekhne::getSocketForSignature(const char *signature) {
 	return -1;
 }
 
-status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply) {
+status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply, VHandler *replyHandler) {
 	status_t err = V_ERROR;
 	int32_t _socket = getSocketForSignature(signature);
 	VMallocIO data;
@@ -325,13 +325,11 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 				VMessage msg;
 				msg.Unflatten(&mio);
 				if (print_debug_messages) msg.PrintToStream();
-							// short circuit here to Process message directly if source is waiting
-				if (msg.IsSourceWaiting()) {
-					v_app->ProcessMessage(&msg);
-					if (msg._replyMessage) {
-						// recursive so be careful!
-						SendToRemoteHost(signature, msg._replyMessage, 0);
-					}
+				// short circuit here to Process message directly if source is waiting
+				if (reply) {
+					*reply = msg;
+				} else if (replyHandler) {
+					replyHandler->MessageReceived(&msg);
 				} else {
 					v_app->PostMessage(&msg);
 				}
