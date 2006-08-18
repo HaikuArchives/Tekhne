@@ -23,7 +23,8 @@ test_SOURCES = \
 	VStringTest.cc\
 	VListTest.cc \
 	VTListTest.cc \
-	VMessengerTest.cc
+	VMessengerTest.cc\
+	VRosterTest.cc
 
 test_LDFLAGS = \
 	-pthread\

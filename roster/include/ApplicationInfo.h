@@ -29,9 +29,12 @@
 
 class ApplicationInfo {
 private:
+	tekhne::VString _signature;
 public:
-	ApplicationInfo();
+	ApplicationInfo(tekhne::VString sig);
 	virtual ~ApplicationInfo();
+
+	bool IsMe(tekhne::VString &s);
 };
 
 #endif /* _APPLICATIONINFO_H */

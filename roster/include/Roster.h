@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include "ApplicationInfo.h"
 
 #ifndef _ROSTER_H
 #define _ROSTER_H
@@ -30,6 +31,7 @@
 class Roster : public tekhne::VApplication {
 private:
 	tekhne::VList _runningApps;
+	ApplicationInfo *FindAppBySignature(tekhne::VString& sig);
 public:
 	Roster();
 	virtual ~Roster();

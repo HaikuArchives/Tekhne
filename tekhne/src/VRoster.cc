@@ -116,7 +116,11 @@ team_t VRoster::TeamFor(const char *signature) const {
 
 bool VRoster::IsRunning(const char *signature) const {
 	VMessage msg(V_ROSTER_IS_RUNNING);
+	VMessage reply;
 	msg.AddString("_signature", signature);
-	_rosterMgr->SendMessage(&msg, static_cast<VHandler*>(0));
-	return false;
+	_rosterMgr->SendMessage(&msg, &reply);
+	reply.PrintToStream();
+	bool ans = false;
+	reply.FindBool("_reply", &ans);
+	return ans;
 }

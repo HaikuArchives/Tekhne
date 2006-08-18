@@ -38,23 +38,48 @@ Roster::~Roster() {
 void Roster::ReadyToRun(void) {
 }
 
+ApplicationInfo *Roster::FindAppBySignature(VString& sig) {
+	VListIterator iter(_runningApps);
+	while(iter.HasNext()) {
+		ApplicationInfo *ai = static_cast<ApplicationInfo*>(iter.Next());
+		if (ai->IsMe(sig)) return ai;
+	}
+	return 0;
+}
+
+
 void Roster::MessageReceived(VMessage *message) {
 	VString sig;
-
+	ApplicationInfo *ai;
+	VMessage reply;
 	switch(message->what) {
 		case V_ROSTER_REGISTER:
 			message->FindString("_signature", &sig);
 			cout << "register " << sig.String() << endl;
+			ai = FindAppBySignature(sig);
+			if (!ai) {
+				_runningApps.AddItem(new ApplicationInfo(sig));
+			}
 			break;
 		case V_ROSTER_UNREGISTER:
 			message->FindString("_signature", &sig);
 			cout << "unregister " << sig.String() << endl;
+			ai = FindAppBySignature(sig);
+			if (ai) {
+				_runningApps.RemoveItem(ai);
+			}
 			break;
 		case V_ROSTER_ACTIVATE:
 			break;
 		case V_ROSTER_TEAM_FOR:
 			break;
 		case V_ROSTER_IS_RUNNING:
+			message->FindString("_signature", &sig);
+			cout << "IsRunning " << sig.String() << endl;
+			ai = FindAppBySignature(sig);
+			reply.what = V_ROSTER_IS_RUNNING;
+			reply.AddBool("_reply", ai != 0);
+			message->SendReply(&reply);
 			break;
 		case V_ROSTER_START_WATCHING:
 			break;

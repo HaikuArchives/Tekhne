@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Roster.cc
+ *            VRosterTest.h
  *
  * Copyright (c) 2006 Geoffrey Clements
  *
@@ -20,20 +20,35 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
+ *
  ****************************************************************************/
 
+#ifndef VROSTERTEST_H_
+#define VROSTERTEST_H_
+
 #include "tekhne.h"
-#include "IRoster.h"
-#include "ApplicationInfo.h"
+#include <cppunit/TestCase.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/TestCaller.h>
 
 using namespace tekhne;
 
-ApplicationInfo::ApplicationInfo(VString signature) : _signature(signature) {
-}
+class VRosterTest : public CppUnit::TestFixture {
+	private:
+		VRoster *bc;
+	public:
+		static CppUnit::Test *VRosterTest::suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VRosterTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VRosterTest>("testCreate",
+								   &VRosterTest::testCreate ) );
+			return suiteOfTests;
+		}
 
-ApplicationInfo::~ApplicationInfo() {
-}
+		void setUp();
+		void tearDown();
 
-bool ApplicationInfo::IsMe(VString &s) {
-	return s == _signature;
-}
+		void testCreate();
+};
+
+
+#endif /*VROSTERTEST_H_*/
