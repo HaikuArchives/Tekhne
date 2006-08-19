@@ -1017,8 +1017,8 @@ status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendT
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(*message);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceWaiting = false;
 		msg->_isSourceRemote = true;
+		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, reply, 0);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {
@@ -1040,8 +1040,8 @@ status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(*message);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceWaiting = false;
 		msg->_isSourceRemote = true;
+		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {
@@ -1062,8 +1062,8 @@ status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(command);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceWaiting = true;
 		msg->_isSourceRemote = true;
+		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, reply, 0);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {
@@ -1086,8 +1086,8 @@ status_t VMessage::SendReply(uint32_t command, VHandler *replyHandler) {
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(command);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceWaiting = true;
 		msg->_isSourceRemote = true;
+		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {

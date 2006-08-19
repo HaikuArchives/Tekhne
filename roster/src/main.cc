@@ -25,9 +25,7 @@
 #include "Roster.h"
 #include <iostream>
 
-int main()
-{
-	tekhne::print_debug_messages = true;
+int main(int argc, char*argv[]) {
 	Roster *r = new Roster();
 	r->Run();
 	delete r;

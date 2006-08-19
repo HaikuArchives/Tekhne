@@ -42,8 +42,10 @@ public:
 	status_t AddItem(VHashable &key, void *item);
 	void *FindItem(VHashable &key);
 	void *RemoveItem(VHashable &key);
+	void *RemoveItem(void *value);
 
 	void Items(VList &itemList);
+	void Keys(VList &keyList);
 };
 
 }

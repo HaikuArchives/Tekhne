@@ -68,17 +68,38 @@ void *VDictionary::FindItem(VHashable &k) {
 }
 
 void *VDictionary::RemoveItem(VHashable &k) {
+	void *reply = 0;
 	uint32_t key = k.hash();
 	VListIterator iter(items);
 	while(iter.HasNext()) {
 		dict_item *item = static_cast<dict_item *>(iter.Next());
 		if (item) {
 			if (item->key == key) {
-				if (items.RemoveItem(item)) return item;
+				items.RemoveItem(item);
+				reply = item->value;
+				delete item;
+				break;
 			}
 		}
 	}
-	return 0;
+	return reply;
+}
+
+void *VDictionary::RemoveItem(void *value) {
+	void *reply = 0;
+	VListIterator iter(items);
+	while(iter.HasNext()) {
+		dict_item *item = static_cast<dict_item *>(iter.Next());
+		if (item) {
+			if (item->value == value) {
+				items.RemoveItem(item);
+				reply = item->value;
+				delete item;
+				break;
+			}
+		}
+	}
+	return reply;
 }
 
 void VDictionary::Items(VList &itemList) {

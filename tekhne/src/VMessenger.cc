@@ -130,7 +130,7 @@ status_t VMessenger::SendMessage(VMessage *message, VHandler *replyHandler, bigt
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
-			err = SendToRemoteHost(_signature.String(), message, static_cast<VMessage*>(0));
+			err = SendToRemoteHost(_signature.String(), message, 0, replyHandler);
 		}
 	}
 	return err;
@@ -147,7 +147,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, 
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
-			err = SendToRemoteHost(_signature.String(), message, static_cast<VMessage*>(0));
+			err = SendToRemoteHost(_signature.String(), message, 0, replyMessenger->_handler);
 		}
 	}
 	return err;
@@ -169,7 +169,7 @@ status_t VMessenger::SendMessage(int32_t command, VMessage *reply) const {
 			msg._isSourceRemote = true;
 			msg._isSourceWaiting = true;
 			msg.AddString("_replySignature", v_app->Signature());
-			err = SendToRemoteHost(_signature.String(), &msg, reply);
+			err = SendToRemoteHost(_signature.String(), &msg, reply, 0);
 			// need to read reply
 		}
 	}
@@ -187,7 +187,7 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 			VMessage msg(command);
 			msg.AddString("_replySignature", v_app->Signature());
 			msg._isSourceRemote = true;
-			err = SendToRemoteHost(_signature.String(), &msg, static_cast<VMessage*>(0));
+			err = SendToRemoteHost(_signature.String(), &msg, 0, replyHandler);
 		}
 	}
 	return err;
@@ -238,6 +238,37 @@ namespace tekhne {
 	VDictionary socketDictionary;
 }
 
+void tekhne::deleteSocketForSignature(const char *signature) {
+	VString sig(signature);
+	int32_t *sock = static_cast<int32_t*>(socketDictionary.RemoveItem(sig));
+	if (sock) {
+		close(*sock);
+		free(sock);
+	}
+}
+void tekhne::deleteSocket(int32_t socket) {
+	VList items;
+	socketDictionary.Items(items);
+	VListIterator iter(items);
+	while (iter.HasNext()) {
+		int32_t *s = static_cast<int32_t*>(iter.Next());
+		if (*s == socket) {
+			socketDictionary.RemoveItem(s);
+			close(socket);
+			free(s);
+			break;
+		}
+	}
+}
+
+void tekhne::addSocketForSignature(const char *signature, int32_t sock) {
+	VString sig(signature);
+	if (!socketDictionary.FindItem(sig)) {
+		int32_t *sock_item = static_cast<int32_t*>(malloc(sizeof(int32_t)));
+		*sock_item = sock;
+		socketDictionary.AddItem(sig, sock_item);
+	}
+}
 int32_t tekhne::getSocketForSignature(const char *signature) {
 	VString sig(signature);
 	int32_t *sock = static_cast<int32_t*>(socketDictionary.FindItem(sig));
@@ -254,9 +285,7 @@ int32_t tekhne::getSocketForSignature(const char *signature) {
 			strncpy(name.sun_path, socket_name.String(), sizeof (name.sun_path));
 			int32_t e = connect(_socket, (struct sockaddr*)&name, SUN_LEN(&name));
 			if (!e) {
-				sock = static_cast<int32_t*>(malloc(sizeof(int32_t)));
-				*sock = _socket;
-				socketDictionary.AddItem(sig, sock);
+				addSocketForSignature(signature, _socket);
 				return _socket;
 			}
 		}
@@ -268,6 +297,9 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 	status_t err = V_ERROR;
 	int32_t _socket = getSocketForSignature(signature);
 	VMallocIO data;
+	// here we finaly determine if we need to wait
+	if (reply || replyHandler) message->_isSourceWaiting = true;
+	else message->_isSourceWaiting = false;
 	message->Flatten(&data);
 	int32_t len = data.Length();
 	const void *buf = data.Buffer();
@@ -277,9 +309,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 	} else {
 		int32_t e = send (_socket, buf, len, 0);
 		if (e < 0) {
-			VString key(signature);
-			void *p = socketDictionary.RemoveItem(key);
-			if (p) free (p);
+			deleteSocketForSignature(signature);
 			// try one more time
 			_socket = getSocketForSignature(signature);
 			if (_socket < 0) {
@@ -287,9 +317,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 			} else {
 				e = send (_socket, buf, len, 0);
 				if (e < 0) {
-					close(_socket);
-					void *p = socketDictionary.RemoveItem(key);
-					if (p) free (p);
+					deleteSocketForSignature(signature);
 					err = e;
 				}else if (e == len) {
 					err = V_OK;

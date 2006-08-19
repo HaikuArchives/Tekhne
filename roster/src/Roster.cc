@@ -74,7 +74,7 @@ void Roster::MessageReceived(VMessage *message) {
 		case V_ROSTER_TEAM_FOR:
 			break;
 		case V_ROSTER_IS_RUNNING:
-			message->FindString("_signature", &sig);
+			message->FindString("signature", &sig);
 			cout << "IsRunning " << sig.String() << endl;
 			ai = FindAppBySignature(sig);
 			reply.what = V_ROSTER_IS_RUNNING;

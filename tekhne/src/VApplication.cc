@@ -106,9 +106,15 @@ private:
 							VMessage msg;
 							msg.Unflatten(&mio);
 							if (print_debug_messages) msg.PrintToStream();
+							// we don't want to create new sockets in SendToRemoteHost so add
+							// this one if it isn't already in the socketDictionary
+							VString replySig;
+							msg.FindString( "_replySignature", &replySig);
+							addSocketForSignature(replySig.String(), i);
+							// now we can post it
 							v_app->PostMessage(&msg, 0, th->_replyHandler);
 						} else if (len < 0) {
-							close (i);
+							deleteSocket(i);
 							FD_CLR (i, &active_fd_set);
 						}
 					}
