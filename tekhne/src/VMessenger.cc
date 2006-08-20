@@ -48,6 +48,9 @@ VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 	_handler(0), _looper(0), _localTarget(false), _isValid(true), _signature(signature) {
 	if (error) *error = V_OK;
 	if (_signature.Length() == 0) {
+		if (error) *error = V_BAD_VALUE;
+		_isValid = false;
+	} else {
 		// if we are making a remote messenger to ourself just turn it into a local messenger
 		if (_signature == v_app->Signature()) {
 			_looper = v_app;
@@ -55,8 +58,6 @@ VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 			_signature.Clear();
 			_localTarget = true;
 		}
-		if (error) *error = V_OK;
-		_isValid = false;
 	}
 }
 
@@ -295,6 +296,7 @@ int32_t tekhne::getSocketForSignature(const char *signature) {
 
 status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply, VHandler *replyHandler) {
 	status_t err = V_ERROR;
+	
 	int32_t _socket = getSocketForSignature(signature);
 	VMallocIO data;
 	// here we finaly determine if we need to wait
@@ -347,7 +349,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 		if (err == V_OK && message->IsSourceWaiting()) {
 			void *buf = malloc(4096);
 			/* Data arriving on an already-connected socket. */
-			int32_t len = recv (_socket, buf, 4096, 0);
+			int32_t len = read (_socket, buf, 4096);
 			if (len > 0) {
 				VMemoryIO mio(buf, len);
 				VMessage msg;

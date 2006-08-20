@@ -26,6 +26,7 @@
 #include <iostream>
 
 int main(int argc, char*argv[]) {
+	//tekhne::print_debug_messages = true;
 	Roster *r = new Roster();
 	r->Run();
 	delete r;

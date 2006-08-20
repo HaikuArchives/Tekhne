@@ -35,7 +35,6 @@ using namespace tekhne;
 
 class VRosterTest : public CppUnit::TestFixture {
 	private:
-		VRoster *bc;
 	public:
 		static CppUnit::Test *VRosterTest::suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VRosterTest" );

@@ -36,9 +36,9 @@ class VList;
 class VRoster {
 private:
 	VMessenger *_rosterMgr;
-public:
 	VRoster(void);
 	~VRoster();
+public:
 
 //	void AddToRecentDocuments(const entry_ref *document, const char *appSig = 0) const;
 	void GetRecentDocuments(VMessage *refList, int32_t maxCount, const char *ofType = 0,
@@ -79,6 +79,8 @@ public:
 	//team_t TeamFor(entry_ref *executable) const;
 	bool IsRunning(const char *signature) const;
 	//bool IsRunning(entry_ref *executable) const;
+
+	friend class VApplication;
 };
 
 

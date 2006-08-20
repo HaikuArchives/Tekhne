@@ -29,12 +29,14 @@
 using namespace std;
 
 void VRosterTest::setUp() {
-	bc = new VRoster();
 }
 
 void VRosterTest::tearDown() {
-	delete bc;
 }
 void VRosterTest::testCreate() {
-	CPPUNIT_ASSERT(bc->IsRunning("app/v-test-app"));
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/v-test-app"));
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-baldmountain-roster"));
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/v-test-app"));
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-baldmountain-roster"));
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/v-test-app"));
 }

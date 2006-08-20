@@ -100,7 +100,7 @@ private:
 						FD_SET (new_socket, &active_fd_set);
 					} else {
 						/* Data arriving on an already-connected socket. */
-						int32_t len = recv (i, buf, 4096, 0);
+						int32_t len = read(i, buf, 4096);
 						if (len > 0) {
 							VMemoryIO mio(buf, len);
 							VMessage msg;
@@ -113,7 +113,7 @@ private:
 							addSocketForSignature(replySig.String(), i);
 							// now we can post it
 							v_app->PostMessage(&msg, 0, th->_replyHandler);
-						} else if (len < 0) {
+						} else {
 							deleteSocket(i);
 							FD_CLR (i, &active_fd_set);
 						}
@@ -221,6 +221,7 @@ VApplication::VApplication(VMessage *archive) :
 VApplication::~VApplication() {
 	// this will unresgister from the roster app
 	delete v_roster;
+	v_roster = 0;
 	if (_socket >= 0) {
 		close(_socket);
 		VString socket_name("/tmp/");
