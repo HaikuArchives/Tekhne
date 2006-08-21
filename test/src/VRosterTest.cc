@@ -33,10 +33,30 @@ void VRosterTest::setUp() {
 
 void VRosterTest::tearDown() {
 }
-void VRosterTest::testCreate() {
-	CPPUNIT_ASSERT(v_roster->IsRunning("app/v-test-app"));
+void VRosterTest::testIsRunning() {
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-test-app"));
 	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-baldmountain-roster"));
-	CPPUNIT_ASSERT(v_roster->IsRunning("app/v-test-app"));
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-test-app"));
 	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-baldmountain-roster"));
-	CPPUNIT_ASSERT(v_roster->IsRunning("app/v-test-app"));
+	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-test-app"));
+}
+
+void VRosterTest::testGetAppInfo() {
+	app_info ai;
+
+	CPPUNIT_ASSERT(v_roster->GetAppInfo("app/x-test-app", &ai) == V_OK);
+	CPPUNIT_ASSERT(ai.team > 0);
+	CPPUNIT_ASSERT(ai.thread > 0);
+	CPPUNIT_ASSERT(ai.flags == 0);
+	CPPUNIT_ASSERT(strcmp(ai.signature,"app/x-test-app") == 0);
+	CPPUNIT_ASSERT(v_roster->GetAppInfo("app/x-baldmountain-roster", &ai) == V_OK);
+	CPPUNIT_ASSERT(ai.team > 0);
+	CPPUNIT_ASSERT(ai.thread > 0);
+	CPPUNIT_ASSERT(ai.flags == 0);
+	CPPUNIT_ASSERT(strcmp(ai.signature,"app/x-baldmountain-roster") == 0);
+}
+
+void VRosterTest::testTeamFor() {
+	CPPUNIT_ASSERT(v_roster->TeamFor("app/x-test-app") > 0);
+	CPPUNIT_ASSERT(v_roster->TeamFor("app/x-baldmountain-roster") > 0);
 }

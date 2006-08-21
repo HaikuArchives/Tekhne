@@ -22,18 +22,39 @@
  * IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "tekhne.h"
 #include "IRoster.h"
 #include "ApplicationInfo.h"
 
 using namespace tekhne;
 
-ApplicationInfo::ApplicationInfo(VString signature) : _signature(signature) {
+ApplicationInfo::ApplicationInfo(VString signature, team_t team) : _app_info(new app_info()) {
+	strncpy (_app_info->signature, signature.String(), V_MIME_TYPE_LENGTH);
+	// find the thread and team for this
+	_app_info->thread = team;
+	_app_info->team = team;
+	_app_info->flags = 0;
 }
 
 ApplicationInfo::~ApplicationInfo() {
+	delete _app_info;
 }
 
 bool ApplicationInfo::IsMe(VString &s) {
-	return s == _signature;
+	return s == _app_info->signature;
+}
+
+team_t ApplicationInfo::Team(void) {
+	return _app_info->team;
+}
+
+thread_t ApplicationInfo::Thread(void) {
+	return _app_info->thread;
+}
+
+uint32_t ApplicationInfo::Flags(void) {
+	return _app_info->flags;
+}
+
+const char *ApplicationInfo::Signature(void) {
+	return _app_info->signature;
 }

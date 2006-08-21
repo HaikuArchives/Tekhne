@@ -38,15 +38,21 @@ class VRosterTest : public CppUnit::TestFixture {
 	public:
 		static CppUnit::Test *VRosterTest::suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VRosterTest" );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VRosterTest>("testCreate",
-								   &VRosterTest::testCreate ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VRosterTest>("testIsRunning",
+								   &VRosterTest::testIsRunning ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VRosterTest>("testGetAppInfo",
+								   &VRosterTest::testGetAppInfo ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VRosterTest>("testTeamFor",
+								   &VRosterTest::testTeamFor ) );
 			return suiteOfTests;
 		}
 
 		void setUp();
 		void tearDown();
 
-		void testCreate();
+		void testIsRunning();
+		void testGetAppInfo();
+		void testTeamFor();
 };
 
 

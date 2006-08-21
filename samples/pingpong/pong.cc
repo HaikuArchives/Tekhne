@@ -17,7 +17,7 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * LIABILITY, WHIsETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  * 
@@ -33,10 +33,10 @@ class pong : public VApplication {
 private:
 	VMessenger *mgr;
 public:
-	pong() : VApplication ("app/v-sample-pong") { }
+	pong() : VApplication ("app/x-sample-pong") { }
 	
 	void ReadyToRun(void) {
-		mgr = new VMessenger("app/v-sample-ping");
+		mgr = new VMessenger("app/x-sample-ping");
 		// get things started!
 		mgr->SendMessage(PING);
 	}
@@ -52,7 +52,8 @@ public:
 };
 
 int main (int argc, char *argv[]) {
-	
+	tekhne::print_debug_messages = true;
+
 	pong *p = new pong();
 	p->Run();
 	

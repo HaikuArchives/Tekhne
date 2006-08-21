@@ -38,6 +38,7 @@ union Value {
 	int8_t i8;
 	int16_t i16;
 	int32_t i32;
+	uint32_t ui32;
 	int64_t i64;
 	float f;
 	double d;
@@ -94,6 +95,9 @@ storage_item *make_storage_item(const char *name, type_code type, const void *da
 		case V_INT32_TYPE:
 			si->data.i32 = *((const int32_t *)data);
 			break;
+		case V_UINT32_TYPE:
+			si->data.ui32 = *((const uint32_t *)data);
+			break;
 		case V_INT64_TYPE:
 			si->data.i64 = *((const int64_t *)data);
 			break;
@@ -132,6 +136,7 @@ void free_storage_item(storage_item *si) {
 		case V_INT8_TYPE:
 		case V_INT16_TYPE:
 		case V_INT32_TYPE:
+		case V_UINT32_TYPE:
 		case V_INT64_TYPE:
 		case V_FLOAT_TYPE:
 		case V_DOUBLE_TYPE:
@@ -171,6 +176,7 @@ VMessage::VMessage(const VMessage &message) : _isReply(message._isReply), _wasDe
 			case V_INT8_TYPE:
 			case V_INT16_TYPE:
 			case V_INT32_TYPE:
+			case V_UINT32_TYPE:
 			case V_INT64_TYPE:
 			case V_FLOAT_TYPE:
 			case V_DOUBLE_TYPE:
@@ -225,6 +231,10 @@ status_t VMessage::AddInt16(const char *name, int16_t anInt16) {
 
 status_t VMessage::AddInt32(const char *name, int32_t anInt32) {
 	return AddData(name, V_INT32_TYPE, &anInt32, sizeof(int32_t), true, 1);
+}
+
+status_t VMessage::AddUInt32(const char *name, uint32_t aUInt32) {
+	return AddData(name, V_UINT32_TYPE, &aUInt32, sizeof(uint32_t), true, 1);
 }
 
 status_t VMessage::AddInt64(const char *name, int64_t anInt64) {
@@ -312,6 +322,9 @@ status_t VMessage::FindData(const char *name, type_code type, int32_t index, con
 				case V_INT32_TYPE:
 					**(int32_t**)data = si->data.i32;
 					break;
+				case V_UINT32_TYPE:
+					**(uint32_t**)data = si->data.ui32;
+					break;
 				case V_INT64_TYPE:
 					**(int64_t**)data = si->data.i64;
 					break;
@@ -362,6 +375,9 @@ status_t VMessage::FindData(const char *name, type_code type, const void **data,
 					break;
 				case V_INT32_TYPE:
 					**(int32_t**)data = si->data.i32;
+					break;
+				case V_UINT32_TYPE:
+					**(uint32_t**)data = si->data.ui32;
 					break;
 				case V_INT64_TYPE:
 					**(int64_t**)data = si->data.i64;
@@ -431,6 +447,16 @@ status_t VMessage::FindInt32(const char *name, int32_t index, int32_t *anInt32) 
 status_t VMessage::FindInt32(const char *name, int32_t *anInt32) const {
 	ssize_t x;
 	return FindData(name, V_INT32_TYPE, (const void**)&anInt32, &x);
+}
+
+status_t VMessage::FindUInt32(const char *name, int32_t index, uint32_t *aUInt32) const {
+	ssize_t x;
+	return FindData(name, V_UINT32_TYPE, index, (const void**)&aUInt32, &x);
+}
+
+status_t VMessage::FindUInt32(const char *name, uint32_t *aUInt32) const {
+	ssize_t x;
+	return FindData(name, V_UINT32_TYPE, (const void**)&aUInt32, &x);
 }
 
 status_t VMessage::FindInt64(const char *name, int32_t index, int64_t *anInt64) const {
@@ -585,6 +611,7 @@ status_t VMessage::Flatten(VDataIO *object, ssize_t *numBytes) const {
 			case V_INT8_TYPE:
 			case V_INT16_TYPE:
 			case V_INT32_TYPE:
+			case V_UINT32_TYPE:
 			case V_INT64_TYPE:
 			case V_FLOAT_TYPE:
 			case V_DOUBLE_TYPE:
@@ -639,6 +666,7 @@ status_t VMessage::Unflatten(VDataIO *object) {
 			case V_INT8_TYPE:
 			case V_INT16_TYPE:
 			case V_INT32_TYPE:
+			case V_UINT32_TYPE:
 			case V_INT64_TYPE:
 			case V_FLOAT_TYPE:
 			case V_DOUBLE_TYPE:
@@ -687,6 +715,7 @@ ssize_t VMessage::FlattenedSize(void) const {
 			case V_INT8_TYPE:
 			case V_INT16_TYPE:
 			case V_INT32_TYPE:
+			case V_UINT32_TYPE:
 			case V_INT64_TYPE:
 			case V_FLOAT_TYPE:
 			case V_DOUBLE_TYPE:
@@ -923,12 +952,20 @@ status_t VMessage::ReplaceInt16(const char *name, int32_t index, int16_t anInt16
 	return ReplaceData(name, V_INT16_TYPE, index, &anInt16, sizeof(int16_t));
 }
 
-status_t VMessage::ReplaceInt32(const char *name, long anInt32) {
+status_t VMessage::ReplaceInt32(const char *name, int32_t anInt32) {
 	return ReplaceData(name, V_INT32_TYPE, &anInt32, sizeof(int32_t));
 }
 
 status_t VMessage::ReplaceInt32(const char *name, int32_t index, int32_t anInt32) {
 	return ReplaceData(name, V_INT32_TYPE, index, &anInt32, sizeof(int32_t));
+}
+
+status_t VMessage::ReplaceUInt32(const char *name, uint32_t aUInt32) {
+	return ReplaceData(name, V_UINT32_TYPE, &aUInt32, sizeof(uint32_t));
+}
+
+status_t VMessage::ReplaceUInt32(const char *name, int32_t index, uint32_t aUInt32) {
+	return ReplaceData(name, V_UINT32_TYPE, index, &aUInt32, sizeof(uint32_t));
 }
 
 status_t VMessage::ReplaceInt64(const char *name, int64_t anInt64) {
@@ -1148,6 +1185,7 @@ VMessage &VMessage::operator =(const VMessage& msg){
 				case V_INT8_TYPE:
 				case V_INT16_TYPE:
 				case V_INT32_TYPE:
+				case V_UINT32_TYPE:
 				case V_INT64_TYPE:
 				case V_FLOAT_TYPE:
 				case V_DOUBLE_TYPE:

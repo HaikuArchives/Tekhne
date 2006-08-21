@@ -29,6 +29,12 @@
 using namespace tekhne;
 using namespace std;
 
+const char *V_ROSTER_THREAD = "_thread";
+const char *V_ROSTER_TEAM = "_team";
+const char *V_ROSTER_FLAGS = "_flags";
+const char *V_ROSTER_SIGNATURE = "_sig";
+const char *V_ROSTER_REPLY = "_reply";
+
 Roster::Roster() : VApplication("app/x-baldmountain-roster") {
 }
 
@@ -52,33 +58,46 @@ void Roster::MessageReceived(VMessage *message) {
 	VString sig;
 	ApplicationInfo *ai;
 	VMessage reply;
+	uint32_t ui;
 	switch(message->what) {
 		case V_ROSTER_REGISTER:
-			message->FindString("_signature", &sig);
-			cout << "register " << sig.String() << endl;
+			message->FindString(V_ROSTER_SIGNATURE, &sig);
+			message->FindUInt32(V_ROSTER_TEAM, &ui);
+			cout << "register " << sig.String() << " " << ui << endl;
 			ai = FindAppBySignature(sig);
 			if (!ai) {
-				_runningApps.AddItem(new ApplicationInfo(sig));
+				_runningApps.AddItem(new ApplicationInfo(sig, ui));
 			}
 			break;
 		case V_ROSTER_UNREGISTER:
-			message->FindString("_signature", &sig);
+			message->FindString(V_ROSTER_SIGNATURE, &sig);
 			cout << "unregister " << sig.String() << endl;
 			ai = FindAppBySignature(sig);
 			if (ai) {
 				_runningApps.RemoveItem(ai);
+				delete ai;
 			}
 			break;
 		case V_ROSTER_ACTIVATE:
 			break;
 		case V_ROSTER_TEAM_FOR:
+			message->FindString(V_ROSTER_SIGNATURE, &sig);
+			cout << "TeamFor: " << sig.String() << endl;
+			reply.what = V_ROSTER_TEAM_FOR;
+			ai = FindAppBySignature(sig);
+			if (ai) {
+				reply.AddUInt32(V_ROSTER_REPLY, ai->Team());
+			} else {
+				reply.AddUInt32(V_ROSTER_REPLY, 0);
+			}
+			message->SendReply(&reply);
 			break;
 		case V_ROSTER_IS_RUNNING:
-			message->FindString("signature", &sig);
-			cout << "IsRunning " << sig.String() << endl;
+			message->FindString(V_ROSTER_SIGNATURE, &sig);
+			cout << "IsRunning: " << sig.String() << endl;
 			ai = FindAppBySignature(sig);
 			reply.what = V_ROSTER_IS_RUNNING;
-			reply.AddBool("_reply", ai != 0);
+			reply.AddBool(V_ROSTER_REPLY, ai != 0);
 			message->SendReply(&reply);
 			break;
 		case V_ROSTER_START_WATCHING:
@@ -90,6 +109,20 @@ void Roster::MessageReceived(VMessage *message) {
 		case V_ROSTER_APP_LIST:
 			break;
 		case V_ROSTER_APP_INFO:
+			message->FindString(V_ROSTER_SIGNATURE, &sig);
+			cout << "GetAppInfo: " << sig.String() << endl;
+			reply.what = V_ROSTER_TEAM_FOR;
+			ai = FindAppBySignature(sig);
+			if (ai) {
+				reply.AddUInt32(V_ROSTER_THREAD, ai->Thread());
+				reply.AddUInt32(V_ROSTER_TEAM, ai->Team());
+				reply.AddUInt32(V_ROSTER_FLAGS, ai->Flags());
+				reply.AddString(V_ROSTER_SIGNATURE, ai->Signature());
+				reply.AddInt32(V_ROSTER_REPLY, V_OK);
+			} else {
+				reply.AddInt32(V_ROSTER_REPLY, V_NAME_NOT_FOUND);
+			}
+			message->SendReply(&reply);
 			break;
 		case V_ROSTER_BROADCAST:
 			break;

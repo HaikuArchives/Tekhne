@@ -47,7 +47,7 @@ private:
 
 public:
 	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);
-	VMessenger(const char *signature, team_t team = -1, status_t *error = 0);
+	VMessenger(const char *signature, team_t team = 0, status_t *error = 0);
 	VMessenger(const VMessenger &messenger);
 	VMessenger(void);
 

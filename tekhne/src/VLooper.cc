@@ -217,7 +217,7 @@ void *tekhne::looper_thread_func(void *l) {
 
 thread_t VLooper::Run(void) {
 
-	if (print_debug_messages) cout << "Run" << endl;
+	if (print_debug_messages) cout << "VLooper::Run " << _name.String() << endl;
 
 	pthread_attr_init(&_attr);
 	pthread_create(&_thread, &_attr, looper_thread_func, this);

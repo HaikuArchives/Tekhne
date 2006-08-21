@@ -36,9 +36,8 @@ namespace tekhne {
 
 typedef uint32_t type_code;
 typedef int64_t bigtime_t;
-typedef int32_t team_t;
+typedef pthread_t team_t;
 typedef int32_t status_t;
-typedef int32_t port_t; // need to fix this
 typedef pthread_t thread_t;
 
 const bigtime_t V_INFINITE_TIMEOUT = INT64_MAX;
@@ -57,17 +56,18 @@ const type_code V_BOOL_TYPE = 1;
 const type_code V_INT8_TYPE = 2;
 const type_code V_INT16_TYPE = 3;
 const type_code V_INT32_TYPE = 4;
-const type_code V_INT64_TYPE = 5;
-const type_code V_FLOAT_TYPE = 6;
-const type_code V_DOUBLE_TYPE = 7;
-const type_code V_POINT_TYPE = 8;
-const type_code V_RECT_TYPE = 9;
-const type_code V_STRING_TYPE = 10;
-const type_code V_MESSAGE_TYPE = 11;
-const type_code V_MESSENGER_TYPE = 12;
-const type_code V_POINTER_TYPE = 13;
+const type_code V_UINT32_TYPE = 5;
+const type_code V_INT64_TYPE = 6;
+const type_code V_FLOAT_TYPE = 7;
+const type_code V_DOUBLE_TYPE = 8;
+const type_code V_POINT_TYPE = 9;
+const type_code V_RECT_TYPE = 10;
+const type_code V_STRING_TYPE = 11;
+const type_code V_MESSAGE_TYPE = 12;
+const type_code V_MESSENGER_TYPE = 13;
+const type_code V_POINTER_TYPE = 14;
 // match any type
-const type_code V_ANY_TYPE = 14;
+const type_code V_ANY_TYPE = 100;
 
 // random constants
 const int32_t V_NAME_LENGTH = 255;

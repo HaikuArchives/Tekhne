@@ -107,13 +107,11 @@ status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t d
 			if (err == V_OK) {
 				message->_replyMessage = reply;
 				message->_isSourceWaiting = true;
-				err = _looper->PostMessage(message, _handler);
+				err = _looper->PostMessage(message);
 				_looper->Unlock();
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
-			message->_isSourceWaiting = true;
-			message->_isSourceRemote = true;
 			err = SendToRemoteHost(_signature.String(), message, reply);
 		}
 	}
@@ -167,8 +165,6 @@ status_t VMessenger::SendMessage(int32_t command, VMessage *reply) const {
 			_looper->Unlock();
 		} else {
 			VMessage msg(command);
-			msg._isSourceRemote = true;
-			msg._isSourceWaiting = true;
 			msg.AddString("_replySignature", v_app->Signature());
 			err = SendToRemoteHost(_signature.String(), &msg, reply, 0);
 			// need to read reply
@@ -187,7 +183,6 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 		} else {
 			VMessage msg(command);
 			msg.AddString("_replySignature", v_app->Signature());
-			msg._isSourceRemote = true;
 			err = SendToRemoteHost(_signature.String(), &msg, 0, replyHandler);
 		}
 	}
@@ -243,6 +238,7 @@ void tekhne::deleteSocketForSignature(const char *signature) {
 	VString sig(signature);
 	int32_t *sock = static_cast<int32_t*>(socketDictionary.RemoveItem(sig));
 	if (sock) {
+		if (print_debug_messages) cout << "closing socket: " << *sock << endl;
 		close(*sock);
 		free(sock);
 	}
@@ -255,6 +251,7 @@ void tekhne::deleteSocket(int32_t socket) {
 		int32_t *s = static_cast<int32_t*>(iter.Next());
 		if (*s == socket) {
 			socketDictionary.RemoveItem(s);
+			if (print_debug_messages) cout << "closing socket: " << socket << endl;
 			close(socket);
 			free(s);
 			break;
@@ -296,8 +293,9 @@ int32_t tekhne::getSocketForSignature(const char *signature) {
 
 status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply, VHandler *replyHandler) {
 	status_t err = V_ERROR;
-	
-	int32_t _socket = getSocketForSignature(signature);
+	if (!message) return err;
+
+	message->_isSourceRemote = true;
 	VMallocIO data;
 	// here we finaly determine if we need to wait
 	if (reply || replyHandler) message->_isSourceWaiting = true;
@@ -306,10 +304,13 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 	int32_t len = data.Length();
 	const void *buf = data.Buffer();
 
+	int32_t _socket = getSocketForSignature(signature);
+	if (print_debug_messages) cout << "Found socket: "<< _socket << " for " << signature << endl;
 	if (_socket < 0) {
 		return err;
 	} else {
-		int32_t e = send (_socket, buf, len, 0);
+		int32_t e = write (_socket, buf, len);
+		if (print_debug_messages) cout << "Sent: "<< e << " on " << _socket << endl;
 		if (e < 0) {
 			deleteSocketForSignature(signature);
 			// try one more time
@@ -317,7 +318,8 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 			if (_socket < 0) {
 				return err;
 			} else {
-				e = send (_socket, buf, len, 0);
+				e = write (_socket, buf, len);
+				if (print_debug_messages) cout << "2nd Sent: "<< e << " on " << _socket << endl;
 				if (e < 0) {
 					deleteSocketForSignature(signature);
 					err = e;
@@ -327,7 +329,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 					int32_t sent = e;
 					len -= e;
 					while (len > 0 && e > 0) {
-						e = send (_socket, (char *)buf+sent, len, 0);
+						e = write (_socket, (char *)buf+sent, len);
 						if (e > 0) {
 							sent += e;
 						}
@@ -340,16 +342,18 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 			int32_t sent = e;
 			len -= e;
 			while (len > 0 && e > 0) {
-				e = send (_socket, (char *)buf+sent, len, 0);
+				e = write (_socket, (char *)buf+sent, len);
 				if (e > 0) {
 					sent += e;
 				}
 			}
 		}
-		if (err == V_OK && message->IsSourceWaiting()) {
+		if (err == V_OK && message->_isSourceWaiting) {
 			void *buf = malloc(4096);
 			/* Data arriving on an already-connected socket. */
+			if (print_debug_messages) cout << "trying to read on: " << _socket << endl;
 			int32_t len = read (_socket, buf, 4096);
+			if (print_debug_messages) cout << "read: "<< len << endl;
 			if (len > 0) {
 				VMemoryIO mio(buf, len);
 				VMessage msg;
@@ -357,10 +361,13 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 				if (print_debug_messages) msg.PrintToStream();
 				// short circuit here to Process message directly if source is waiting
 				if (reply) {
+					if (print_debug_messages) cout << "Set reply" << endl;
 					*reply = msg;
 				} else if (replyHandler) {
+					if (print_debug_messages) cout << "Send reply to handler" << endl;
 					replyHandler->MessageReceived(&msg);
 				} else {
+					if (print_debug_messages) cout << "Post reply" << endl;
 					v_app->PostMessage(&msg);
 				}
 			}

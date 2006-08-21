@@ -100,7 +100,9 @@ private:
 						FD_SET (new_socket, &active_fd_set);
 					} else {
 						/* Data arriving on an already-connected socket. */
+						if (print_debug_messages) cout << "reading on: " << i << endl;
 						int32_t len = read(i, buf, 4096);
+						if (print_debug_messages) cout << "read: " << len << endl;
 						if (len > 0) {
 							VMemoryIO mio(buf, len);
 							VMessage msg;
@@ -172,6 +174,7 @@ VApplication::VApplication(const char *signature) :
 		exit(-1);
 	}
 	setup_termination_handler();
+	_main_thread = pthread_self();
 	v_app = this;
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
@@ -190,6 +193,7 @@ VApplication::VApplication(const char *signature, status_t *error) :
 		exit(-1);
 	}
 	setup_termination_handler();
+	_main_thread = pthread_self();
 	v_app = this;
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
@@ -208,6 +212,7 @@ VApplication::VApplication(VMessage *archive) :
 		exit(-1);
 	}
 	setup_termination_handler();
+	_main_thread = pthread_self();
 	v_app = this;
 	archive->FindString("mime_sig", &_signature);
 	int32_t err;
@@ -254,9 +259,7 @@ void VApplication::ArgvReceived(int32_t argc, char **argv) {
 
 status_t VApplication::GetAppInfo(app_info *theInfo) const {
 	if (theInfo) {
-		theInfo->thread = pthread_self();
-		theInfo->team = 0; // this needs to be set to the process id
-		theInfo->port = 0;
+		theInfo->team = theInfo->thread = _main_thread;
 		theInfo->flags = 0;
 		if (_signature.CountChars() > V_MIME_TYPE_LENGTH) {
 			strncpy(theInfo->signature, _signature.String(), V_MIME_TYPE_LENGTH);
@@ -392,7 +395,7 @@ void VApplication::ProcessMessage(VMessage *msg) {
 }
 
 thread_t VApplication::Run(void) {
-	if (print_debug_messages) cout << "Run" << endl;
+	if (print_debug_messages) cout << "VApplication::Run" << endl;
 	while (!_quitting) {
 		VMessage *msg = MessageQueue()->NextMessage();
 		if (msg) {
@@ -467,6 +470,8 @@ int32_t VApplication::open_server_socket() {
 		_socket = socket(PF_LOCAL, SOCK_STREAM, 0);
 		if (_socket > 0) {
 			struct linger l = { 1, 1 };
+			int32_t reuse_addr = 1;
+			setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,	sizeof(reuse_addr));
 			err = setsockopt(_socket, SOL_SOCKET, SO_LINGER, &l, sizeof(struct linger));
 			if (err) {
 				close(_socket);

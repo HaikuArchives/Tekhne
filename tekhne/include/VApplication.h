@@ -39,7 +39,7 @@ class msg_thread;
 typedef struct app_info {
 	thread_t thread;
 	team_t team;
-	port_t port;
+	// port_t port; we don't use ports
 	uint32_t flags;
 	// entry_ref ref;
 	char signature[V_MIME_TYPE_LENGTH];
@@ -49,6 +49,7 @@ typedef struct app_info {
 
 class VApplication : public VLooper {
 private:
+	thread_t _main_thread;
 	pulse_thread *_pulse_thread;
 	VString _signature;
 	bool _isLaunching;

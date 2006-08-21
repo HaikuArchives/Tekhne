@@ -80,6 +80,7 @@ private:
 	status_t AddInt8(const char *name, int8_t anInt8);
 	status_t AddInt16(const char *name, int16_t anInt16);
 	status_t AddInt32(const char *name, int32_t anInt32);
+	status_t AddUInt32(const char *name, uint32_t aUInt32);
 	status_t AddInt64(const char *name, int64_t anInt64);
 	status_t AddFloat(const char *name, float aFloat);
 	status_t AddDouble(const char *name, double aDouble);
@@ -108,8 +109,10 @@ private:
 	status_t FindInt8(const char *name, int8_t *anInt8) const;
 	status_t FindInt16(const char *name, int32_t index, int16_t *anInt16) const;
 	status_t FindInt16(const char *name, int16_t *anInt16) const;
-	status_t FindInt32(const char *name, int32_t index, int32_t *anInt32) const;
+	status_t FindInt32(const char *name, int32_t index, int32_t *aUInt32) const;
 	status_t FindInt32(const char *name, int32_t *anInt32) const;
+	status_t FindUInt32(const char *name, int32_t index, uint32_t *aUInt32) const;
+	status_t FindUInt32(const char *name, uint32_t *anInt32) const;
 	status_t FindInt64(const char *name, int32_t index, int64_t *anInt64) const;
 	status_t FindInt64(const char *name, int64_t *anInt64) const;
 	status_t FindFloat(const char *name, int32_t index, float *aFloat) const;
@@ -166,8 +169,10 @@ private:
 	status_t ReplaceInt8(const char *name, int32_t index, int8_t anInt8);
 	status_t ReplaceInt16(const char *name, int16_t anInt16);
 	status_t ReplaceInt16(const char *name, int32_t index, int16_t anInt16);
-	status_t ReplaceInt32(const char *name, long anInt32);
+	status_t ReplaceInt32(const char *name, int32_t anInt32);
 	status_t ReplaceInt32(const char *name, int32_t index, int32_t anInt32);
+	status_t ReplaceUInt32(const char *name, uint32_t aUInt32);
+	status_t ReplaceUInt32(const char *name, int32_t index, uint32_t aUInt32);
 	status_t ReplaceInt64(const char *name, int64_t anInt64);
 	status_t ReplaceInt64(const char *name, int32_t index, int64_t anInt64);
 	status_t ReplaceFloat(const char *name, float aFloat);

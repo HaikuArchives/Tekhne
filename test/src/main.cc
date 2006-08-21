@@ -47,7 +47,7 @@ using namespace tekhne;
 class VTestApplication : public VApplication {
 private:
 public:
-	VTestApplication() : VApplication("app/v-test-app") {
+	VTestApplication() : VApplication("app/x-test-app") {
 		// send pulse every half a second, we quit on the first one
 		SetPulseRate(900*V_MILLISECOND);
 	}

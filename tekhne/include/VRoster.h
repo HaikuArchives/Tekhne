@@ -41,13 +41,13 @@ private:
 public:
 
 //	void AddToRecentDocuments(const entry_ref *document, const char *appSig = 0) const;
-	void GetRecentDocuments(VMessage *refList, int32_t maxCount, const char *ofType = 0,
-							const char *openedByAppSig = 0) const;
-	void GetRecentDocuments(VMessage *refList, int32_t maxCount, const char *ofTypeList[] = 0,
-							int32_t ofTypeListCount = 0, const char *openedByAppSig = 0) const;
+//	void GetRecentDocuments(VMessage *refList, int32_t maxCount, const char *ofType = 0,
+//							const char *openedByAppSig = 0) const;
+//	void GetRecentDocuments(VMessage *refList, int32_t maxCount, const char *ofTypeList[] = 0,
+//							int32_t ofTypeListCount = 0, const char *openedByAppSig = 0) const;
 
 //	void AddToRecentFolders(const entry_ref *folder, const char *appSig = 0) const;
-	void GetRecentFolders(VMessage *refList, int32_t maxCount, const char *openedByAppSig = 0) const;
+//	void GetRecentFolders(VMessage *refList, int32_t maxCount, const char *openedByAppSig = 0) const;
 
 	status_t Broadcast(VMessage *message) const;
 	status_t Broadcast(VMessage *message, VMessenger reply_to) const;
@@ -63,11 +63,11 @@ public:
 	void GetAppList(VList *teams) const;
 	void GetAppList(const char *signature, VList *teams) const;
 
-	void GetRecentApps(VMessage *refList, int32_t maxCount) const;
+//	void GetRecentApps(VMessage *refList, int32_t maxCount) const;
 
-	status_t Launch(const char *type, VMessage *message = 0, team_t *team = 0) const;
-	status_t Launch(const char *type, VList *messages, team_t *team = 0) const;
-	status_t Launch(const char *type, int argc, char **argv, team_t *team = 0) const;
+//	status_t Launch(const char *type, VMessage *message = 0, team_t *team = 0) const;
+//	status_t Launch(const char *type, VList *messages, team_t *team = 0) const;
+//	status_t Launch(const char *type, int argc, char **argv, team_t *team = 0) const;
 //	status_t Launch(const entry_ref *file, const BMessage *message = 0, team_t *team = 0) const;
 //	status_t Launch(const entry_ref *file, const BList *messages, team_t *team = 0) const;
 //	status_t Launch(const entry_ref *file, int argc, const char * const char *argv,

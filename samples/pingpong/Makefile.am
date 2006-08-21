@@ -11,7 +11,7 @@ AM_CXXFLAGS =\
 	-g
 
 
-bin_PROGRAMS = ping pong ping.debug pong.debug
+bin_PROGRAMS = ping pong
 
 ping_SOURCES = ping.cc pingpong.h
 
@@ -22,16 +22,6 @@ ping_LDFLAGS = \
 ping_LDADD = \
 	-ltekhne
 
-ping_debug_SOURCES = ping.cc pingpong.h
-
-ping_debug_LDFLAGS = \
-	-pthread\
-	-static\
-	-L../../tekhne/src
-
-ping_debug_LDADD = \
-	-ltekhne
-
 pong_SOURCES = pong.cc pingpong.h
 
 pong_LDFLAGS = \
@@ -40,14 +30,3 @@ pong_LDFLAGS = \
 
 pong_LDADD = \
 	-ltekhne
-
-pong_debug_SOURCES = pong.cc pingpong.h
-
-pong_debug_LDFLAGS = \
-	-pthread\
-	-static\
-	-L../../tekhne/src
-
-pong_debug_LDADD = \
-	-ltekhne
-

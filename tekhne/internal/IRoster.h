@@ -25,6 +25,8 @@
 #ifndef _IROSTER_H
 #define _IROSTER_H
 
+#include <stdint.h>
+
 namespace tekhne {
 
 const int32_t V_ROSTER_REGISTER = 3000;

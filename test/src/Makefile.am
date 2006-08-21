@@ -28,8 +28,7 @@ test_SOURCES = \
 
 test_LDFLAGS = \
 	-pthread\
-	 -L../../tekhne/src
+	-L../../tekhne/src
 
 test_LDADD = \
-	 -ltekhne -lcppunit
-
+	-ltekhne -lcppunit

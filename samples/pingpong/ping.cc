@@ -33,9 +33,9 @@ class ping : public VApplication {
 private:
 	VMessenger *mgr;
 public:
-	ping() : VApplication("app/v-sample-ping") {}
+	ping() : VApplication("app/x-sample-ping") {}
 	void ReadyToRun(void) {
-		mgr = new VMessenger("app/v-sample-pong");
+		mgr = new VMessenger("app/x-sample-pong");
 	}
 
 	void MessageReceived(VMessage *msg) {
@@ -49,7 +49,8 @@ public:
 };
 
 int main (int argc, char *argv[]) {
-	
+	tekhne::print_debug_messages = true;
+
 	ping *p = new ping();
 	p->Run();
 	
