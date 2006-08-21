@@ -232,9 +232,8 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 
 namespace tekhne {
 	VDictionary socketDictionary;
-}
 
-void tekhne::deleteSocketForSignature(const char *signature) {
+void deleteSocketForSignature(const char *signature) {
 	VString sig(signature);
 	int32_t *sock = static_cast<int32_t*>(socketDictionary.RemoveItem(sig));
 	if (sock) {
@@ -243,7 +242,7 @@ void tekhne::deleteSocketForSignature(const char *signature) {
 		free(sock);
 	}
 }
-void tekhne::deleteSocket(int32_t socket) {
+void deleteSocket(int32_t socket) {
 	VList items;
 	socketDictionary.Items(items);
 	VListIterator iter(items);
@@ -259,7 +258,7 @@ void tekhne::deleteSocket(int32_t socket) {
 	}
 }
 
-void tekhne::addSocketForSignature(const char *signature, int32_t sock) {
+void addSocketForSignature(const char *signature, int32_t sock) {
 	VString sig(signature);
 	if (!socketDictionary.FindItem(sig)) {
 		int32_t *sock_item = static_cast<int32_t*>(malloc(sizeof(int32_t)));
@@ -267,7 +266,7 @@ void tekhne::addSocketForSignature(const char *signature, int32_t sock) {
 		socketDictionary.AddItem(sig, sock_item);
 	}
 }
-int32_t tekhne::getSocketForSignature(const char *signature) {
+int32_t getSocketForSignature(const char *signature) {
 	VString sig(signature);
 	int32_t *sock = static_cast<int32_t*>(socketDictionary.FindItem(sig));
 	if (sock) {
@@ -291,7 +290,32 @@ int32_t tekhne::getSocketForSignature(const char *signature) {
 	return -1;
 }
 
-status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply, VHandler *replyHandler) {
+
+bool readyToWriteSocket(int32_t socket) {
+	fd_set write_fd_set;
+	FD_ZERO (&write_fd_set);
+	FD_SET (socket, &write_fd_set);
+	if (print_debug_messages) cout << "checking to see if we are ready to write: " << socket << endl;
+	if (select (FD_SETSIZE, 0, &write_fd_set, 0, 0) < 0) {
+		return false;
+	}
+	if (print_debug_messages) cout << "OK\n";
+	return true;
+}
+
+bool readyToReadSocket(int32_t socket) {
+	fd_set read_fd_set;
+	FD_ZERO (&read_fd_set);
+	FD_SET (socket, &read_fd_set);
+	if (print_debug_messages) cout << "checking to see if we are ready to read: " << socket << endl;
+	if (select (FD_SETSIZE, &read_fd_set, 0, 0, 0) < 0) {
+		return false;
+	}
+	if (print_debug_messages) cout << "OK\n";
+	return true;
+}
+
+status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply, VHandler *replyHandler) {
 	status_t err = V_ERROR;
 	if (!message) return err;
 
@@ -309,6 +333,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 	if (_socket < 0) {
 		return err;
 	} else {
+		readyToWriteSocket(_socket);
 		int32_t e = write (_socket, buf, len);
 		if (print_debug_messages) cout << "Sent: "<< e << " on " << _socket << endl;
 		if (e < 0) {
@@ -318,6 +343,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 			if (_socket < 0) {
 				return err;
 			} else {
+				readyToWriteSocket(_socket);
 				e = write (_socket, buf, len);
 				if (print_debug_messages) cout << "2nd Sent: "<< e << " on " << _socket << endl;
 				if (e < 0) {
@@ -329,6 +355,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 					int32_t sent = e;
 					len -= e;
 					while (len > 0 && e > 0) {
+						readyToWriteSocket(_socket);
 						e = write (_socket, (char *)buf+sent, len);
 						if (e > 0) {
 							sent += e;
@@ -342,6 +369,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 			int32_t sent = e;
 			len -= e;
 			while (len > 0 && e > 0) {
+				readyToWriteSocket(_socket);
 				e = write (_socket, (char *)buf+sent, len);
 				if (e > 0) {
 					sent += e;
@@ -351,7 +379,7 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 		if (err == V_OK && message->_isSourceWaiting) {
 			void *buf = malloc(4096);
 			/* Data arriving on an already-connected socket. */
-			if (print_debug_messages) cout << "trying to read on: " << _socket << endl;
+			readyToReadSocket(_socket);
 			int32_t len = read (_socket, buf, 4096);
 			if (print_debug_messages) cout << "read: "<< len << endl;
 			if (len > 0) {
@@ -376,3 +404,5 @@ status_t tekhne::SendToRemoteHost(const char *signature, VMessage *message, VMes
 	}
 	return err;
 }
+
+} // namespace tekhne

@@ -42,30 +42,12 @@ namespace tekhne {
 
 bool print_debug_messages = false;
 
-class ReplyHandler : public VLooper {
-	// this handler is used to get replies to send back to originating app
-	const char *_signature;
-public:
-	ReplyHandler(const char *sig) : VLooper("app reply handler"), _signature(sig) {}
-	void MessageReceived(VMessage *msg) {
-		VString replySignature;
-		msg->FindString("_replySignature", &replySignature);
-		if (replySignature.Length( )) {
-			msg->AddString("_replySignature", _signature);
-			msg->_isSourceWaiting = false;
-			msg->_isSourceRemote = true;
-			SendToRemoteHost(replySignature.String(), msg, 0, 0);
-		}
-	}
-};
-
 class msg_thread {
 private:
 	bool _done;
 	int32_t _socket;
 	pthread_attr_t _attr;
 	pthread_t _thread;
-	ReplyHandler *_replyHandler;
 	static void* loop(void *t) {
 		tekhne::msg_thread *th = static_cast<tekhne::msg_thread *>(t);
 		void *buf = malloc(4096);
@@ -100,7 +82,6 @@ private:
 						FD_SET (new_socket, &active_fd_set);
 					} else {
 						/* Data arriving on an already-connected socket. */
-						if (print_debug_messages) cout << "reading on: " << i << endl;
 						int32_t len = read(i, buf, 4096);
 						if (print_debug_messages) cout << "read: " << len << endl;
 						if (len > 0) {
@@ -114,7 +95,7 @@ private:
 							msg.FindString( "_replySignature", &replySig);
 							addSocketForSignature(replySig.String(), i);
 							// now we can post it
-							v_app->PostMessage(&msg, 0, th->_replyHandler);
+							v_app->PostMessage(&msg);
 						} else {
 							deleteSocket(i);
 							FD_CLR (i, &active_fd_set);
@@ -129,9 +110,6 @@ private:
 	}
 public:
 	msg_thread(int32_t s, const char *sig) : _done(false), _socket(s) {
-		// start the app message reply Handler
-		_replyHandler = new ReplyHandler(sig);
-		_replyHandler->Run();
 		pthread_attr_init(&_attr);
 		pthread_create(&_thread, &_attr, loop, this);
 		pthread_detach(_thread);
