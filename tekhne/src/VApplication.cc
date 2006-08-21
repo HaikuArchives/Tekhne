@@ -59,49 +59,55 @@ private:
 
 		while (!th->_done) {
 			read_fd_set = active_fd_set;
-			if (select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0) {
-				perror ("select");
-				v_app->Quit();
-				return 0;
-			}
-			for (int i = 0; i < FD_SETSIZE; ++i) {
-				if (FD_ISSET (i, &read_fd_set)) {
-					if (i == th->_socket) {
-						/* Connection request on original socket. */
-						int new_socket;
-						size = sizeof (clientname);
-						new_socket = accept (th->_socket, (struct sockaddr *) &clientname, &size);
-						if (new_socket < 0) {
-							perror ("accept");
-							v_app->Quit();
-							return 0;
-						}
-						if (print_debug_messages) printf ("Server: connect from host %s, port %hd.\n",
-							inet_ntoa (clientname.sin_addr),
-							ntohs (clientname.sin_port));
-						FD_SET (new_socket, &active_fd_set);
-					} else {
-						/* Data arriving on an already-connected socket. */
-						int32_t len = read(i, buf, 4096);
-						if (print_debug_messages) cout << "read: " << len << endl;
-						if (len > 0) {
-							VMemoryIO mio(buf, len);
-							VMessage msg;
-							msg.Unflatten(&mio);
-							if (print_debug_messages) msg.PrintToStream();
-							// we don't want to create new sockets in SendToRemoteHost so add
-							// this one if it isn't already in the socketDictionary
-							VString replySig;
-							msg.FindString( "_replySignature", &replySig);
-							addSocketForSignature(replySig.String(), i);
-							// now we can post it
-							v_app->PostMessage(&msg);
+			int32_t result = select (FD_SETSIZE, &read_fd_set, 0, 0, 0);
+			if (result < 0) {
+				if (errno != EINTR) {
+					perror ("select");
+					v_app->Quit();
+					return 0;
+				}
+			} else if (result > 0) {
+				for (int i = 0; i < FD_SETSIZE; ++i) {
+					if (FD_ISSET (i, &read_fd_set)) {
+						if (i == th->_socket) {
+							/* Connection request on original socket. */
+							int new_socket;
+							size = sizeof (clientname);
+							new_socket = accept (th->_socket, (struct sockaddr *) &clientname, &size);
+							if (new_socket < 0) {
+								perror ("accept");
+								v_app->Quit();
+								return 0;
+							}
+							if (print_debug_messages) printf ("Server: connect from host %s, port %hd.\n",
+								inet_ntoa (clientname.sin_addr),
+								ntohs (clientname.sin_port));
+							FD_SET (new_socket, &active_fd_set);
 						} else {
-							deleteSocket(i);
-							FD_CLR (i, &active_fd_set);
+							/* Data arriving on an already-connected socket. */
+							int32_t len = read(i, buf, 4096);
+							if (print_debug_messages) cout << "read: " << len << endl;
+							if (len > 0) {
+								VMemoryIO mio(buf, len);
+								VMessage msg;
+								msg.Unflatten(&mio);
+								if (print_debug_messages) msg.PrintToStream();
+								// we don't want to create new sockets in SendToRemoteHost so add
+								// this one if it isn't already in the socketDictionary
+								VString replySig;
+								msg.FindString( "_replySignature", &replySig);
+								addSocketForSignature(replySig.String(), i);
+								// now we can post it
+								v_app->PostMessage(&msg);
+							} else {
+								deleteSocket(i);
+								FD_CLR (i, &active_fd_set);
+							}
 						}
 					}
 				}
+			} else {
+				if (print_debug_messages) cout << "select timed out\n";
 			}
 		}
 		free(buf);

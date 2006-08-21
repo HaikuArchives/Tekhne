@@ -296,7 +296,7 @@ bool readyToWriteSocket(int32_t socket) {
 	FD_ZERO (&write_fd_set);
 	FD_SET (socket, &write_fd_set);
 	if (print_debug_messages) cout << "checking to see if we are ready to write: " << socket << endl;
-	if (select (FD_SETSIZE, 0, &write_fd_set, 0, 0) < 0) {
+	if (select (socket+1, 0, &write_fd_set, 0, 0) < 0) {
 		return false;
 	}
 	if (print_debug_messages) cout << "OK\n";
@@ -308,7 +308,7 @@ bool readyToReadSocket(int32_t socket) {
 	FD_ZERO (&read_fd_set);
 	FD_SET (socket, &read_fd_set);
 	if (print_debug_messages) cout << "checking to see if we are ready to read: " << socket << endl;
-	if (select (FD_SETSIZE, &read_fd_set, 0, 0, 0) < 0) {
+	if (select (socket+1, &read_fd_set, 0, 0, 0) < 0) {
 		return false;
 	}
 	if (print_debug_messages) cout << "OK\n";
