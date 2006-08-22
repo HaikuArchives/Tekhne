@@ -42,6 +42,8 @@ namespace tekhne {
 
 bool print_debug_messages = false;
 
+fd_set active_fd_set;
+
 class msg_thread {
 private:
 	bool _done;
@@ -53,12 +55,13 @@ private:
 		void *buf = malloc(4096);
 		struct sockaddr_in clientname;
 		size_t size;
-		fd_set active_fd_set, read_fd_set;
+		fd_set read_fd_set;
 		FD_ZERO (&active_fd_set);
 		FD_SET (th->_socket, &active_fd_set);
 
 		while (!th->_done) {
 			read_fd_set = active_fd_set;
+			// struct timeval tv = {1,0};
 			int32_t result = select (FD_SETSIZE, &read_fd_set, 0, 0, 0);
 			if (result < 0) {
 				if (errno != EINTR) {
@@ -101,7 +104,6 @@ private:
 								v_app->PostMessage(&msg);
 							} else {
 								deleteSocket(i);
-								FD_CLR (i, &active_fd_set);
 							}
 						}
 					}

@@ -231,27 +231,32 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 }
 
 namespace tekhne {
-	VDictionary socketDictionary;
+
+VDictionary socketDictionary;
+
+extern fd_set active_fd_set;
 
 void deleteSocketForSignature(const char *signature) {
 	VString sig(signature);
 	int32_t *sock = static_cast<int32_t*>(socketDictionary.RemoveItem(sig));
 	if (sock) {
-		if (print_debug_messages) cout << "closing socket: " << *sock << endl;
+		if (print_debug_messages) cout << "deleting socket: " << *sock << " for " << signature << endl;
 		close(*sock);
+		FD_CLR (*sock, &active_fd_set);
 		free(sock);
 	}
 }
-void deleteSocket(int32_t socket) {
+void deleteSocket(int32_t sock) {
 	VList items;
 	socketDictionary.Items(items);
 	VListIterator iter(items);
 	while (iter.HasNext()) {
 		int32_t *s = static_cast<int32_t*>(iter.Next());
-		if (*s == socket) {
+		if (*s == sock) {
+			if (print_debug_messages) cout << "deleting socket: " << sock << endl;
 			socketDictionary.RemoveItem(s);
-			if (print_debug_messages) cout << "closing socket: " << socket << endl;
-			close(socket);
+			close(sock);
+			FD_CLR (sock, &active_fd_set);
 			free(s);
 			break;
 		}
@@ -261,15 +266,19 @@ void deleteSocket(int32_t socket) {
 void addSocketForSignature(const char *signature, int32_t sock) {
 	VString sig(signature);
 	if (!socketDictionary.FindItem(sig)) {
+		if (print_debug_messages) cout << "adding socket: " << sock << " for " << signature << endl;
 		int32_t *sock_item = static_cast<int32_t*>(malloc(sizeof(int32_t)));
 		*sock_item = sock;
 		socketDictionary.AddItem(sig, sock_item);
+		// we don't need this here because it is already set
+		//FD_SET (sock, &active_fd_set);
 	}
 }
 int32_t getSocketForSignature(const char *signature) {
 	VString sig(signature);
 	int32_t *sock = static_cast<int32_t*>(socketDictionary.FindItem(sig));
 	if (sock) {
+		if (print_debug_messages) cout << "socket: " << *sock << " for " << signature << endl;
 		return *sock;
 	} else {
 		int32_t _socket = socket(PF_LOCAL, SOCK_STREAM, 0);
@@ -315,6 +324,8 @@ bool readyToReadSocket(int32_t socket) {
 	return true;
 }
 
+#include <sys/timex.h>
+
 status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply, VHandler *replyHandler) {
 	status_t err = V_ERROR;
 	if (!message) return err;
@@ -333,7 +344,7 @@ status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *re
 	if (_socket < 0) {
 		return err;
 	} else {
-		readyToWriteSocket(_socket);
+		//readyToWriteSocket(_socket);
 		int32_t e = write (_socket, buf, len);
 		if (print_debug_messages) cout << "Sent: "<< e << " on " << _socket << endl;
 		if (e < 0) {
@@ -343,7 +354,7 @@ status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *re
 			if (_socket < 0) {
 				return err;
 			} else {
-				readyToWriteSocket(_socket);
+				//readyToWriteSocket(_socket);
 				e = write (_socket, buf, len);
 				if (print_debug_messages) cout << "2nd Sent: "<< e << " on " << _socket << endl;
 				if (e < 0) {
@@ -355,7 +366,7 @@ status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *re
 					int32_t sent = e;
 					len -= e;
 					while (len > 0 && e > 0) {
-						readyToWriteSocket(_socket);
+						//readyToWriteSocket(_socket);
 						e = write (_socket, (char *)buf+sent, len);
 						if (e > 0) {
 							sent += e;
@@ -369,7 +380,7 @@ status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *re
 			int32_t sent = e;
 			len -= e;
 			while (len > 0 && e > 0) {
-				readyToWriteSocket(_socket);
+				//readyToWriteSocket(_socket);
 				e = write (_socket, (char *)buf+sent, len);
 				if (e > 0) {
 					sent += e;
@@ -379,7 +390,7 @@ status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *re
 		if (err == V_OK && message->_isSourceWaiting) {
 			void *buf = malloc(4096);
 			/* Data arriving on an already-connected socket. */
-			readyToReadSocket(_socket);
+			//readyToReadSocket(_socket);
 			int32_t len = read (_socket, buf, 4096);
 			if (print_debug_messages) cout << "read: "<< len << endl;
 			if (len > 0) {
