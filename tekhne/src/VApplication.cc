@@ -29,6 +29,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <arpa/inet.h>
 
 using namespace tekhne;
@@ -104,11 +105,34 @@ private:
 								v_app->PostMessage(&msg);
 							} else {
 								deleteSocket(i);
+								close(i);
+								FD_CLR(i, &active_fd_set);
 							}
 						}
 					}
 				}
 			} else {
+				// if we time out try a non-blocking read on each active socket just in case we opened one before a select
+/*				for (int i = 0; i < FD_SETSIZE; ++i) {
+					if (FD_ISSET (i, &active_fd_set)) {
+						int32_t flags;
+						fcntl(i, F_GETFL, O_NONBLOCK);
+						flags |= O_NONBLOCK;
+						fcntl (i, F_SETFL, flags);
+						int32_t len = read(i, buf, 4096);
+						flags &= ~O_NONBLOCK;
+						fcntl (i, F_SETFL, flags);
+						if (len > 0) {
+							if (print_debug_messages) cout << "read: " << len << endl;
+							VMemoryIO mio(buf, len);
+							VMessage msg;
+							msg.Unflatten(&mio);
+							if (print_debug_messages) msg.PrintToStream();
+							// now we can post it
+							v_app->PostMessage(&msg);
+						}
+					}
+				}				*/
 				if (print_debug_messages) cout << "select timed out\n";
 			}
 		}
