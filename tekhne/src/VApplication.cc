@@ -56,12 +56,10 @@ private:
 		void *buf = malloc(4096);
 		struct sockaddr_in clientname;
 		size_t size;
-		fd_set read_fd_set;
-		FD_ZERO (&active_fd_set);
 		FD_SET (th->_socket, &active_fd_set);
 
 		while (!th->_done) {
-			read_fd_set = active_fd_set;
+			fd_set read_fd_set = active_fd_set;
 			// struct timeval tv = {1,0};
 			int32_t result = select (FD_SETSIZE, &read_fd_set, 0, 0, 0);
 			if (result < 0) {
@@ -90,12 +88,11 @@ private:
 						} else {
 							/* Data arriving on an already-connected socket. */
 							int32_t len = read(i, buf, 4096);
-							if (print_debug_messages) cout << "read: " << len << endl;
 							if (len > 0) {
 								VMemoryIO mio(buf, len);
 								VMessage msg;
 								msg.Unflatten(&mio);
-								if (print_debug_messages) msg.PrintToStream();
+								if (print_debug_messages) { cout << __FILE__ << " " << __LINE__ << ": "; msg.PrintToStream(); }
 								// we don't want to create new sockets in SendToRemoteHost so add
 								// this one if it isn't already in the socketDictionary
 								VString replySig;
@@ -111,28 +108,8 @@ private:
 						}
 					}
 				}
-			} else {
-				// if we time out try a non-blocking read on each active socket just in case we opened one before a select
-/*				for (int i = 0; i < FD_SETSIZE; ++i) {
-					if (FD_ISSET (i, &active_fd_set)) {
-						int32_t flags;
-						fcntl(i, F_GETFL, O_NONBLOCK);
-						flags |= O_NONBLOCK;
-						fcntl (i, F_SETFL, flags);
-						int32_t len = read(i, buf, 4096);
-						flags &= ~O_NONBLOCK;
-						fcntl (i, F_SETFL, flags);
-						if (len > 0) {
-							if (print_debug_messages) cout << "read: " << len << endl;
-							VMemoryIO mio(buf, len);
-							VMessage msg;
-							msg.Unflatten(&mio);
-							if (print_debug_messages) msg.PrintToStream();
-							// now we can post it
-							v_app->PostMessage(&msg);
-						}
-					}
-				}				*/
+			}
+			else {
 				if (print_debug_messages) cout << "select timed out\n";
 			}
 		}
@@ -183,6 +160,7 @@ VApplication::VApplication(const char *signature) :
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
+	FD_ZERO (&active_fd_set);
 	setup_termination_handler();
 	_main_thread = pthread_self();
 	v_app = this;
@@ -202,6 +180,7 @@ VApplication::VApplication(const char *signature, status_t *error) :
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
+	FD_ZERO (&active_fd_set);
 	setup_termination_handler();
 	_main_thread = pthread_self();
 	v_app = this;
@@ -221,6 +200,7 @@ VApplication::VApplication(VMessage *archive) :
 		cout << "Exiting..." << endl;
 		exit(-1);
 	}
+	FD_ZERO (&active_fd_set);
 	setup_termination_handler();
 	_main_thread = pthread_self();
 	v_app = this;

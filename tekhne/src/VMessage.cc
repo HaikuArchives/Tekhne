@@ -1050,11 +1050,12 @@ VMessenger *VMessage::ReturnAddress(void) {
 status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout, bigtime_t replyTimeout) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
+	msg->_isReply = true;
 	if (_isSourceRemote) {
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(*message);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceRemote = true;
+		msg->_isReply = true;
 		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, reply, 0);
 		delete msg;
@@ -1073,11 +1074,11 @@ status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendT
 status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_t sendTimeout) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
+	msg->_isReply = true;
 	if (_isSourceRemote) {
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(*message);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceRemote = true;
 		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
 		delete msg;
@@ -1095,11 +1096,11 @@ status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_
 status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
+	msg->_isReply = true;
 	if (_isSourceRemote) {
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(command);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceRemote = true;
 		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, reply, 0);
 		delete msg;
@@ -1119,11 +1120,11 @@ status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 status_t VMessage::SendReply(uint32_t command, VHandler *replyHandler) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
+	msg->_isReply = true;
 	if (_isSourceRemote) {
 		VString sig = v_app->Signature();
 		VMessage *msg = new VMessage(command);
 		msg->AddString("_replySignature", sig);
-		msg->_isSourceRemote = true;
 		FindString("_replySignature", &sig);
 		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
 		delete msg;
