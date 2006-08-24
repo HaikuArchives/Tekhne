@@ -140,7 +140,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t d
 				timeout.tv_sec = now.tv_sec + 5;
 				timeout.tv_nsec = now.tv_usec * 1000;
 				while (!_replyMessage) {
-					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+					err = pthread_cond_timedwait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex, &timeout);
 				}
 				if (err != ETIMEDOUT) {
 					*reply = *_replyMessage;
@@ -182,7 +182,7 @@ status_t VMessenger::SendMessage(VMessage *message, VHandler *replyHandler, bigt
 				timeout.tv_sec = now.tv_sec + 5;
 				timeout.tv_nsec = now.tv_usec * 1000;
 				while (!_replyMessage) {
-					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+					err = pthread_cond_timedwait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex, &timeout);
 				}
 				if (err != ETIMEDOUT) {
 					replyHandler->Looper()->PostMessage(_replyMessage);
@@ -224,7 +224,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, 
 				timeout.tv_sec = now.tv_sec + 5;
 				timeout.tv_nsec = now.tv_usec * 1000;
 				while (!_replyMessage) {
-					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+					err = pthread_cond_timedwait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex, &timeout);
 				}
 				if (err != ETIMEDOUT) {
 					replyMessenger->SendMessage(_replyMessage, static_cast<VHandler*>(0));
@@ -266,7 +266,7 @@ status_t VMessenger::SendMessage(int32_t command, VMessage *reply) const {
 				timeout.tv_sec = now.tv_sec + 5;
 				timeout.tv_nsec = now.tv_usec * 1000;
 				while (!_replyMessage) {
-					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+					err = pthread_cond_timedwait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex, &timeout);
 				}
 				if (err != ETIMEDOUT) {
 					*reply = *_replyMessage;
@@ -304,7 +304,7 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 				timeout.tv_sec = now.tv_sec + 5;
 				timeout.tv_nsec = now.tv_usec * 1000;
 				while (!_replyMessage) {
-					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+					err = pthread_cond_timedwait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex, &timeout);
 				}
 				if (err != ETIMEDOUT) {
 					replyHandler->Looper()->PostMessage(_replyMessage);
