@@ -96,10 +96,28 @@ private:
 								// we don't want to create new sockets in SendToRemoteHost so add
 								// this one if it isn't already in the socketDictionary
 								VString replySig;
+								int32_t msgr_id = 0;
 								msg.FindString( "_replySignature", &replySig);
 								addSocketForSignature(replySig.String(), i);
 								// now we can post it
-								v_app->PostMessage(&msg);
+								if (msg.FindInt32( "_replyMessenger", &msgr_id) == V_OK) {
+									// We still REALLY need to fix the asynchronous messages They need
+									// to come here rather than the end of SendToRemoteHost
+									VMessenger *msgr = findMessenger(msgr_id);
+									if (msgr) {
+										VLooper *looper;
+										msgr->Target(&looper);
+										if (looper) {
+											looper->PostMessage(&msg);
+										} else {
+											v_app->PostMessage(&msg);
+										}
+									} else {
+										v_app->PostMessage(&msg);
+									}
+								} else {
+									v_app->PostMessage(&msg);
+								}
 							} else {
 								deleteSocket(i);
 								close(i);

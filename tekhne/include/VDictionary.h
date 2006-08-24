@@ -48,6 +48,19 @@ public:
 	void Keys(VList &keyList);
 };
 
+class VInteger : public VHashable {
+private:
+	int32_t value;
+public:
+	VInteger(int32_t i) : value(i) {}
+	VInteger(VInteger &i) : value(i.value) {}
+	virtual ~VInteger() {}
+
+	uint32_t hash(void) { return value; }
+};
+
+extern const VInteger zero;
+
 }
 
 #endif /* _VDICTIONARY_H */

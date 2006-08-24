@@ -36,16 +36,18 @@ using namespace tekhne;
 
 VMessenger::VMessenger(const VHandler *handler, const VLooper *looper, status_t *error) :
 	_handler(const_cast<VHandler *>(handler)), _looper(const_cast<VLooper *>(looper)),
-	_localTarget(true), _isValid(true), _signature(0) {
+	_localTarget(true), _isValid(true), _signature(0), _id(getMextMessengerId()) {
 	if (error) *error = V_OK;
 	if (!_handler || !_looper) {
 		_isValid = false;
 		if (error) *error = V_BAD_VALUE;
 	}
+	if (_isValid) registerMessenger(this, _id);
 }
 
 VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
-	_handler(0), _looper(0), _localTarget(false), _isValid(true), _signature(signature) {
+	_handler(0), _looper(0), _localTarget(false), _isValid(true),
+	_signature(signature), _id(getMextMessengerId()) {
 	if (error) *error = V_OK;
 	if (_signature.Length() == 0) {
 		if (error) *error = V_BAD_VALUE;
@@ -59,10 +61,12 @@ VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 			_localTarget = true;
 		}
 	}
+	if (_isValid) registerMessenger(this, _id);
 }
 
 VMessenger::VMessenger(const VMessenger &messenger) :
-	_handler(0), _looper(0), _localTarget(true), _isValid(true), _signature(0) {
+	_handler(0), _looper(0), _localTarget(true), _isValid(true),
+	_signature(0), _id(getMextMessengerId()) {
 	if (messenger._isValid) {
 		_handler = messenger._handler;
 		_looper = messenger._looper;
@@ -71,14 +75,16 @@ VMessenger::VMessenger(const VMessenger &messenger) :
 	} else {
 		_isValid = false;
 	}
+	if (_isValid) registerMessenger(this, _id);
 }
 
-VMessenger::VMessenger(void) {
-	_handler = 0;
-	_looper = 0;
+VMessenger::VMessenger(void) : _handler(0), _looper(0), _localTarget(true),
+	_isValid(false), _signature(0), _id(getMextMessengerId())  {
+	if (_isValid) registerMessenger(this, _id);
 }
 
 VMessenger::~VMessenger() {
+	unregisterMessenger(_id);
 }
 
 bool VMessenger::IsValid(void) const {
@@ -112,6 +118,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t d
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
+			message->AddInt32("_originatingMessenger", _id);
 			err = SendToRemoteHost(_signature.String(), message, reply);
 		}
 	}
@@ -129,6 +136,7 @@ status_t VMessenger::SendMessage(VMessage *message, VHandler *replyHandler, bigt
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
+			message->AddInt32("_originatingMessenger", _id);
 			err = SendToRemoteHost(_signature.String(), message, 0, replyHandler);
 		}
 	}
@@ -146,6 +154,7 @@ status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, 
 			}
 		} else {
 			message->AddString("_replySignature", v_app->Signature());
+			message->AddInt32("_originatingMessenger", _id);
 			err = SendToRemoteHost(_signature.String(), message, 0, replyMessenger->_handler);
 		}
 	}
@@ -166,6 +175,7 @@ status_t VMessenger::SendMessage(int32_t command, VMessage *reply) const {
 		} else {
 			VMessage msg(command);
 			msg.AddString("_replySignature", v_app->Signature());
+			msg.AddInt32("_originatingMessenger", _id);
 			err = SendToRemoteHost(_signature.String(), &msg, reply, 0);
 			// need to read reply
 		}
@@ -183,6 +193,7 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 		} else {
 			VMessage msg(command);
 			msg.AddString("_replySignature", v_app->Signature());
+			msg.AddInt32("_originatingMessenger", _id);
 			err = SendToRemoteHost(_signature.String(), &msg, 0, replyHandler);
 		}
 	}
@@ -232,9 +243,35 @@ bool VMessenger::operator ==(const VMessenger& v) const {
 
 namespace tekhne {
 
+VDictionary messengerDictionary;
+
+void registerMessenger(VMessenger *msgr, int32_t id) {
+	VInteger i(id);
+	messengerDictionary.AddItem(i, msgr);
+}
+
+VMessenger *unregisterMessenger(int32_t id) {
+	VInteger i(id);
+	return static_cast<VMessenger*>(messengerDictionary.RemoveItem(i));
+}
+
+VMessenger *findMessenger(int32_t id) {
+	VInteger i(id);
+	return static_cast<VMessenger*>(messengerDictionary.FindItem(i));
+}
+
 VDictionary socketDictionary;
 
 extern fd_set active_fd_set;
+static int32_t messenger_id = 0;
+VLocker messenger_id_lock;
+
+int32_t getMextMessengerId(void) {
+	VAutoLock l(messenger_id_lock);
+	int32_t id = messenger_id;
+	messenger_id++;
+	return id;
+}
 
 void deleteSocketForSignature(const char *signature) {
 	VString sig(signature);

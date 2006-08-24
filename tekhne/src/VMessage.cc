@@ -1056,6 +1056,10 @@ status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendT
 		msg->_isReply = true;
 		msg->AddString("_replySignature", sig);
 		FindString("_replySignature", &sig);
+		int32_t msgr_id = 0;
+		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+			msg->AddInt32("_replyMessenger", msgr_id);
+		}
 		err = SendToRemoteHost(sig.String(), msg, reply, 0);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {
@@ -1080,6 +1084,10 @@ status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_
 		msg->_isReply = true;
 		msg->AddString("_replySignature", sig);
 		FindString("_replySignature", &sig);
+		int32_t msgr_id = 0;
+		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+			msg->AddInt32("_replyMessenger", msgr_id);
+		}
 		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {
@@ -1103,6 +1111,10 @@ status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 		msg->_isReply = true;
 		msg->AddString("_replySignature", sig);
 		FindString("_replySignature", &sig);
+		int32_t msgr_id = 0;
+		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+			msg->AddInt32("_replyMessenger", msgr_id);
+		}
 		err = SendToRemoteHost(sig.String(), msg, reply, 0);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {
@@ -1128,6 +1140,10 @@ status_t VMessage::SendReply(uint32_t command, VHandler *replyHandler) {
 		msg->_isReply = true;
 		msg->AddString("_replySignature", sig);
 		FindString("_replySignature", &sig);
+		int32_t msgr_id = 0;
+		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+			msg->AddInt32("_replyMessenger", msgr_id);
+		}
 		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
 		delete msg;
 	} else if (_replyHandler && _replyHandler->Looper()) {

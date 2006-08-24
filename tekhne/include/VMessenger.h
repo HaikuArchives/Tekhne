@@ -44,6 +44,8 @@ private:
 	bool _localTarget;
 	bool _isValid;
 	VString _signature;
+	// part of our return address
+	int32_t _id;
 
 public:
 	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);

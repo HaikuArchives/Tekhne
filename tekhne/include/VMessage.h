@@ -62,7 +62,7 @@ private:
 	// the messenger return address,created from the _handler and It's VLooper?
 	VMessenger *_returnAddress;
 
-	public:
+public:
 	int32_t what;
 
 	VMessage(uint32_t command);

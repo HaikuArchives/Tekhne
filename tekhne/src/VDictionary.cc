@@ -112,3 +112,5 @@ void VDictionary::Items(VList &itemList) {
 		}
 	}
 }
+
+const VInteger zero(0);

@@ -28,6 +28,10 @@
 namespace tekhne {
 
 // don't use these they are mine need to move them to internal
+extern int32_t getMextMessengerId(void);
+extern void registerMessenger(VMessenger *msgr, int32_t id);
+extern VMessenger *unregisterMessenger(int32_t id);
+extern VMessenger *findMessenger(int32_t id);
 extern void deleteSocketForSignature(const char *signature);
 extern void deleteSocket(int32_t socket);
 extern void addSocketForSignature(const char *signature, int32_t sock);
