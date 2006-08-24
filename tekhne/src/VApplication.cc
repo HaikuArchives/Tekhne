@@ -90,34 +90,31 @@ private:
 							int32_t len = read(i, buf, 4096);
 							if (len > 0) {
 								VMemoryIO mio(buf, len);
-								VMessage msg;
-								msg.Unflatten(&mio);
-								if (print_debug_messages) { cout << __FILE__ << " " << __LINE__ << ": "; msg.PrintToStream(); }
+								VMessage *msg = new VMessage();
+								msg->Unflatten(&mio);
+								if (print_debug_messages) { cout << __FILE__ << " " << __LINE__ << ": "; msg->PrintToStream(); }
 								// we don't want to create new sockets in SendToRemoteHost so add
 								// this one if it isn't already in the socketDictionary
 								VString replySig;
 								int32_t msgr_id = 0;
-								msg.FindString( "_replySignature", &replySig);
+								msg->FindString( "_replySignature", &replySig);
 								addSocketForSignature(replySig.String(), i);
 								// now we can post it
-								if (msg.FindInt32( "_replyMessenger", &msgr_id) == V_OK) {
+								if (msg->FindInt32( "_replyMessenger", &msgr_id) == V_OK) {
 									// We still REALLY need to fix the asynchronous messages They need
 									// to come here rather than the end of SendToRemoteHost
 									VMessenger *msgr = findMessenger(msgr_id);
 									if (msgr) {
-										VLooper *looper;
-										msgr->Target(&looper);
-										if (looper) {
-											looper->PostMessage(&msg);
-										} else {
-											v_app->PostMessage(&msg);
+										if (!msgr->set_reply_message(msg)) {
+											v_app->PostMessage(msg);
 										}
 									} else {
-										v_app->PostMessage(&msg);
+										v_app->PostMessage(msg);
 									}
 								} else {
-									v_app->PostMessage(&msg);
+									v_app->PostMessage(msg);
 								}
+								delete msg;
 							} else {
 								deleteSocket(i);
 								close(i);

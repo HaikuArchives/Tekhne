@@ -29,6 +29,7 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -38,16 +39,20 @@ VMessenger::VMessenger(const VHandler *handler, const VLooper *looper, status_t 
 	_handler(const_cast<VHandler *>(handler)), _looper(const_cast<VLooper *>(looper)),
 	_localTarget(true), _isValid(true), _signature(0), _id(getMextMessengerId()) {
 	if (error) *error = V_OK;
+	setup_reply_mutex();
 	if (!_handler || !_looper) {
 		_isValid = false;
 		if (error) *error = V_BAD_VALUE;
 	}
-	if (_isValid) registerMessenger(this, _id);
+	if (_isValid) {
+		registerMessenger(this, _id);
+	}
 }
 
 VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 	_handler(0), _looper(0), _localTarget(false), _isValid(true),
 	_signature(signature), _id(getMextMessengerId()) {
+	setup_reply_mutex();
 	if (error) *error = V_OK;
 	if (_signature.Length() == 0) {
 		if (error) *error = V_BAD_VALUE;
@@ -67,6 +72,7 @@ VMessenger::VMessenger(const char *signature, team_t team, status_t *error) :
 VMessenger::VMessenger(const VMessenger &messenger) :
 	_handler(0), _looper(0), _localTarget(true), _isValid(true),
 	_signature(0), _id(getMextMessengerId()) {
+	setup_reply_mutex();
 	if (messenger._isValid) {
 		_handler = messenger._handler;
 		_looper = messenger._looper;
@@ -80,11 +86,14 @@ VMessenger::VMessenger(const VMessenger &messenger) :
 
 VMessenger::VMessenger(void) : _handler(0), _looper(0), _localTarget(true),
 	_isValid(false), _signature(0), _id(getMextMessengerId())  {
+	setup_reply_mutex();
 	if (_isValid) registerMessenger(this, _id);
 }
 
 VMessenger::~VMessenger() {
-	unregisterMessenger(_id);
+	pthread_mutex_destroy(&_reply_mutex);
+	pthread_cond_destroy(&_reply_cond);
+  	unregisterMessenger(_id);
 }
 
 bool VMessenger::IsValid(void) const {
@@ -108,18 +117,40 @@ status_t VMessenger::LockTargetWithTimeout(bigtime_t timeout) const {
 status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t deliveryTimeout, bigtime_t replyTimeout) const {
 	status_t err = V_ERROR;
 	if (_isValid) {
+		if (reply) message->_isSourceWaiting = true;
+		else  message->_isSourceWaiting = false;
 		if (_localTarget) {
 			err = _looper->LockWithTimeout(deliveryTimeout);
 			if (err == V_OK) {
 				message->_replyMessage = reply;
-				message->_isSourceWaiting = true;
 				err = _looper->PostMessage(message);
 				_looper->Unlock();
 			}
 		} else {
+			if (reply) const_cast<VMessenger*>(this)->_isWaiting = true;
+			else  const_cast<VMessenger*>(this)->_isWaiting = false;
 			message->AddString("_replySignature", v_app->Signature());
 			message->AddInt32("_originatingMessenger", _id);
-			err = SendToRemoteHost(_signature.String(), message, reply);
+			err = SendToRemoteHost(_signature.String(), message);
+			if (err == V_OK && reply) {
+				struct timeval now;
+				struct timespec timeout;
+				pthread_mutex_lock(&const_cast<VMessenger*>(this)->_reply_mutex);
+				gettimeofday(&now, 0);
+				timeout.tv_sec = now.tv_sec + 5;
+				timeout.tv_nsec = now.tv_usec * 1000;
+				while (!_replyMessage) {
+					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+				}
+				if (err != ETIMEDOUT) {
+					*reply = *_replyMessage;
+					delete _replyMessage;
+					const_cast<VMessenger*>(this)->_replyMessage = 0;
+				}
+				/* operate on x and y */
+				pthread_mutex_unlock(&const_cast<VMessenger*>(this)->_reply_mutex);
+			}
+			const_cast<VMessenger*>(this)->_isWaiting = false;
 		}
 	}
 	return err;
@@ -128,16 +159,40 @@ status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t d
 status_t VMessenger::SendMessage(VMessage *message, VHandler *replyHandler, bigtime_t deliveryTimeout) const {
 	status_t err = V_ERROR;
 	if (_isValid) {
+		if (replyHandler) message->_isSourceWaiting = true;
+		else  message->_isSourceWaiting = false;
 		if (_localTarget) {
 			err = _looper->LockWithTimeout(deliveryTimeout);
 			if (err == V_OK) {
+				message->_replyHandler = replyHandler;
 				err = _looper->PostMessage(message, _handler, replyHandler);
 				_looper->Unlock();
 			}
 		} else {
+			if (replyHandler) const_cast<VMessenger*>(this)->_isWaiting = true;
+			else const_cast<VMessenger*>(this)->_isWaiting = false;
 			message->AddString("_replySignature", v_app->Signature());
 			message->AddInt32("_originatingMessenger", _id);
-			err = SendToRemoteHost(_signature.String(), message, 0, replyHandler);
+			err = SendToRemoteHost(_signature.String(), message);
+			if (err == V_OK && replyHandler) {
+				struct timeval now;
+				struct timespec timeout;
+				pthread_mutex_lock(&const_cast<VMessenger*>(this)->_reply_mutex);
+				gettimeofday(&now, 0);
+				timeout.tv_sec = now.tv_sec + 5;
+				timeout.tv_nsec = now.tv_usec * 1000;
+				while (!_replyMessage) {
+					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+				}
+				if (err != ETIMEDOUT) {
+					replyHandler->Looper()->PostMessage(_replyMessage);
+					delete _replyMessage;
+					const_cast<VMessenger*>(this)->_replyMessage = 0;
+				}
+				/* operate on x and y */
+				pthread_mutex_unlock(&const_cast<VMessenger*>(this)->_reply_mutex);
+			}
+			const_cast<VMessenger*>(this)->_isWaiting = false;
 		}
 	}
 	return err;
@@ -146,16 +201,40 @@ status_t VMessenger::SendMessage(VMessage *message, VHandler *replyHandler, bigt
 status_t VMessenger::SendMessage(VMessage *message, VMessenger *replyMessenger, bigtime_t deliveryTimeout) const {
 	status_t err = V_ERROR;
 	if (_isValid) {
+		if (replyMessenger) message->_isSourceWaiting = true;
+		else  message->_isSourceWaiting = false;
 		if (_localTarget) {
 			err = _looper->LockWithTimeout(deliveryTimeout);
 			if (err == V_OK) {
+				if (replyMessenger) message->_replyHandler = replyMessenger->Target(0);
 				err = _looper->PostMessage(message, _handler, replyMessenger->_handler);
 				_looper->Unlock();
 			}
 		} else {
+			if (replyMessenger) const_cast<VMessenger*>(this)->_isWaiting = true;
+			else const_cast<VMessenger*>(this)->_isWaiting = false;
 			message->AddString("_replySignature", v_app->Signature());
 			message->AddInt32("_originatingMessenger", _id);
-			err = SendToRemoteHost(_signature.String(), message, 0, replyMessenger->_handler);
+			err = SendToRemoteHost(_signature.String(), message);
+			if (err == V_OK && replyMessenger) {
+				struct timeval now;
+				struct timespec timeout;
+				pthread_mutex_lock(&const_cast<VMessenger*>(this)->_reply_mutex);
+				gettimeofday(&now, 0);
+				timeout.tv_sec = now.tv_sec + 5;
+				timeout.tv_nsec = now.tv_usec * 1000;
+				while (!_replyMessage) {
+					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+				}
+				if (err != ETIMEDOUT) {
+					replyMessenger->SendMessage(_replyMessage, static_cast<VHandler*>(0));
+					delete _replyMessage;
+					const_cast<VMessenger*>(this)->_replyMessage = 0;
+				}
+				/* operate on x and y */
+				pthread_mutex_unlock(&const_cast<VMessenger*>(this)->_reply_mutex);
+			}
+			const_cast<VMessenger*>(this)->_isWaiting = false;
 		}
 	}
 	return err;
@@ -174,10 +253,30 @@ status_t VMessenger::SendMessage(int32_t command, VMessage *reply) const {
 			_looper->Unlock();
 		} else {
 			VMessage msg(command);
+			if (reply) const_cast<VMessenger*>(this)->_isWaiting = msg._isSourceWaiting = true;
+			else const_cast<VMessenger*>(this)->_isWaiting = msg._isSourceWaiting = false;
 			msg.AddString("_replySignature", v_app->Signature());
 			msg.AddInt32("_originatingMessenger", _id);
-			err = SendToRemoteHost(_signature.String(), &msg, reply, 0);
-			// need to read reply
+			err = SendToRemoteHost(_signature.String(), &msg);
+			if (err == V_OK && reply) {
+				struct timeval now;
+				struct timespec timeout;
+				pthread_mutex_lock(&const_cast<VMessenger*>(this)->_reply_mutex);
+				gettimeofday(&now, 0);
+				timeout.tv_sec = now.tv_sec + 5;
+				timeout.tv_nsec = now.tv_usec * 1000;
+				while (!_replyMessage) {
+					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+				}
+				if (err != ETIMEDOUT) {
+					*reply = *_replyMessage;
+					delete _replyMessage;
+					const_cast<VMessenger*>(this)->_replyMessage = 0;
+				}
+				/* operate on x and y */
+				pthread_mutex_unlock(&const_cast<VMessenger*>(this)->_reply_mutex);
+			}
+			const_cast<VMessenger*>(this)->_isWaiting = false;
 		}
 	}
 	return err;
@@ -192,9 +291,30 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 			_looper->Unlock();
 		} else {
 			VMessage msg(command);
+			if (replyHandler) const_cast<VMessenger*>(this)->_isWaiting = msg._isSourceWaiting = true;
+			else const_cast<VMessenger*>(this)->_isWaiting = msg._isSourceWaiting = false;
 			msg.AddString("_replySignature", v_app->Signature());
 			msg.AddInt32("_originatingMessenger", _id);
-			err = SendToRemoteHost(_signature.String(), &msg, 0, replyHandler);
+			err = SendToRemoteHost(_signature.String(), &msg);
+			if (err == V_OK && replyHandler) {
+				struct timeval now;
+				struct timespec timeout;
+				pthread_mutex_lock(&const_cast<VMessenger*>(this)->_reply_mutex);
+				gettimeofday(&now, 0);
+				timeout.tv_sec = now.tv_sec + 5;
+				timeout.tv_nsec = now.tv_usec * 1000;
+				while (!_replyMessage) {
+					err = pthread_cond_wait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex);
+				}
+				if (err != ETIMEDOUT) {
+					replyHandler->Looper()->PostMessage(_replyMessage);
+					delete _replyMessage;
+					const_cast<VMessenger*>(this)->_replyMessage = 0;
+				}
+				/* operate on x and y */
+				pthread_mutex_unlock(&const_cast<VMessenger*>(this)->_reply_mutex);
+			}
+			const_cast<VMessenger*>(this)->_isWaiting = false;
 		}
 	}
 	return err;
@@ -202,7 +322,7 @@ status_t VMessenger::SendMessage(int32_t command, VHandler *replyHandler) const 
 
 VHandler *VMessenger::Target(VLooper **looper) const {
 	if (_isValid && _localTarget) {
-		*looper = _looper;
+		if (looper) *looper = _looper;
 		return _handler;
 	}
 	*looper = 0;
@@ -328,15 +448,13 @@ int32_t getSocketForSignature(const char *signature) {
 	return -1;
 }
 
-status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply, VHandler *replyHandler) {
+status_t SendToRemoteHost(const char *signature, VMessage *message) {
 	status_t err = V_ERROR;
 	if (!message) return err;
 
 	message->_isSourceRemote = true;
 	VMallocIO data;
 	// here we finaly determine if we need to wait
-	if (reply || replyHandler) message->_isSourceWaiting = true;
-	else message->_isSourceWaiting = false;
 	message->Flatten(&data);
 	int32_t len = data.Length();
 	const void *buf = data.Buffer();
@@ -385,26 +503,6 @@ status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *re
 					sent += e;
 				}
 			}
-		}
-		if (err == V_OK && message->_isSourceWaiting) {
-			void *buf = malloc(4096);
-			/* Data arriving on an already-connected socket. */
-			int32_t len = read (_socket, buf, 4096);
-			if (len > 0) {
-				VMemoryIO mio(buf, len);
-				VMessage msg;
-				msg.Unflatten(&mio);
-				if (print_debug_messages) { cout << __FILE__ << " " << __LINE__ << ": "; msg.PrintToStream(); }
-				// short circuit here to Process message directly if source is waiting
-				if (reply) {
-					*reply = msg;
-				} else if (replyHandler) {
-					replyHandler->MessageReceived(&msg);
-				} else {
-					v_app->PostMessage(&msg);
-				}
-			}
-			free(buf);
 		}
 	}
 	return err;

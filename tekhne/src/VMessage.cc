@@ -1050,26 +1050,30 @@ VMessenger *VMessage::ReturnAddress(void) {
 status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendTimeout, bigtime_t replyTimeout) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
-	if (_isSourceRemote) {
-		VString sig = v_app->Signature();
-		VMessage *msg = new VMessage(*message);
-		msg->_isReply = true;
-		msg->AddString("_replySignature", sig);
-		FindString("_replySignature", &sig);
-		int32_t msgr_id = 0;
-		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
-			msg->AddInt32("_replyMessenger", msgr_id);
-		}
-		err = SendToRemoteHost(sig.String(), msg, reply, 0);
-		delete msg;
-	} else if (_replyHandler && _replyHandler->Looper()) {
-		if (_replyHandler->LockLooperWithTimeout(sendTimeout) == V_OK) {
-			message->_isReply = true;
-			message->_replyMessage = reply;
-			// becasue we are delivering the message ourselves we don't need the replyTimeout?
-			_replyHandler->MessageReceived(message);
-			_replyHandler->UnlockLooper( );
-			err = V_OK;
+	if (reply) {
+		// create a messenger and send it that way
+	} else {
+		if (_isSourceRemote) {
+			VString sig = v_app->Signature();
+			VMessage *msg = new VMessage(*message);
+			msg->_isReply = true;
+			msg->AddString("_replySignature", sig);
+			FindString("_replySignature", &sig);
+			int32_t msgr_id = 0;
+			if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+				msg->AddInt32("_replyMessenger", msgr_id);
+			}
+			err = SendToRemoteHost(sig.String(), msg);
+			delete msg;
+		} else if (_replyHandler && _replyHandler->Looper()) {
+			if (_replyHandler->LockLooperWithTimeout(sendTimeout) == V_OK) {
+				message->_isReply = true;
+				message->_replyMessage = reply;
+				// becasue we are delivering the message ourselves we don't need the replyTimeout?
+				_replyHandler->MessageReceived(message);
+				_replyHandler->UnlockLooper( );
+				err = V_OK;
+			}
 		}
 	}
 	return err;
@@ -1078,25 +1082,29 @@ status_t VMessage::SendReply(VMessage *message, VMessage *reply, bigtime_t sendT
 status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_t sendTimeout) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
-	if (_isSourceRemote) {
-		VString sig = v_app->Signature();
-		VMessage *msg = new VMessage(*message);
-		msg->_isReply = true;
-		msg->AddString("_replySignature", sig);
-		FindString("_replySignature", &sig);
-		int32_t msgr_id = 0;
-		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
-			msg->AddInt32("_replyMessenger", msgr_id);
-		}
-		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
-		delete msg;
-	} else if (_replyHandler && _replyHandler->Looper()) {
-		if (_replyHandler->LockLooperWithTimeout(sendTimeout) == V_OK) {
-			message->_isReply = true;
-			message->_replyHandler = replyHandler;
-			err = _replyHandler->Looper()->PostMessage(message);
-			_replyHandler->UnlockLooper( );
-			err = V_OK;
+	if (replyHandler) {
+		// create a messenger and send it that way
+	} else {
+		if (_isSourceRemote) {
+			VString sig = v_app->Signature();
+			VMessage *msg = new VMessage(*message);
+			msg->_isReply = true;
+			msg->AddString("_replySignature", sig);
+			FindString("_replySignature", &sig);
+			int32_t msgr_id = 0;
+			if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+				msg->AddInt32("_replyMessenger", msgr_id);
+			}
+			err = SendToRemoteHost(sig.String(), msg);
+			delete msg;
+		} else if (_replyHandler && _replyHandler->Looper()) {
+			if (_replyHandler->LockLooperWithTimeout(sendTimeout) == V_OK) {
+				message->_isReply = true;
+				message->_replyHandler = replyHandler;
+				err = _replyHandler->Looper()->PostMessage(message);
+				_replyHandler->UnlockLooper( );
+				err = V_OK;
+			}
 		}
 	}
 	return err;
@@ -1105,27 +1113,31 @@ status_t VMessage::SendReply(VMessage *message, VHandler *replyHandler, bigtime_
 status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
-	if (_isSourceRemote) {
-		VString sig = v_app->Signature();
-		VMessage *msg = new VMessage(command);
-		msg->_isReply = true;
-		msg->AddString("_replySignature", sig);
-		FindString("_replySignature", &sig);
-		int32_t msgr_id = 0;
-		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
-			msg->AddInt32("_replyMessenger", msgr_id);
-		}
-		err = SendToRemoteHost(sig.String(), msg, reply, 0);
-		delete msg;
-	} else if (_replyHandler && _replyHandler->Looper()) {
-		if (_replyHandler->LockLooper( ) == V_OK) {
+	if (reply) {
+		// create a messenger and send it that way
+	} else {
+		if (_isSourceRemote) {
+			VString sig = v_app->Signature();
 			VMessage *msg = new VMessage(command);
 			msg->_isReply = true;
-			msg->_replyMessage = reply;
-			_replyHandler->MessageReceived(msg);
+			msg->AddString("_replySignature", sig);
+			FindString("_replySignature", &sig);
+			int32_t msgr_id = 0;
+			if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+				msg->AddInt32("_replyMessenger", msgr_id);
+			}
+			err = SendToRemoteHost(sig.String(), msg);
 			delete msg;
-			_replyHandler->UnlockLooper( );
-			err = V_OK;
+		} else if (_replyHandler && _replyHandler->Looper()) {
+			if (_replyHandler->LockLooper( ) == V_OK) {
+				VMessage *msg = new VMessage(command);
+				msg->_isReply = true;
+				msg->_replyMessage = reply;
+				_replyHandler->MessageReceived(msg);
+				delete msg;
+				_replyHandler->UnlockLooper( );
+				err = V_OK;
+			}
 		}
 	}
 	return err;
@@ -1134,27 +1146,31 @@ status_t VMessage::SendReply(uint32_t command, VMessage *reply) {
 status_t VMessage::SendReply(uint32_t command, VHandler *replyHandler) {
 	status_t err = V_ERROR;
 	_isSourceWaiting = false;
-	if (_isSourceRemote) {
-		VString sig = v_app->Signature();
-		VMessage *msg = new VMessage(command);
-		msg->_isReply = true;
-		msg->AddString("_replySignature", sig);
-		FindString("_replySignature", &sig);
-		int32_t msgr_id = 0;
-		if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
-			msg->AddInt32("_replyMessenger", msgr_id);
-		}
-		err = SendToRemoteHost(sig.String(), msg, 0, replyHandler);
-		delete msg;
-	} else if (_replyHandler && _replyHandler->Looper()) {
-		if (_replyHandler->LockLooper( )) {
+	if (replyHandler) {
+		// create a messenger and send it that way
+	} else {
+		if (_isSourceRemote) {
+			VString sig = v_app->Signature();
 			VMessage *msg = new VMessage(command);
 			msg->_isReply = true;
-			msg->_replyHandler = replyHandler;
-			err = _replyHandler->Looper()->PostMessage(msg);
+			msg->AddString("_replySignature", sig);
+			FindString("_replySignature", &sig);
+			int32_t msgr_id = 0;
+			if (FindInt32("_originatingMessenger", &msgr_id) == V_OK) {
+				msg->AddInt32("_replyMessenger", msgr_id);
+			}
+			err = SendToRemoteHost(sig.String(), msg);
 			delete msg;
-			_replyHandler->UnlockLooper( );
-			err = V_OK;
+		} else if (_replyHandler && _replyHandler->Looper()) {
+			if (_replyHandler->LockLooper( )) {
+				VMessage *msg = new VMessage(command);
+				msg->_isReply = true;
+				msg->_replyHandler = replyHandler;
+				err = _replyHandler->Looper()->PostMessage(msg);
+				delete msg;
+				_replyHandler->UnlockLooper( );
+				err = V_OK;
+			}
 		}
 	}
 	return err;

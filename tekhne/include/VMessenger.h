@@ -29,12 +29,12 @@
 #include "StandardDefs.h"
 #include "VErrors.h"
 #include "VString.h"
+#include "VMessage.h"
 
 namespace tekhne {
 
 class VHandler;
 class VLooper;
-class VMessage;
 class VMallocIO;
 
 class VMessenger {
@@ -46,6 +46,27 @@ private:
 	VString _signature;
 	// part of our return address
 	int32_t _id;
+	// this is stuff needed for getting a reply back to SendMessage
+	pthread_mutex_t _reply_mutex;
+	pthread_cond_t _reply_cond;
+	VMessage *_replyMessage;
+	bool _isWaiting;
+
+	inline void setup_reply_mutex(void) {
+		pthread_mutex_init(&_reply_mutex, 0);
+		pthread_cond_init(&_reply_cond, 0);
+	}
+	inline bool set_reply_message(VMessage *msg) {
+		if (_isWaiting) {
+			pthread_mutex_lock(&_reply_mutex);
+			_replyMessage = new VMessage(*msg);
+			_isWaiting = false;
+			pthread_cond_broadcast(&_reply_cond);
+			pthread_mutex_unlock(&_reply_mutex);
+			return true;
+		}
+		return false;
+	}
 
 public:
 	VMessenger(const VHandler *handler, const VLooper *looper = 0, status_t *error = 0);
@@ -72,6 +93,8 @@ public:
 
 	VMessenger &operator =(const VMessenger& v);
 	bool operator ==(const VMessenger& v) const;
+
+	friend class msg_thread;
 };
 
 }

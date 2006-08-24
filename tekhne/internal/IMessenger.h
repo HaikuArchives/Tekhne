@@ -36,7 +36,7 @@ extern void deleteSocketForSignature(const char *signature);
 extern void deleteSocket(int32_t socket);
 extern void addSocketForSignature(const char *signature, int32_t sock);
 extern int32_t getSocketForSignature(const char *signature);
-extern status_t SendToRemoteHost(const char *signature, VMessage *message, VMessage *reply=0, VHandler *replyHandler=0);
+extern status_t SendToRemoteHost(const char *signature, VMessage *message);
 }
 
 #endif /* _IMESSENGER_H */

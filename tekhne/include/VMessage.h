@@ -218,10 +218,7 @@ public:
 	friend class VLooper;
 	friend void *looper_thread_func(void *l);
 	friend class VMessenger;
-	//friend class msg_thread;
-	//friend class VApplication;
-	friend class ReplyHandler;
-	friend status_t SendToRemoteHost(const char *, VMessage *, VMessage *, VHandler *);
+	friend status_t SendToRemoteHost(const char *, VMessage *);
 };
 
 } // namespace tekhne
