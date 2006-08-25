@@ -8,8 +8,7 @@ AM_CXXFLAGS =\
 	-D__STDC_LIMIT_MACROS\
 	-D_REENTRANT\
 	-pthread\
-	-Wall\
-	-g
+	-Wall
 
 lib_LTLIBRARIES = libtekhne.la
 

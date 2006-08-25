@@ -101,6 +101,20 @@ const int32_t V_MESSAGE_NOT_UNDERSTOOD = 1065;
 const int32_t V_REQUEST_LAUNCHED = 1066;
 const int32_t V_REQUEST_QUIT = 1067;
 
+// VMessageFilter constants
+const int32_t V_ANY_DELIVERY = 1068;
+const int32_t V_PROGRAMMED_DELIVERY = 1069;
+const int32_t V_DROPPED_DELIVERY = 1070;
+
+const int32_t V_ANY_SOURCE = 1071;
+const int32_t V_LOCAL_SOURCE = 1072;
+const int32_t V_REMOTE_SOURCE = 1073;
+
+const int32_t V_ANY_COMMAND = 0;
+
+const int32_t V_DISPATCH_MESSAGE = 1074;
+const int32_t V_SKIP_MESSAGE = 1075;
+
 const int32_t V_MILLISECOND = 1000;
 const int32_t V_SECOND = 1000*V_MILLISECOND;
 const int32_t V_MINUTE = 60*V_SECOND;

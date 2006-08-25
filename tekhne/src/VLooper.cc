@@ -53,16 +53,20 @@ VLooper *VLooper::LooperForThread(thread_t thread) {
 }
 
 void VLooper::AddCommonFilter(VMessageFilter *filter) {
-	if (!_filterList) {
-		_filterList = new VList();
-		_filterList->AddItem(filter);
-	} else if(!_filterList->HasItem(filter)) {
-		_filterList->AddItem(filter);
+	if (filter) {
+		if (!_filterList) {
+			_filterList = new VList();
+			_filterList->AddItem(filter);
+		} else if(!_filterList->HasItem(filter)) {
+			_filterList->AddItem(filter);
+		}
+		filter->_looper = this;
 	}
 }
 
 bool VLooper::RemoveCommonFilter(VMessageFilter *filter) {
-	if (_filterList) {
+	if (filter && _filterList) {
+		filter->_looper = 0;
 		return _filterList->RemoveItem(filter);
 	}
 	return false;
@@ -113,14 +117,17 @@ void VLooper::DispatchMessage(VMessage *message, VHandler *target) {
 	if (target) {
 		// 1) Specific handler
 		target->MessageReceived(_currentMessage);
+		message->_wasDelivered = true;
 	} else {
 		VHandler *ph = PreferredHandler();
 		if (ph) {
 			// 2) preferred handler
 			ph->MessageReceived(_currentMessage);
+			message->_wasDelivered = true;
 		} else {
 			// 3) send to ourself
 			this->MessageReceived(_currentMessage);
+			message->_wasDelivered = true;
 		}
 	}
 }
@@ -201,10 +208,28 @@ void *tekhne::looper_thread_func(void *l) {
 					if (looper->QuitRequested()) {
 						looper->_quitting = true;
 					}
+					looper->_currentMessage->_wasDelivered = true;
 					break;
 				default:
-					// goes to the preferred handler if there is one and then ourselves
-					looper->DispatchMessage(looper->_currentMessage, looper->_currentMessage->_handler);
+					if (looper->_filterList) {
+						VListIterator iter(*looper->_filterList);
+						while (iter.HasNext()) {
+							VMessageFilter *filter = static_cast<VMessageFilter*>(iter.Next());
+							if (filter) {
+								if (filter->_filter) {
+									// this probably isn't correct
+									if (filter->_filter(looper->_currentMessage, &looper->_currentMessage->_handler, filter) == V_DISPATCH_MESSAGE) {
+										// goes to the preferred handler if there is one and then ourselves
+										looper->DispatchMessage(looper->_currentMessage, looper->_currentMessage->_handler);
+									}
+								}
+							}
+						}
+					}
+					// if all else fails deliver it to ourselves
+					if (!looper->_currentMessage->WasDelivered()) {
+						looper->DispatchMessage(looper->_currentMessage, looper->_currentMessage->_handler);
+					}
 			}
 			delete looper->_currentMessage;
 			looper->_currentMessage = 0;
