@@ -217,9 +217,13 @@ void *tekhne::looper_thread_func(void *l) {
 							VMessageFilter *filter = static_cast<VMessageFilter*>(iter.Next());
 							if (filter) {
 								if (filter->_filter) {
-									// this probably isn't correct
+									// this probably isn't correct, we probably need to index through all handlers and deliver to all of them?
 									if (filter->_filter(looper->_currentMessage, &looper->_currentMessage->_handler, filter) == V_DISPATCH_MESSAGE) {
 										// goes to the preferred handler if there is one and then ourselves
+										looper->DispatchMessage(looper->_currentMessage, looper->_currentMessage->_handler);
+									}
+								} else {
+									if (filter->Filter( looper->_currentMessage, &looper->_currentMessage->_handler) == V_DISPATCH_MESSAGE) {
 										looper->DispatchMessage(looper->_currentMessage, looper->_currentMessage->_handler);
 									}
 								}
