@@ -465,6 +465,7 @@ void VApplication::InjectStartupMessages(void) {
 	VMessage *msg = new VMessage(V_APP_ACTIVATED);
 	msg->AddBool("active", true);
 	PostMessage(msg);
+	delete msg;
 	PostMessage(V_READY_TO_RUN);
 }
 

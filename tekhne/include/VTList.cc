@@ -41,7 +41,7 @@ VTList<T>::VTList(const VTList<T>& anotherList) {
 
 template <class T>
 VTList<T>::~VTList() {
-	delete items;
+	delete [] items;
 }
 
 template <class T>

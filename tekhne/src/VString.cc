@@ -414,7 +414,7 @@ VString &VString::CopyInto(VString &destination, int32_t sourceOffset, int32_t c
 void VString::CopyInto(char *destination, int32_t sourceOffset, int32_t charCount) const {
 	assert(!bufferLocked);
 	VString s = Substring(sourceOffset, sourceOffset+charCount);
-	memmove(destination, s.buf, s.bufferLen+1);
+	memmove(destination, s.buf, s.bufferLen);
 }
 
 VString &VString::MoveInto(VString &destination, int32_t sourceOffset, int32_t charCount) {

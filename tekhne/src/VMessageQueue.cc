@@ -32,6 +32,11 @@ VMessageQueue::VMessageQueue(void) {
 }
 
 VMessageQueue::~VMessageQueue() {
+	VListIterator iter(_list);
+	while(iter.HasNext()) {
+		VMessage *msg = static_cast<VMessage*>(iter.Next());
+		delete msg;
+	}
 	sem_destroy (&_sem);
 }
 

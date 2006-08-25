@@ -124,8 +124,10 @@ public:
 	}
 
 	void *Next() {
-		if (_forward) return _items[_currentItem++];
-		return _items[_currentItem--];
+		void *p = _items[_currentItem];
+		if (_forward) _currentItem++;
+		else _currentItem--;
+		return p;
 	}
 };
 

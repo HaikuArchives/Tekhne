@@ -45,6 +45,7 @@ VLooper::VLooper(VMessage *archive) :
 }
 
 VLooper::~VLooper() {
+	delete _mq;
 }
 
 VLooper *VLooper::LooperForThread(thread_t thread) {
