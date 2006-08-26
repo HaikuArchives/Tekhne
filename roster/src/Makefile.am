@@ -22,4 +22,4 @@ roster_LDFLAGS = \
 	 -L../../tekhne/src
 
 roster_LDADD = \
-	 -ltekhne
+	 -ltekhne -lfreetype

@@ -2,7 +2,8 @@
 
 INCLUDES =\
 	 -I../include\
-	 -I../internal
+	 -I../internal\
+	 -I/usr/include/freetype2
 
 AM_CXXFLAGS =\
 	-D__STDC_LIMIT_MACROS\
@@ -17,6 +18,7 @@ libtekhne_la_SOURCES = \
 	VArchivable.cc\
 	VBlockCache.cc\
 	VDictionary.cc\
+	VFont.cc\
 	VHandler.cc\
 	VList.cc\
 	VLocker.cc\

@@ -20,7 +20,7 @@ ping_LDFLAGS = \
 	-L../../tekhne/src
 
 ping_LDADD = \
-	-ltekhne
+	-ltekhne -lfreetype
 
 pong_SOURCES = pong.cc pingpong.h
 
@@ -29,4 +29,4 @@ pong_LDFLAGS = \
 	-L../../tekhne/src
 
 pong_LDADD = \
-	-ltekhne
+	-ltekhne -lfreetype

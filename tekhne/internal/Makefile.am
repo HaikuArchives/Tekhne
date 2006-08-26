@@ -3,7 +3,8 @@
 libtekhne_internaldir = $(pkginternaldir)
 
 libtekhne_internal_DATA = \
-	IRoster.h\
-	IMessenger.h
+	IFont.h\
+	IMessenger.h\
+	IRoster.h
 
 EXTRA_DIST = $(libtekhne_internal_DATA)

@@ -16,6 +16,7 @@ libtekhne_include_DATA = \
 	VDictionary.h\
 	VErrors.h\
 	VFindDirectory.h\
+	VFont.h\
 	VHandler.h\
 	VHashable.h\
 	VList.h\
