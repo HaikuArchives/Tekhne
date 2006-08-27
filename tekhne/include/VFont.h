@@ -48,15 +48,15 @@ enum font_metric_mode {
 
 class unicode_block {
 public:
-	inline unicode_block();
-	inline unicode_block(uint64_t block2, uint64_t block1);
+	inline unicode_block() { fData[0] = 0; fData[1] = 0; }
+	inline unicode_block(uint64_t block2, uint64_t block1)  { fData[0] = block1; fData[1] = block2; }
 
-	inline bool Includes(const unicode_block &block) const;
-	inline unicode_block operator&(const unicode_block &block) const;
-	inline unicode_block operator|(const unicode_block &block) const;
-	inline unicode_block &operator=(const unicode_block &block);
-	inline unicode_block operator==(const unicode_block &block) const;
-	inline unicode_block operator!=(const unicode_block &block) const;
+	inline bool Includes(const unicode_block &block) const { if (fData[0] & block.fData[0]) return true; if (fData[1] & block.fData[1]) return true; return false; }
+	inline unicode_block operator &(const unicode_block &block) const { unicode_block ub(fData[1] & block.fData[1],fData[0] & block.fData[0]); return ub; }
+	inline unicode_block operator|(const unicode_block &block) const { unicode_block ub(fData[1] | block.fData[1],fData[0] | block.fData[0]); return ub; }
+	inline unicode_block &operator=(const unicode_block &block) { fData[0] = block.fData[0]; fData[1] = block.fData[1]; return *this;}
+	inline bool operator==(const unicode_block &block) const { return fData[0] == block.fData[0] && fData[1] == block.fData[1]; }
+	inline bool operator!=(const unicode_block &block) const { return fData[0] != block.fData[0] || fData[1] != block.fData[1]; }
 
 private:
 	uint64_t fData[2];

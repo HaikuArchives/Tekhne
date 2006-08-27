@@ -31,4 +31,4 @@ test_LDFLAGS = \
 	-L../../tekhne/src
 
 test_LDADD = \
-	-ltekhne -lcppunit -lfreetype
+	-ltekhne -lcppunit

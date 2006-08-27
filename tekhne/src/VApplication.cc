@@ -25,7 +25,6 @@
 
 #include "tekhne.h"
 #include "IMessenger.h"
-#include "IFont.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -186,10 +185,6 @@ VApplication::VApplication(const char *signature) :
 	v_roster = new VRoster();
 	open_server_socket();
 	InjectStartupMessages();
-	if (InitializeFonts()) {
-		cout << "Font initialization failed. Exiting...\n";
-		Quit();
-	}
 }
 
 VApplication::VApplication(const char *signature, status_t *error) :
@@ -210,10 +205,6 @@ VApplication::VApplication(const char *signature, status_t *error) :
 	v_roster = new VRoster();
 	open_server_socket();
 	InjectStartupMessages();
-	if (InitializeFonts()) {
-		cout << "Font initialization failed. Exiting...\n";
-		Quit();
-	}
 }
 
 VApplication::VApplication(VMessage *archive) :
@@ -235,10 +226,6 @@ VApplication::VApplication(VMessage *archive) :
 	v_roster = new VRoster();
 	open_server_socket();
 	InjectStartupMessages();
-	if (InitializeFonts()) {
-		cout << "Font initialization failed. Exiting...\n";
-		Quit();
-	}
 }
 
 VApplication::~VApplication() {

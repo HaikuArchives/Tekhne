@@ -27,7 +27,6 @@
 
 namespace tekhne {
 
-extern int32_t InitializeFonts(void);
 }
 
 #endif /* _IFONT_H */
