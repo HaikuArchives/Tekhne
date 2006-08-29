@@ -116,3 +116,17 @@ VPolygon& VPolygon::operator=(const VPolygon& p) {
 	}
 	return *this;
 }
+
+bool VPolygon::Contains(VPoint p) {
+	VPoint **pt = _points->Items();
+	int32_t npol = _points->CountItems();
+	bool c = false;
+	int i, j;
+	for (i = 0, j = npol-1; i < npol; j = i++) {
+		if ((((pt[i]->y<=p.y) && (p.y<pt[j]->y)) ||
+					 ((pt[j]->y<=p.y) && (p.y<pt[i]->y))) &&
+					 (p.x < (pt[j]->x - pt[i]->x) * (p.y - pt[i]->y) / (pt[j]->y - pt[i]->y) + pt[i]->x))
+			c = !c;
+	}
+	return c;
+}

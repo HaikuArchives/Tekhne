@@ -54,6 +54,12 @@ VRegion::~VRegion(){
 }
 
 bool VRegion::Contains(VPoint point) const {
+	for (int i=0;i<_rects->CountItems(); i++) {
+		VRect *r = _rects->GetItem(i);
+		if (r && r->Contains( point)) {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -67,30 +73,52 @@ bool VRegion::Intersects(VRect rect) const {
 }
 
 void VRegion::MakeEmpty(void) {
+	_rects->MakeEmpty();
 }
 
 void VRegion::OffsetBy(int32_t horizontal, int32_t vertical) {
+	for (int i=0;i<_rects->CountItems(); i++) {
+		VRect *r = _rects->GetItem(i);
+		if (r) r->OffsetBy( (float)horizontal, (float)vertical);
+	}
 }
 
 void VRegion::PrintToStream(void) const {
+	cout << "VRegion:\n";
+	for (int i=0;i<_rects->CountItems(); i++) {
+		VRect *r = _rects->GetItem(i);
+		if (r) {
+			r->PrintToStream( );
+			cout << endl;
+		}
+	}
 }
 
 VRect VRegion::RectAt(int32_t index) {
 	VRect r;
+	VRect *p = _rects->GetItem(index);
+	if (p)
+		return *p;
 	return r;
 }
 
 int32_t VRegion::CountRects(void) {
-	return 0;
+	return _rects->CountItems();
 }
 
 void VRegion::Set(VRect rect) {
+	MakeEmpty();
+	_rects->AddItem(new VRect(rect));
 }
 
 void VRegion::Include(VRect rect) {
+	_rects->AddItem(new VRect(rect));
 }
 
 void VRegion::Include(const VRegion *region) {
+	for (int i=0;i<region->_rects->CountItems(); i++) {
+		_rects->AddItem(new VRect(*region->_rects->GetItem(i)));
+	}
 }
 
 void VRegion::Exclude(VRect rect) {

@@ -75,8 +75,15 @@ void VRegionTest::tearDown() {
 }
 
 void VRegionTest::testCreate() {
-	VRegion *r = new VRegion();
-	r->PrintToStream();
-	delete r;
+	VRect r(-1, -6, 5, 3);
+	VRegion *rgn = new VRegion(r);
+	rgn->PrintToStream();
+	CPPUNIT_ASSERT( rgn->Contains(VPoint(1, 1)) );
+	CPPUNIT_ASSERT( !rgn->Contains(VPoint(10, 13)) );
+	rgn->OffsetBy(3, 5);
+	rgn->PrintToStream();
+	CPPUNIT_ASSERT( rgn->CountRects() == 1 );
+	rgn->MakeEmpty();
+	CPPUNIT_ASSERT( rgn->CountRects() == 0 );
+	delete rgn;
 }
-

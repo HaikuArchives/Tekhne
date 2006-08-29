@@ -47,6 +47,7 @@ public:
 	void MapTo(VRect source, VRect destination);
 	void PrintToStream(void) const;
 	VPolygon& operator=(const VPolygon& p);
+	bool Contains(VPoint p);
 };
 
 }
