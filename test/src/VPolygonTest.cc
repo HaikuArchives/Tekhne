@@ -53,6 +53,8 @@ void VPolygonTest::testFrame() {
 	CPPUNIT_ASSERT( r.top == -4 );
 	CPPUNIT_ASSERT( r.right == 76 );
 	CPPUNIT_ASSERT( r.bottom == 65 );
+	CPPUNIT_ASSERT( x.Contains(VPoint(8.9, 8)) );
+	CPPUNIT_ASSERT( !x.Contains(VPoint(10, 100)) );
 }
 
 void VPolygonTest::testMapTo() {
