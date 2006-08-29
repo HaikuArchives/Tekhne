@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VRegion.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,34 +23,43 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VREGION_H
+#define _VREGION_H
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
 #include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VStopWatch.h"
+#include "math.h"
+#include "VRect.h"
+#include "VTList.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VRegion {
+private:
+	VTList<VRect*> *_rects;
+public:
+	VRegion(const VRegion& region);
+	VRegion(const VRect rect);
+	VRegion(void);
+	virtual ~VRegion();
+
+	bool Contains(VPoint point) const;
+	VRect Frame(void) const;
+	bool Intersects(VRect rect) const;
+	void MakeEmpty(void);
+	void OffsetBy(int32_t horizontal, int32_t vertical);
+	void PrintToStream(void) const;
+	VRect RectAt(int32_t index);
+	int32_t CountRects(void);
+	void Set(VRect rect);
+	void Include(VRect rect);
+	void Include(const VRegion *region);
+	void Exclude(VRect rect);
+	void Exclude(const VRegion *region);
+	void IntersectWith(const VRegion *region);
+
+	VRegion& operator =(const VRegion& region);
+};
+
+}
+
+#endif /* _VREGION_H */

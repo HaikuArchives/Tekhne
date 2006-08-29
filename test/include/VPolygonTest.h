@@ -35,25 +35,41 @@
 using namespace tekhne;
 
 class VPolygonTest : public CppUnit::TestFixture {
-private:
-public:
-	static CppUnit::Test *VPolygonTest::suite() {
-		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VPolygonTest" );
-		suiteOfTests->addTest( new CppUnit::TestCaller<VPolygonTest>("testCreate",
-								&VPolygonTest::testCreate ) );
-		suiteOfTests->addTest( new CppUnit::TestCaller<VPolygonTest>("testFrame",
-							   &VPolygonTest::testFrame ) );
-		suiteOfTests->addTest( new CppUnit::TestCaller<VPolygonTest>("testMapTo",
-							   &VPolygonTest::testMapTo ) );
-		return suiteOfTests;
-	}
+	private:
+	public:
+		static CppUnit::Test *VPolygonTest::suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VPolygonTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VPolygonTest>("testCreate",
+								   &VPolygonTest::testCreate ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VPolygonTest>("testFrame",
+								   &VPolygonTest::testFrame ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VPolygonTest>("testMapTo",
+								   &VPolygonTest::testMapTo ) );
+			return suiteOfTests;
+		}
 
-	void setUp();
-	void tearDown();
+		void setUp();
+		void tearDown();
 
-	void testCreate();
-	void testFrame();
-	void testMapTo();
+		void testCreate();
+		void testFrame();
+		void testMapTo();
+};
+
+class VRegionTest : public CppUnit::TestFixture {
+	private:
+	public:
+		static CppUnit::Test *VRegionTest::suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VRegionTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VRegionTest>("testCreate",
+								   &VRegionTest::testCreate ) );
+			return suiteOfTests;
+		}
+
+		void setUp();
+		void tearDown();
+
+		void testCreate();
 };
 
 #endif /* _VPOLOYGONTEST_H */

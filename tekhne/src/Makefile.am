@@ -32,6 +32,7 @@ libtekhne_la_SOURCES = \
 	VPoint.cc\
 	VPolygon.cc\
 	VRect.cc\
+	VRegion.cc\
 	VRoster.cc\
 	VString.cc\
 	VStopWatch.cc\

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            VPolygonTest.cc
+ *            VRegion.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
  *
@@ -23,60 +23,85 @@
  *
  ****************************************************************************/
 
-#include "VPolygonTest.h"
+#include "tekhne.h"
 #include <iostream>
+#include <limits>
 
+using namespace tekhne;
 using namespace std;
 
-void VPolygonTest::setUp() {
+VRegion::VRegion(const VRegion& region) {
+	_rects = new VTList<VRect*>();
+	for (int i=0;i<region._rects->CountItems(); i++) {
+		_rects->AddItem(new VRect(*region._rects->GetItem(i)));
+	}
 }
 
-void VPolygonTest::tearDown() {
+VRegion::VRegion(const VRect rect) {
+	_rects = new VTList<VRect*>();
+	_rects->AddItem(new VRect(rect));
 }
 
-void VPolygonTest::testCreate() {
-	VPoint pts[] = {VPoint(9,8), VPoint(76,65), VPoint(-8,-4) };
-	VPolygon *p = new VPolygon(pts, 3);
-	p->PrintToStream();
-	CPPUNIT_ASSERT( p->CountPoints() == 3 );
-	VPolygon x;
-	x = *p;
-	delete p;
-	CPPUNIT_ASSERT( x.CountPoints() == 3 );
+VRegion::VRegion(void) {
+	_rects = new VTList<VRect*>();
 }
 
-void VPolygonTest::testFrame() {
-	VPoint pts[] = {VPoint(9,8), VPoint(76,65), VPoint(-8,-4) };
-	VPolygon x(pts, 3);
-	VRect r = x.Frame();
-	CPPUNIT_ASSERT( r.left == -8 );
-	CPPUNIT_ASSERT( r.top == -4 );
-	CPPUNIT_ASSERT( r.right == 76 );
-	CPPUNIT_ASSERT( r.bottom == 65 );
+VRegion::~VRegion(){
+	for (int i=0;i<_rects->CountItems(); i++) {
+		delete _rects->GetItem(i);
+	}
+	delete _rects;
 }
 
-void VPolygonTest::testMapTo() {
-	VPoint pts[] = {VPoint(9,8), VPoint(76,65), VPoint(-8,-4) };
-	VPolygon x(pts, 3);
-	VRect dest(0, 0, 30, 20);
-	VRect r = x.Frame();
-	x.MapTo(r, dest);
-	r = x.Frame();
-	CPPUNIT_ASSERT( r.left == 0 );
-	CPPUNIT_ASSERT( r.top == 0 );
-	CPPUNIT_ASSERT( r.right == 30 );
-	CPPUNIT_ASSERT( r.bottom == 20 );
+bool VRegion::Contains(VPoint point) const {
+	return false;
 }
 
-void VRegionTest::setUp() {
+VRect VRegion::Frame(void) const {
+	VRect r;
+	return r;
 }
 
-void VRegionTest::tearDown() {
+bool VRegion::Intersects(VRect rect) const {
+	return false;
 }
 
-void VRegionTest::testCreate() {
-	VRegion *r = new VRegion();
-	r->PrintToStream();
-	delete r;
+void VRegion::MakeEmpty(void) {
 }
 
+void VRegion::OffsetBy(int32_t horizontal, int32_t vertical) {
+}
+
+void VRegion::PrintToStream(void) const {
+}
+
+VRect VRegion::RectAt(int32_t index) {
+	VRect r;
+	return r;
+}
+
+int32_t VRegion::CountRects(void) {
+	return 0;
+}
+
+void VRegion::Set(VRect rect) {
+}
+
+void VRegion::Include(VRect rect) {
+}
+
+void VRegion::Include(const VRegion *region) {
+}
+
+void VRegion::Exclude(VRect rect) {
+}
+
+void VRegion::Exclude(const VRegion *region) {
+}
+
+void VRegion::IntersectWith(const VRegion *region) {
+}
+
+VRegion& VRegion::operator=(const VRegion& region) {
+	return *this;
+}
