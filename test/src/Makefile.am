@@ -20,6 +20,7 @@ test_SOURCES = \
 	VMallocIOTest.cc\
 	VMessageTest.cc\
 	VPointTest.cc\
+	VPolygonTest.cc\
 	VStringTest.cc\
 	VListTest.cc \
 	VTListTest.cc \
@@ -27,7 +28,7 @@ test_SOURCES = \
 	VRosterTest.cc
 
 test_LDFLAGS = \
-	-pthread\
+	-pthread -static\
 	-L../../tekhne/src
 
 test_LDADD = \

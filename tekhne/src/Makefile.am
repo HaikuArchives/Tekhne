@@ -30,6 +30,7 @@ libtekhne_la_SOURCES = \
 	VMessageQueue.cc\
 	VMessenger.cc\
 	VPoint.cc\
+	VPolygon.cc\
 	VRect.cc\
 	VRoster.cc\
 	VString.cc\

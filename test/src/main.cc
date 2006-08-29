@@ -30,6 +30,7 @@
 #include "VDictionaryTest.h"
 #include "VMallocIOTest.h"
 #include "VPointTest.h"
+#include "VPolygonTest.h"
 #include "ThreadTest.h"
 #include "VMessageTest.h"
 #include "VMessengerTest.h"
@@ -63,6 +64,7 @@ public:
 		runner.addTest( VDictionaryTest::suite() );
 		runner.addTest( VMallocIOTest::suite() );
 		runner.addTest( VPointTest::suite() );
+		runner.addTest( VPolygonTest::suite() );
 		runner.addTest( VRectTest::suite() );
 		runner.addTest( ThreadTest::suite() );
 		runner.addTest( VMessageTest::suite() );

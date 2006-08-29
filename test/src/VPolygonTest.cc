@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VPolygonTest.cc
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,33 +23,47 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#include "VPolygonTest.h"
+#include <iostream>
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VStopWatch.h"
+using namespace std;
 
-#endif /* _TEKHNE_H */
+void VPolygonTest::setUp() {
+}
+
+void VPolygonTest::tearDown() {
+}
+
+void VPolygonTest::testCreate() {
+	VPoint pts[] = {VPoint(9,8), VPoint(76,65), VPoint(-8,-4) };
+	VPolygon *p = new VPolygon(pts, 3);
+	p->PrintToStream();
+	CPPUNIT_ASSERT( p->CountPoints() == 3 );
+	VPolygon x;
+	x = *p;
+	delete p;
+	CPPUNIT_ASSERT( x.CountPoints() == 3 );
+}
+
+void VPolygonTest::testFrame() {
+	VPoint pts[] = {VPoint(9,8), VPoint(76,65), VPoint(-8,-4) };
+	VPolygon x(pts, 3);
+	VRect r = x.Frame();
+	CPPUNIT_ASSERT( r.left == -8 );
+	CPPUNIT_ASSERT( r.top == -4 );
+	CPPUNIT_ASSERT( r.right == 76 );
+	CPPUNIT_ASSERT( r.bottom == 65 );
+}
+
+void VPolygonTest::testMapTo() {
+	VPoint pts[] = {VPoint(9,8), VPoint(76,65), VPoint(-8,-4) };
+	VPolygon x(pts, 3);
+	VRect dest(0, 0, 30, 20);
+	VRect r = x.Frame();
+	x.MapTo(r, dest);
+	r = x.Frame();
+	CPPUNIT_ASSERT( r.left == 0 );
+	CPPUNIT_ASSERT( r.top == 0 );
+	CPPUNIT_ASSERT( r.right == 30 );
+	CPPUNIT_ASSERT( r.bottom == 20 );
+}

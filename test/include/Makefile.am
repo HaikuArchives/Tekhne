@@ -9,6 +9,7 @@ test_include_DATA = \
 	VMallocIOTest.h\
 	VMessageTest.h\
 	VPointTest.h\
+	VPolygonTest.h\
 	VStringTest.h\
 	VListTest.h \
 	VTListTest.h \

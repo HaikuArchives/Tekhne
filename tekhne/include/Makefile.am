@@ -32,6 +32,7 @@ libtekhne_include_DATA = \
 	VMime.h\
 	VNodeMonitor.h\
 	VPoint.h\
+	VPolygon.h\
 	VPositionIO.h\
 	VQuery.h\
 	VRect.h\

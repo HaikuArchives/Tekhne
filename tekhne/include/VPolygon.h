@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VPolygon.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,33 +23,32 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VPOLYGON_H
+#define _VPOLYGON_H
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
 #include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VStopWatch.h"
+#include "VRect.h"
+#include "VTList.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VPolygon {
+private:
+	VTList<VPoint*> *_points;
+public:
+	VPolygon(const VPoint *pointList, int32_t numPoints);
+	VPolygon(const VPolygon *polygon);
+	VPolygon();
+	virtual ~VPolygon();
+
+	void AddPoints(const VPoint *pointList, int32_t numPoints);
+	int32_t CountPoints(void) const;
+	VRect Frame(void) const;
+	void MapTo(VRect source, VRect destination);
+	void PrintToStream(void) const;
+	VPolygon& operator=(const VPolygon& p);
+};
+
+}
+
+#endif /* _VPOLYGON_H */
