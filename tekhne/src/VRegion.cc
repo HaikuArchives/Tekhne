@@ -64,7 +64,27 @@ bool VRegion::Contains(VPoint point) const {
 }
 
 VRect VRegion::Frame(void) const {
-	VRect r;
+	int32_t count = _rects->CountItems();
+	float left = 0;
+	float top = 0;
+	float right = -1;
+	float bottom = -1;
+	if (count > 0) {
+		VRect *p = _rects->GetItem(0);
+		left = p->left;
+		top = p->top;
+		right = p->right;
+		bottom = p->bottom;
+		for (int i=1;i<count; i++) {
+			// do calcs
+			p = _rects->GetItem(i);
+			left = min(left, p->left);
+			top = min(top, p->top);
+			right = max(right, p->right);
+			bottom = max(bottom, p->bottom);
+		}
+	}
+	VRect r(left, top, right, bottom);
 	return r;
 }
 
@@ -84,12 +104,12 @@ void VRegion::OffsetBy(int32_t horizontal, int32_t vertical) {
 }
 
 void VRegion::PrintToStream(void) const {
-	cout << "VRegion:\n";
+	cout << "VRegion:";
 	for (int i=0;i<_rects->CountItems(); i++) {
 		VRect *r = _rects->GetItem(i);
 		if (r) {
+			cout << " ";
 			r->PrintToStream( );
-			cout << endl;
 		}
 	}
 }

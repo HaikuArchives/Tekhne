@@ -2,17 +2,17 @@
  *            VPointTest.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "VPointTest.h"
@@ -30,7 +30,7 @@ using namespace std;
 
 static inline bool cf(float x, float y) {
 	float z = x-y;
-	if (z < 0) z = -z; 
+	if (z < 0) z = -z;
 	return z < 0.0001;
 }
 
@@ -107,7 +107,7 @@ void VRectTest::tearDown() {
 void VRectTest::testCreate() {
 	CPPUNIT_ASSERT (r->IsValid());
 	CPPUNIT_ASSERT(checkRectValue(*r, 5, 64, 8, 93));
-	
+
 	VRect x(5, 64, -8, 93);
 	CPPUNIT_ASSERT(checkRectValue(x, 5, 64, -8, 93));
 	CPPUNIT_ASSERT (!x.IsValid());
@@ -151,7 +151,7 @@ void VRectTest::testCreate() {
 
 	CPPUNIT_ASSERT(checkRectValue(VRect(0, 0, 12, 15).OffsetBySelf(2, 3), 2, 3, 14, 18));
 	CPPUNIT_ASSERT(checkRectValue(VRect(0, 0, 12, 15).OffsetBySelf(VPoint(2, 3)), 2, 3, 14, 18));
-	
+
 	a.Set(0, 0, 12, 15);
 	b = a.OffsetByCopy(2, -3);
 	CPPUNIT_ASSERT(a != b);
@@ -191,6 +191,12 @@ void VRectTest::testContains() {
 	CPPUNIT_ASSERT(!x.Contains(VRect(0, -4, 8, 8)));
 	CPPUNIT_ASSERT(!x.Contains(VRect(-5, 0, -4, 8)));
 	CPPUNIT_ASSERT(!x.Contains(VRect(0, -5, 8, -4)));
+
+	CPPUNIT_ASSERT(x.Intersects(VRect(0, 0, 34, 45)));
+	CPPUNIT_ASSERT(x.Intersects(VRect(-5, 0, 0, 45)));
+	CPPUNIT_ASSERT(x.Intersects(VRect(0, -3, 8, 18)));
+	CPPUNIT_ASSERT(x.Intersects(VRect(-5, -4, 2, 2)));
+	CPPUNIT_ASSERT(!x.Intersects(VRect(10, 12, 34, 56)));
 	// bool Intersects(VRect rect) const;
 }
 
@@ -210,7 +216,7 @@ void VRectTest::testSetPoint() {
 	a.Set(4, 5, 34, 76);
 	a.SetRightBottom(VPoint(-1, -23));
 	CPPUNIT_ASSERT(checkRectValue(a, 4, 5, -1, -23));
-	
+
 	CPPUNIT_ASSERT(checkPtValue(a.LeftTop(),4,5));
 	CPPUNIT_ASSERT(checkPtValue(a.LeftBottom(),4,-23));
 	CPPUNIT_ASSERT(checkPtValue(a.RightTop(),-1,5));
@@ -221,7 +227,7 @@ void VRectTest::testOperators() {
 	VRect a(4, 5, 34, 76);
 	VRect b(-2, 3, 18, 16);
 	VRect c(4, 5, 34, 76);
-	
+
 	CPPUNIT_ASSERT(a == c);
 	CPPUNIT_ASSERT(a != b);
 

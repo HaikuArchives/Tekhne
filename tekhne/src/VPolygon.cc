@@ -77,7 +77,7 @@ VRect VPolygon::Frame(void) const {
 		bottom = p->y;
 		for (int i=1;i<count; i++) {
 			// do calcs
-			VPoint *p = _points->GetItem(i);
+			p = _points->GetItem(i);
 			left = min(left, p->x);
 			top = min(top, p->y);
 			right = max(right, p->x);
@@ -102,10 +102,10 @@ void VPolygon::MapTo(VRect source, VRect destination) {
 }
 
 void VPolygon::PrintToStream(void) const {
-	cout << "VPolygon:\n";
+	cout << "VPolygon:";
 	for (int i=0;i<_points->CountItems(); i++) {
+		cout << " ";
 		_points->GetItem(i)->PrintToStream();
-		cout << endl;
 	}
 }
 

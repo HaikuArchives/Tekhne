@@ -2,17 +2,17 @@
  *            VRect.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,13 +20,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "tekhne.h"
 #include <iostream>
 
 using namespace tekhne;
+
+namespace tekhne {
+bool lineIntersect(VPoint a, VPoint b, VPoint c, VPoint d) {
+	if (a.x==b.x && a.y==b.y || c.x==d.x && c.y==d.y) return false;
+
+	// Since we know line ab is vertical and line cd is horizontal
+	if (a.x >= c.x && a.x <= d.x && a.y <= c.y && b.y >= c.y) return true;
+	return false;
+}
+}
 
 bool VRect::Contains(VPoint point) const {
 	return point.x >= left && point.x <= right &&
@@ -40,7 +50,15 @@ bool VRect::Contains(VRect rect) const {
 }
 
 bool VRect::Intersects(VRect rect) const {
-	// TODO: finish this one
+	if (lineIntersect(LeftTop(), LeftBottom(), rect.LeftTop(), rect.RightTop())) return true;
+	if (lineIntersect(RightTop(), RightBottom(), rect.LeftTop(), rect.RightTop())) return true;
+	if (lineIntersect(LeftTop(), LeftBottom(), rect.LeftBottom(), rect.RightBottom())) return true;
+	if (lineIntersect(RightTop(), RightBottom(), rect.LeftBottom(), rect.RightBottom())) return true;
+
+	if (lineIntersect(rect.LeftTop(), rect.LeftBottom(), LeftTop(), RightTop())) return true;
+	if (lineIntersect(rect.RightTop(), rect.RightBottom(), LeftTop(), RightTop())) return true;
+	if (lineIntersect(rect.LeftTop(), rect.LeftBottom(), LeftBottom(), RightBottom())) return true;
+	if (lineIntersect(rect.RightTop(), rect.RightBottom(), LeftBottom(), RightBottom())) return true;
 	return false;
 }
 
