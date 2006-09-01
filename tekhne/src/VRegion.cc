@@ -89,6 +89,10 @@ VRect VRegion::Frame(void) const {
 }
 
 bool VRegion::Intersects(VRect rect) const {
+	for (int i=0;i<_rects->CountItems(); i++) {
+		VRect *r = _rects->GetItem(i);
+		if (r && r->Intersects(rect)) return true;
+	}
 	return false;
 }
 
@@ -132,19 +136,40 @@ void VRegion::Set(VRect rect) {
 }
 
 void VRegion::Include(VRect rect) {
-	_rects->AddItem(new VRect(rect));
+	if (!Intersects(rect)) {
+		_rects->AddItem(new VRect(rect));
+	} else {
+		for (int i=0;i<_rects->CountItems(); i++) {
+			VRect *r = _rects->GetItem(i);
+			if (r) {
+				if(r->Contains(rect)) {
+					continue;
+				} else {
+					// we need to break up the rect and only include the bits we need
+
+				}
+			}
+		}
+	}
 }
 
 void VRegion::Include(const VRegion *region) {
 	for (int i=0;i<region->_rects->CountItems(); i++) {
-		_rects->AddItem(new VRect(*region->_rects->GetItem(i)));
+		Include(*region->_rects->GetItem(i));
 	}
 }
 
 void VRegion::Exclude(VRect rect) {
+	 // no need to do anythin unless it intersects
+	if (Intersects(rect)) {
+
+	}
 }
 
 void VRegion::Exclude(const VRegion *region) {
+	for (int i=0;i<region->_rects->CountItems(); i++) {
+		Exclude(*region->_rects->GetItem(i));
+	}
 }
 
 void VRegion::IntersectWith(const VRegion *region) {

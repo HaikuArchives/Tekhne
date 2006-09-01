@@ -28,16 +28,6 @@
 
 using namespace tekhne;
 
-namespace tekhne {
-bool lineIntersect(VPoint a, VPoint b, VPoint c, VPoint d) {
-	if (a.x==b.x && a.y==b.y || c.x==d.x && c.y==d.y) return false;
-
-	// Since we know line ab is vertical and line cd is horizontal
-	if (a.x >= c.x && a.x <= d.x && a.y <= c.y && b.y >= c.y) return true;
-	return false;
-}
-}
-
 bool VRect::Contains(VPoint point) const {
 	return point.x >= left && point.x <= right &&
 		point.y <= bottom && point.y >= top;
@@ -50,16 +40,7 @@ bool VRect::Contains(VRect rect) const {
 }
 
 bool VRect::Intersects(VRect rect) const {
-	if (lineIntersect(LeftTop(), LeftBottom(), rect.LeftTop(), rect.RightTop())) return true;
-	if (lineIntersect(RightTop(), RightBottom(), rect.LeftTop(), rect.RightTop())) return true;
-	if (lineIntersect(LeftTop(), LeftBottom(), rect.LeftBottom(), rect.RightBottom())) return true;
-	if (lineIntersect(RightTop(), RightBottom(), rect.LeftBottom(), rect.RightBottom())) return true;
-
-	if (lineIntersect(rect.LeftTop(), rect.LeftBottom(), LeftTop(), RightTop())) return true;
-	if (lineIntersect(rect.RightTop(), rect.RightBottom(), LeftTop(), RightTop())) return true;
-	if (lineIntersect(rect.LeftTop(), rect.LeftBottom(), LeftBottom(), RightBottom())) return true;
-	if (lineIntersect(rect.RightTop(), rect.RightBottom(), LeftBottom(), RightBottom())) return true;
-	return false;
+	return !(rect.left > right || rect.right < left || rect.top > bottom || rect.bottom < top);
 }
 
 void VRect::InsetBy(float x, float y) {
