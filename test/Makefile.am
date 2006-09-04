@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = include src
+SUBDIRS = src
 
 testdocdir = ${prefix}/doc/test
 testdoc_DATA = \

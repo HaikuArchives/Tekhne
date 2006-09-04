@@ -79,7 +79,6 @@ AC_DEFINE_UNQUOTED(PACKAGE_SOURCE_DIR, "${packagesrcdir}")
 
 AC_OUTPUT([
 Makefile
-include/Makefile
 src/Makefile
 ])
 

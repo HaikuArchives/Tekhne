@@ -14,8 +14,10 @@ libtekhne_include_DATA = \
 	VBlockCache.h\
 	VDataIO.h\
 	VDictionary.h\
+	VEntry.h\
 	VErrors.h\
 	VFindDirectory.h\
+	VFlattenable.h\
 	VFont.h\
 	VHandler.h\
 	VHashable.h\
@@ -31,6 +33,7 @@ libtekhne_include_DATA = \
 	VMessenger.h\
 	VMime.h\
 	VNodeMonitor.h\
+	VPath.h\
 	VPoint.h\
 	VPolygon.h\
 	VPositionIO.h\
@@ -38,6 +41,7 @@ libtekhne_include_DATA = \
 	VRect.h\
 	VRegion.h\
 	VRoster.h\
+	VStatable.h\
 	VStopWatch.h\
 	VString.h\
 	VTList.cc\

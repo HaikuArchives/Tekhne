@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VPathTest.cc
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,37 +23,28 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#include "VPathTest.h"
+#include <iostream>
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VStopWatch.h"
-#include "VPath.h"
-#include "VStatable.h"
-#include "VEntry.h"
+using namespace std;
 
-#endif /* _TEKHNE_H */
+void VPathTest::setUp() {
+}
+
+void VPathTest::tearDown() {
+}
+
+void VPathTest::testCreate() {
+	VPath p;
+
+	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
+	CPPUNIT_ASSERT(p.SetTo("/foo") == V_OK);
+	CPPUNIT_ASSERT(p.SetTo("/foo", "bar") == V_BAD_VALUE);
+	CPPUNIT_ASSERT(p.SetTo("/foo/a") == V_BAD_VALUE);
+	CPPUNIT_ASSERT(p.InitCheck() == V_BAD_VALUE);
+	CPPUNIT_ASSERT(p.SetTo("/usr") == V_OK);
+	CPPUNIT_ASSERT(p.SetTo("/usr/bin") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.Path(), "/usr/bin") == 0);
+	CPPUNIT_ASSERT(strcmp(p.Leaf(), "bin") == 0);
+}

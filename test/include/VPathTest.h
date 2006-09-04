@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VPathTest.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,37 +23,32 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef VPATHTEST_H_
+#define VPATHTEST_H_
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VStopWatch.h"
-#include "VPath.h"
-#include "VStatable.h"
-#include "VEntry.h"
+#include "tekhne.h"
+#include <cppunit/TestCase.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/TestCaller.h>
 
-#endif /* _TEKHNE_H */
+using namespace tekhne;
+
+class VPathTest : public CppUnit::TestFixture {
+	private:
+		VBlockCache *bc;
+	public:
+		static CppUnit::Test *VPathTest::suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VPathTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VPathTest>("testCreate",
+								   &VPathTest::testCreate ) );
+			return suiteOfTests;
+		}
+
+		void setUp();
+		void tearDown();
+
+		void testCreate();
+};
+
+
+#endif /*VPATHTEST_H_*/

@@ -143,7 +143,7 @@ void VRegion::Include(VRect rect) {
 			VRect *r = _rects->GetItem(i);
 			if (r) {
 				if(r->Contains(rect)) {
-					continue;
+					return;
 				} else {
 					// we need to break up the rect and only include the bits we need
 

@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VBlockCache.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,37 +23,27 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VFLATTENABLE_H
+#define _VFLATTENABLE_H
 
 #include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VStopWatch.h"
-#include "VPath.h"
-#include "VStatable.h"
-#include "VEntry.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VFlattenable {
+private:
+public:
+
+	virtual ~VFlattenable() {}
+
+	virtual status_t Flatten(void *buffer, ssize_t numBytes) const = 0;
+	virtual status_t Unflatten(type_code code, const void *buffer, ssize_t numBytes) = 0;
+	virtual ssize_t FlattenedSize(void) const = 0;
+	virtual bool IsFixedSize(void) const = 0;
+	virtual type_code TypeCode(void) const = 0;
+	virtual bool AllowsTypeCode(type_code code) { return code == TypeCode(); }
+};
+
+} // namespace tekhne
+
+#endif /* _VFLATTENABLE_H */

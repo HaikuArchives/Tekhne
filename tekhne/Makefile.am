@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = include internal src
+SUBDIRS = include src
 
 libtekhnedocdir = ${prefix}/doc/tekhne
 libtekhnedoc_DATA = \

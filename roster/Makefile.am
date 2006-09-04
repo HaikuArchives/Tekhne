@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = include src
+SUBDIRS = src
 
 rosterdocdir = ${prefix}/doc/roster
 rosterdoc_DATA = \
@@ -20,4 +20,3 @@ dist-hook:
 			cp -p $$specfile $(distdir); \
 		fi \
 	done
-

@@ -18,6 +18,7 @@ libtekhne_la_SOURCES = \
 	VArchivable.cc\
 	VBlockCache.cc\
 	VDictionary.cc\
+	VEntry.cc\
 	VFont.cc\
 	VHandler.cc\
 	VList.cc\
@@ -29,11 +30,13 @@ libtekhne_la_SOURCES = \
 	VMessageFilter.cc\
 	VMessageQueue.cc\
 	VMessenger.cc\
+	VPath.cc\
 	VPoint.cc\
 	VPolygon.cc\
 	VRect.cc\
 	VRegion.cc\
 	VRoster.cc\
+	VStatable.cc\
 	VString.cc\
 	VStopWatch.cc\
 	VMessageRunner.cc

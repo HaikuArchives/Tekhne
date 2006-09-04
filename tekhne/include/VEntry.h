@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VBlockCache.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,37 +23,51 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VENTRY_H
+#define _VENTRY_H
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VStopWatch.h"
-#include "VPath.h"
 #include "VStatable.h"
-#include "VEntry.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VDirectory;
+class VPath;
+
+class VEntry : public VStatable {
+private:
+public:
+	VEntry(const VDirectory *dir, const char *path, bool traverse = false);
+	VEntry(const char *path, bool traverse = false);
+	VEntry(void);
+	VEntry(const VEntry &entry);
+
+	virtual ~VEntry();
+
+	bool Exists(void) const;
+	status_t GetName(char *buffer) const;
+	status_t GetPath(VPath *path) const;
+
+	status_t GetParent(VEntry *entry) const;
+	status_t GetParent(VDirectory *dir) const;
+	virtual status_t GetStat(struct stat *st) const;
+
+	status_t InitCheck(void) const;
+
+	status_t Remove(void);
+
+	status_t Rename(const char *path, bool clobber = false);
+	status_t MoveTo(VDirectory *dir, const char *path = 0, bool clobber = false);
+
+	status_t SetTo(const char *path, bool traverse = false);
+	status_t SetTo(const VDirectory *dir, const char *path, bool traverse = false);
+	void Unset(void);
+
+	VEntry& operator=(const VEntry &entry);
+
+	bool operator==(const VEntry &entry) const;
+	bool operator!=(const VEntry &entry) const;
+};
+
+} // namespace tekhne
+
+#endif /* _VENTRY_H */
