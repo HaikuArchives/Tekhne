@@ -50,8 +50,5 @@
 #include "VPolygon.h"
 #include "VRegion.h"
 #include "VStopWatch.h"
-#include "VPath.h"
-#include "VStatable.h"
-#include "VEntry.h"
 
 #endif /* _TEKHNE_H */

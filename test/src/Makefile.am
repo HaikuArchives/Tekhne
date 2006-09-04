@@ -19,7 +19,6 @@ test_SOURCES = \
 	VDictionaryTest.cc\
 	VMallocIOTest.cc\
 	VMessageTest.cc\
-	VPathTest.cc\
 	VPointTest.cc\
 	VPolygonTest.cc\
 	VStringTest.cc\

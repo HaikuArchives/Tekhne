@@ -35,7 +35,6 @@
 #include "VMessageTest.h"
 #include "VMessengerTest.h"
 #include "VRosterTest.h"
-#include "VPathTest.h"
 
 #include "VApplication.h"
 
@@ -72,7 +71,6 @@ public:
 		runner.addTest( VMessageTest::suite() );
 		runner.addTest( VMessengerTest::suite() );
 		runner.addTest( VRosterTest::suite() );
-		runner.addTest( VPathTest::suite() );
 		runner.run();
 	}
 
