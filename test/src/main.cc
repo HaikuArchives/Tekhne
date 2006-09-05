@@ -67,6 +67,7 @@ public:
 		runner.addTest( VPolygonTest::suite() );
 		runner.addTest( VRectTest::suite() );
 		runner.addTest( VRegionTest::suite() );
+		runner.addTest( VShapeTest::suite() );
 		runner.addTest( ThreadTest::suite() );
 		runner.addTest( VMessageTest::suite() );
 		runner.addTest( VMessengerTest::suite() );

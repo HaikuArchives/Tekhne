@@ -139,10 +139,10 @@ status_t VMessenger::SendMessage(VMessage *message, VMessage *reply, bigtime_t d
 				gettimeofday(&now, 0);
 				timeout.tv_sec = now.tv_sec + 5;
 				timeout.tv_nsec = now.tv_usec * 1000;
-				while (!_replyMessage) {
+				while (!_replyMessage && !err) {
 					err = pthread_cond_timedwait(&const_cast<VMessenger*>(this)->_reply_cond, &const_cast<VMessenger*>(this)->_reply_mutex, &timeout);
 				}
-				if (err != ETIMEDOUT) {
+				if (err != ETIMEDOUT && _replyMessage) {
 					*reply = *_replyMessage;
 					delete _replyMessage;
 					const_cast<VMessenger*>(this)->_replyMessage = 0;

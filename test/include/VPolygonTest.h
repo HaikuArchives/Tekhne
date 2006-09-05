@@ -72,4 +72,20 @@ class VRegionTest : public CppUnit::TestFixture {
 		void testCreate();
 };
 
+class VShapeTest : public CppUnit::TestFixture {
+	private:
+	public:
+		static CppUnit::Test *VShapeTest::suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VShapeTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VShapeTest>("testCreate",
+								   &VShapeTest::testCreate ) );
+			return suiteOfTests;
+		}
+
+		void setUp();
+		void tearDown();
+
+		void testCreate();
+};
+
 #endif /* _VPOLOYGONTEST_H */

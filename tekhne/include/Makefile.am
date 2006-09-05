@@ -38,6 +38,7 @@ libtekhne_include_DATA = \
 	VRect.h\
 	VRegion.h\
 	VRoster.h\
+	VShape.h\
 	VStopWatch.h\
 	VString.h\
 	VTList.cc\

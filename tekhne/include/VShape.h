@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VShape.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,35 +23,42 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VSHAPE_H
+#define _VSHAPE_H
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
 #include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
 #include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VStopWatch.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VShape : VArchivable {
+private:
+	VList _pts;
+public:
+	VShape();
+	VShape(const VShape &copyFrom);
+	VShape(VMessage *archive);
+
+	virtual ~VShape();
+
+	static VArchivable *Instantiate(VMessage *archive);
+	virtual status_t Archive(VMessage *archive, bool deep = true) const;
+
+	status_t AddShape(const VShape *otherShape);
+
+	status_t BezierTo(VPoint controlPoints[3]);
+
+	VRect Bounds(void) const;
+
+	void Clear(void);
+
+	void Close(void);
+
+	status_t LineTo(VPoint point);
+
+	status_t MoveTo(VPoint point);
+};
+
+} // namespace tekhne
+
+#endif /* _VSHAPE_H */

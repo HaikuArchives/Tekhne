@@ -89,3 +89,22 @@ void VRegionTest::testCreate() {
 	CPPUNIT_ASSERT( rgn->CountRects() == 0 );
 	delete rgn;
 }
+
+void VShapeTest::setUp() {
+}
+
+void VShapeTest::tearDown() {
+}
+
+void VShapeTest::testCreate() {
+	VShape s;
+	s.MoveTo(VPoint(-1, -1));
+	s.LineTo(VPoint(1, -1));
+	s.LineTo(VPoint(1, 1));
+	s.Close();
+	VRect r = s.Bounds();
+	CPPUNIT_ASSERT( r.left == -1 );
+	CPPUNIT_ASSERT( r.top == -1 );
+	CPPUNIT_ASSERT( r.right == 1 );
+	CPPUNIT_ASSERT( r.bottom == 1 );
+}

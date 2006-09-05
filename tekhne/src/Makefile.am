@@ -34,6 +34,7 @@ libtekhne_la_SOURCES = \
 	VRect.cc\
 	VRegion.cc\
 	VRoster.cc\
+	VShape.cc\
 	VString.cc\
 	VStopWatch.cc\
 	VMessageRunner.cc
