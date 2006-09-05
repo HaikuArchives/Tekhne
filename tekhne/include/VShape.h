@@ -31,7 +31,7 @@
 
 namespace tekhne {
 
-class VShape : VArchivable {
+class VShape : public VArchivable {
 private:
 	VList _pts;
 public:
@@ -45,8 +45,6 @@ public:
 	virtual status_t Archive(VMessage *archive, bool deep = true) const;
 
 	status_t AddShape(const VShape *otherShape);
-
-	status_t BezierTo(VPoint controlPoints[3]);
 
 	VRect Bounds(void) const;
 

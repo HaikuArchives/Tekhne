@@ -34,18 +34,10 @@ namespace tekhne {
 
 const int32_t V_MOVE_TO_OP = 1;
 const int32_t V_LINE_TO_OP = 2;
-const int32_t V_BEZIER_TO_OP = 3;
 
 struct shape_point {
 	int32_t _type;
 	VPoint _pt;
-};
-
-struct shape_bezier {
-	int32_t _type;
-	VPoint _pt0;
-	VPoint _pt1;
-	VPoint _pt2;
 };
 
 }
@@ -58,21 +50,25 @@ VShape::VShape(const VShape &copyFrom) {
 }
 
 VShape::VShape(VMessage *archive) {
+	int32_t pt_idx = 0;
+	int32_t op_idx = 0;
+	int32_t op;
+
+	while (archive->FindInt32("ops", op_idx++, &op) == V_OK) {
+		VPoint pt;
+		archive->FindPoint("pts", pt_idx++, &pt);
+		if (op == V_MOVE_TO_OP) {
+			MoveTo(pt);
+		} else {
+			LineTo(pt);
+		}
+	}
 }
 
 VShape::~VShape() {
 	VListIterator iter(_pts);
 	while(iter.HasNext()) {
-		void *p = iter.Next();
-		if (p) {
-			shape_point *pt = static_cast<shape_point*>(p);
-			if (pt->_type == V_BEZIER_TO_OP) {
-				shape_bezier *b = static_cast<shape_bezier*>(p);
-				delete b;
-			} else {
-				delete pt;
-			}
-		}
+		delete static_cast<shape_point*>(iter.Next());
 	}
 }
 
@@ -83,33 +79,13 @@ status_t VShape::AddShape(const VShape *otherShape) {
 			void *p = iter.Next();
 			if (p) {
 				shape_point *pt = static_cast<shape_point*>(p);
-				if (pt->_type == V_BEZIER_TO_OP) {
-					shape_bezier *b = static_cast<shape_bezier*>(p);
-					struct shape_bezier *new_pt = new struct shape_bezier();
-					new_pt->_type = b->_type;
-					new_pt->_pt0 = b->_pt0;
-					new_pt->_pt1 = b->_pt1;
-					new_pt->_pt2 = b->_pt2;
-					_pts.AddItem(new_pt);
-				} else {
-					struct shape_point *new_pt = new struct shape_point();
-					new_pt->_type = pt->_type;
-					new_pt->_pt = pt->_pt;
-					_pts.AddItem(new_pt);
-				}
+				struct shape_point *new_pt = new struct shape_point();
+				new_pt->_type = pt->_type;
+				new_pt->_pt = pt->_pt;
+				_pts.AddItem(new_pt);
 			}
 		}
 	}
-	return V_OK;
-}
-
-status_t VShape::BezierTo(VPoint controlPoints[3]) {
-	struct shape_bezier *pt = new struct shape_bezier();
-	pt->_type = V_BEZIER_TO_OP;
-	pt->_pt0 = controlPoints[0];
-	pt->_pt1 = controlPoints[1];
-	pt->_pt2 = controlPoints[2];
-	_pts.AddItem(pt);
 	return V_OK;
 }
 
@@ -127,10 +103,7 @@ VRect VShape::Bounds(void) const {
 		void *p = iter.Next();
 		if (p) {
 			shape_point *pt = static_cast<shape_point*>(p);
-			if (pt->_type == V_BEZIER_TO_OP) {
-				shape_bezier *b = static_cast<shape_bezier*>(p);
-				start = true;
-			} else if (pt->_type == V_LINE_TO_OP) {
+			if (pt->_type == V_LINE_TO_OP) {
 				if (!start) {
 					left = min(left, last_pt.x);
 					top = min(top, last_pt.y);
@@ -191,5 +164,14 @@ VArchivable *VShape::Instantiate(VMessage *archive) {
 }
 
 status_t VShape::Archive(VMessage *archive, bool deep) const {
+	VListIterator iter(_pts);
+	while(iter.HasNext()) {
+		void *p = iter.Next();
+		if (p) {
+			shape_point *pt = static_cast<shape_point*>(p);
+			archive->AddInt32("ops", pt->_type);
+			archive->AddPoint("pts", pt->_pt);
+		}
+	}
 	return V_OK;
 }

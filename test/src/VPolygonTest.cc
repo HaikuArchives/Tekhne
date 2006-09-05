@@ -107,4 +107,15 @@ void VShapeTest::testCreate() {
 	CPPUNIT_ASSERT( r.top == -1 );
 	CPPUNIT_ASSERT( r.right == 1 );
 	CPPUNIT_ASSERT( r.bottom == 1 );
+
+	VMessage msg;
+	s.Archive(&msg);
+	VShape *s2 = dynamic_cast<VShape*>(VShape::Instantiate(&msg));
+	CPPUNIT_ASSERT( s2 );
+	CPPUNIT_ASSERT( r.left == -1 );
+	r = s2->Bounds();
+	CPPUNIT_ASSERT( r.left == -1 );
+	CPPUNIT_ASSERT( r.top == -1 );
+	CPPUNIT_ASSERT( r.right == 1 );
+	CPPUNIT_ASSERT( r.bottom == 1 );
 }
