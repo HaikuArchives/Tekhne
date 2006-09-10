@@ -79,6 +79,8 @@ class VShapeTest : public CppUnit::TestFixture {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VShapeTest" );
 			suiteOfTests->addTest( new CppUnit::TestCaller<VShapeTest>("testCreate",
 								   &VShapeTest::testCreate ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VShapeTest>("testIterator",
+								   &VShapeTest::testIterator ) );
 			return suiteOfTests;
 		}
 
@@ -86,6 +88,7 @@ class VShapeTest : public CppUnit::TestFixture {
 		void tearDown();
 
 		void testCreate();
+		void testIterator();
 };
 
 #endif /* _VPOLOYGONTEST_H */

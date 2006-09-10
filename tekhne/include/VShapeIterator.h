@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VRegion.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,36 +23,28 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VSHAPEITERATOR_H
+#define _VSHAPEITERATOR_H
 
-#include "StandardDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
 #include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
+#include "VPoint.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VShapeIterator {
+	private:
+	public:
+		VShapeIterator() {}
+		virtual ~VShapeIterator() {}
+
+		// implemented in VShape.cc
+		status_t Iterate(VShape *shape);
+
+		virtual status_t IterateClose(void) { return V_OK; }
+		virtual status_t IterateLineTo(int32_t lineCount, VPoint * linePoints) { return V_OK; }
+		virtual status_t IterateMoveTo(VPoint * point) { return V_OK; }
+};
+
+}
+
+#endif /* _VSHAPEITERATOR_H */

@@ -55,6 +55,8 @@ public:
 	status_t LineTo(VPoint point);
 
 	status_t MoveTo(VPoint point);
+
+	friend class VShapeIterator;
 };
 
 } // namespace tekhne

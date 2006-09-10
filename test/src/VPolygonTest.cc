@@ -119,3 +119,34 @@ void VShapeTest::testCreate() {
 	CPPUNIT_ASSERT( r.right == 1 );
 	CPPUNIT_ASSERT( r.bottom == 1 );
 }
+
+class TestShapeIterator : public VShapeIterator {
+private:
+	int32_t moves;
+	int32_t lines;
+	int32_t closes;
+public:
+	TestShapeIterator() : moves(0), lines(0), closes(0) {}
+	virtual status_t IterateClose(void) { closes++; return V_OK; }
+	virtual status_t IterateLineTo(int32_t lineCount, VPoint * linePoints) { lines += lineCount; return V_OK; }
+	virtual status_t IterateMoveTo(VPoint * point) { moves++; return V_OK; }
+
+	int32_t getMoves() { return moves; }
+	int32_t getLines() { return lines; }
+	int32_t getCloses() { return closes; }
+};
+
+void VShapeTest::testIterator() {
+	VShape s;
+	s.MoveTo(VPoint(-1, -1));
+	s.LineTo(VPoint(1, -1));
+	s.LineTo(VPoint(1, 1));
+	s.Close();
+
+	TestShapeIterator tsi;
+	tsi.Iterate(&s);
+
+	CPPUNIT_ASSERT( tsi.getMoves() == 1 );
+	CPPUNIT_ASSERT( tsi.getLines() == 2 );
+	CPPUNIT_ASSERT( tsi.getCloses() == 1 );
+}
