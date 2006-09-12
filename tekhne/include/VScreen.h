@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VScreen.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,43 +23,38 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VSCREEN_H
+#define _VSCREEN_H
 
-#include "StandardDefs.h"
-#include "InterfaceDefs.h"
-#include "GraphicsDefs.h"
-#include "AppDefs.h"
 #include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
 #include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
 #include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
-#include "VView.h"
-#include "VControl.h"
-#include "VListView.h"
-#include "VMenu.h"
-#include "VMenuBar.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+const int32_t V_MAIN_SCREEN_ID = 0;
+
+typedef struct {
+	int32 id;
+	rgb_color color_list[256];
+	uint8 inversion_map[256];
+	uint8 index_map[32768];
+} color_map;
+
+class VScreen {
+	private:
+	public:
+		VScreen(VWindow *window);
+		VScreen(int32_t id = V_MAIN_SCREEN_ID);
+		~VScreen();
+
+		const color_map *ColorMap(void);
+		inline uint8 IndexForColor(rgb_color color);
+		uint8 IndexForColor(uint8 red, uint8 green, uint8 blue, uint8 alpha = 255);
+		rgb_color ColorForIndex(const uint8 index);
+		uint8 InvertIndex(uint8 index);
+};
+
+} // namespace tekhne
+
+#endif /* _VSCREEN_H */

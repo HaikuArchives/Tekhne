@@ -114,17 +114,20 @@ const uint16_t V_OUTLINED_FACE = 4;
 const uint16_t V_STRIKEOUT_FACE = 5;
 const uint16_t V_BOLD_FACE = 6;
 
-const uint8_t B_CHAR_SPACING = 0;
-const uint8_t B_STRING_SPACING = 1;
-const uint8_t B_BITMAP_SPACING = 2;
-const uint8_t B_FIXED_SPACING = 3;
+const uint8_t V_CHAR_SPACING = 0;
+const uint8_t V_STRING_SPACING = 1;
+const uint8_t V_BITMAP_SPACING = 2;
+const uint8_t V_FIXED_SPACING = 3;
 
-const int32_t V_FONT_FAMILY_LENGTH = 64;
-const int32_t V_FONT_STYLE_LENGTH = 64;
+const int32_t V_FONT_FAMILY_LENGTH = 63;
+const int32_t V_FONT_STYLE_LENGTH = 63;
 
 typedef char font_family[V_FONT_FAMILY_LENGTH + 1];
 typedef char font_style[V_FONT_STYLE_LENGTH + 1];
 
+const int32_t V_DISABLE_ANTIALIASING = 0;
+const int32_t V_IS_FIXED = 1;
+const int32_t V_HAS_TUNED_FONT = 2;
 
 class VFont {
 private:

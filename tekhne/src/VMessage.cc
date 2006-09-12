@@ -118,6 +118,7 @@ storage_item *make_storage_item(const char *name, type_code type, const void *da
 			si->data.r.right = ((const VRect *)data)->right;
 			break;
 		case V_POINTER_TYPE:
+		case V_RAW_TYPE:
 		case V_MESSAGE_TYPE:
 		case V_MESSENGER_TYPE:
 			si->data.p = data;
@@ -142,6 +143,7 @@ void free_storage_item(storage_item *si) {
 		case V_DOUBLE_TYPE:
 		case V_POINTER_TYPE:
 		case V_POINT_TYPE:
+		case V_RAW_TYPE:
 		case V_RECT_TYPE:
 		case V_MESSAGE_TYPE:
 		case V_MESSENGER_TYPE:
@@ -182,6 +184,7 @@ VMessage::VMessage(const VMessage &message) : _isReply(message._isReply), _wasDe
 			case V_DOUBLE_TYPE:
 			case V_POINTER_TYPE:
 			case V_POINT_TYPE:
+			case V_RAW_TYPE:
 			case V_RECT_TYPE:
 			case V_MESSAGE_TYPE:
 			case V_MESSENGER_TYPE:
@@ -341,6 +344,7 @@ status_t VMessage::FindData(const char *name, type_code type, int32_t index, con
 					(*((VRect**)data))->Set(si->data.r.left, si->data.r.top, si->data.r.right, si->data.r.bottom);
 					break;
 				case V_POINTER_TYPE:
+				case V_RAW_TYPE:
 				case V_MESSAGE_TYPE:
 				case V_MESSENGER_TYPE:
 					*data = si->data.p;
@@ -395,6 +399,7 @@ status_t VMessage::FindData(const char *name, type_code type, const void **data,
 					(*((VRect**)data))->Set(si->data.r.left, si->data.r.top, si->data.r.right, si->data.r.bottom);
 					break;
 				case V_POINTER_TYPE:
+				case V_RAW_TYPE:
 				case V_MESSAGE_TYPE:
 				case V_MESSENGER_TYPE:
 					*data = si->data.p;
@@ -623,6 +628,7 @@ status_t VMessage::Flatten(VDataIO *object, ssize_t *numBytes) const {
 				break;
 			case V_STRING_TYPE:
 			case V_POINTER_TYPE:
+			case V_RAW_TYPE:
 				rc = object->Write(si, sizeof(storage_item));
 				if (rc != sizeof(storage_item)) return V_ERROR;
 				bc += rc;
@@ -675,6 +681,7 @@ status_t VMessage::Unflatten(VDataIO *object) {
 				break;
 			case V_STRING_TYPE:
 			case V_POINTER_TYPE:
+			case V_RAW_TYPE:
 				si->data.p = malloc(si->numBytes);
 				rc = object->Read(const_cast<void *>(si->data.p), si->numBytes);
 				if (rc != si->numBytes) return V_ERROR;
@@ -724,6 +731,7 @@ ssize_t VMessage::FlattenedSize(void) const {
 				numBytes += sizeof(storage_item);
 				break;
 			case V_POINTER_TYPE:
+			case V_RAW_TYPE:
 				numBytes += sizeof(storage_item);
 				numBytes += si->numBytes;
 				break;
@@ -1227,6 +1235,7 @@ VMessage &VMessage::operator =(const VMessage& msg){
 				case V_DOUBLE_TYPE:
 				case V_POINTER_TYPE:
 				case V_POINT_TYPE:
+				case V_RAW_TYPE:
 				case V_RECT_TYPE:
 				case V_MESSAGE_TYPE:
 				case V_MESSENGER_TYPE:

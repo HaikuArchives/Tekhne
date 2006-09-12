@@ -4,6 +4,8 @@ libtekhne_includedir = $(pkgincludedir)
 
 libtekhne_include_DATA = \
 	AppDefs.h\
+	GraphicsDefs.h\
+	InterfaceDefs.h\
 	ClassInfo.h\
 	StandardDefs.h\
 	tekhne.h\
@@ -12,6 +14,7 @@ libtekhne_include_DATA = \
 	VArchivable.h\
 	VAutoLock.h\
 	VBlockCache.h\
+	VControl.h\
 	VDataIO.h\
 	VDictionary.h\
 	VErrors.h\
@@ -20,10 +23,13 @@ libtekhne_include_DATA = \
 	VHandler.h\
 	VHashable.h\
 	VList.h\
+	VListView.h\
 	VLocker.h\
 	VLooper.h\
 	VMallocIO.h\
 	VMemoryIO.h\
+	VMenu.h\
+	VMenuBar.h\
 	VMessage.h\
 	VMessageFilter.h\
 	VMessageQueue.h\
@@ -43,6 +49,8 @@ libtekhne_include_DATA = \
 	VStopWatch.h\
 	VString.h\
 	VTList.cc\
-	VTList.h
+	VTList.h\
+	VView.h
+
 
 EXTRA_DIST = $(libtekhne_include_DATA)
