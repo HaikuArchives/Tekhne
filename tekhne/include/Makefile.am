@@ -9,6 +9,7 @@ libtekhne_include_DATA = \
 	ClassInfo.h\
 	StandardDefs.h\
 	tekhne.h\
+	VAlert.h\
 	VAppFileInfo.h\
 	VApplication.h\
 	VArchivable.h\
@@ -44,13 +45,17 @@ libtekhne_include_DATA = \
 	VRect.h\
 	VRegion.h\
 	VRoster.h\
+	VScreen.h\
+	VScrollBar.h\
 	VShape.h\
 	VShapeIterator.h\
 	VStopWatch.h\
 	VString.h\
+	VTextView.h\
 	VTList.cc\
 	VTList.h\
-	VView.h
+	VView.h\
+	VWindow.h
 
 
 EXTRA_DIST = $(libtekhne_include_DATA)

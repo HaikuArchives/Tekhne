@@ -78,20 +78,7 @@ typedef struct font_height {
 	float leading;
 } font_height;
 
-typedef struct tuned_font_info {
-	float size;
-	float shear;
-	float rotation;
-	uint32_t flags;
-	uint16_t face;
-} tuned_font_info;
-
 class VShape;
-
-const int32_t V_TRUNCATE_BEGINNING = 2000;
-const int32_t V_TRUNCATE_MIDDLE = 2001;
-const int32_t V_TRUNCATE_END = 2002;
-const int32_t V_TRUNCATE_SMART = 2003;
 
 const uint8_t V_UNICODE_UTF8 = 0;
 const uint8_t V_ISO_8859_6 = 1;
@@ -128,6 +115,19 @@ typedef char font_style[V_FONT_STYLE_LENGTH + 1];
 const int32_t V_DISABLE_ANTIALIASING = 0;
 const int32_t V_IS_FIXED = 1;
 const int32_t V_HAS_TUNED_FONT = 2;
+
+const int32_t V_TRUNCATE_END = 0;
+const int32_t V_TRUNCATE_BEGINNING = 1;
+const int32_t V_TRUNCATE_MIDDLE = 2;
+const int32_t V_TRUNCATE_SMART = 3;
+
+typedef struct {
+	float size;
+	float shear;
+	float rotation;
+	int32_t flags;
+	int16_t face;
+} tuned_font_info;
 
 class VFont {
 private:

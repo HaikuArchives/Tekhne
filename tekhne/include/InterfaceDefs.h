@@ -28,15 +28,10 @@
 
 #include <stdint.h>
 
+#include "GraphicsDefs.h"
+#include "VRect.h"
+
 namespace tekhne {
-
-const int32_t V_ALIGN_LEFT = 0;
-const int32_t V_ALIGN_RIGHT = 1;
-const int32_t V_ALIGN_CENTER = 2;
-
-const int32_t V_WIDTH_AS_USUAL = 0;
-const int32_t V_WIDTH_FROM_LABEL = 1;
-const int32_t V_WIDTH_FROM_WIDEST = 2;
 
 const int32_t V_PLAIN_BORDER = 0;
 const int32_t V_FANCY_BORDER = 1;
@@ -114,6 +109,54 @@ const int8_t V_NUM_LOC = 38;
 
 const int8_t V_HORIZONTAL = 0;
 const int8_t V_VERTICAL = 1;
+
+const int32_t V_LIGHTEN_MAX_TINT = 0;
+const int32_t V_LIGHTEN_2_TINT = 1;
+const int32_t V_LIGHTEN_1_TINT = 2;
+const int32_t V_NO_TINT = 3;
+const int32_t V_DARKEN_1_TINT = 4;
+const int32_t V_DARKEN_2_TINT = 5;
+const int32_t V_DARKEN_3_TINT = 6;
+const int32_t V_DARKEN_4_TINT = 7;
+const int32_t V_DARKEN_MAX_TINT = 8;
+const int32_t V_DISABLED_LABEL_TINT = 9;
+const int32_t V_HIGHLIGHT_BACKGROUND_TINT = 10;
+const int32_t V_DISABLED_MARK_TINT = 11;
+
+const int32_t V_PANEL_BACKGROUND_COLOR = 0;
+const int32_t V_MENU_BACKGROUND_COLOR = 1;
+const int32_t V_MENU_SELECTION_BACKGROUND_COLOR = 2;
+const int32_t V_MENU_ITEM_TEXT_COLOR = 3;
+const int32_t V_MENU_SELECTED_ITEM_TEXT_COLOR = 4;
+const int32_t V_WINDOW_TAB_COLOR = 5;
+const int32_t V_KEYBOARD_NAVIGATION_COLOR = 6;
+const int32_t V_DESKTOP_COLOR = 7;
+
+typedef enum {
+	V_ALIGN_LEFT,
+	V_ALIGN_RIGHT,
+	V_ALIGN_CENTER
+} alignment;
+
+typedef struct {
+	color_space mode;
+	VRect frame;
+	uint32_t spaces;
+	float min_refresh_rate;
+	float max_refresh_rate;
+	float refresh_rate;
+	uint16_t h_position;
+	uint16_t v_position;
+	uint16_t h_size;
+	uint16_t v_size;
+} screen_info;
+
+typedef struct {
+	bool proportional;
+	bool double_arrows;
+	int32_t knob;
+	int32_t min_knob_size;
+} scroll_bar_info;
 
 } // namespace tekhne
 

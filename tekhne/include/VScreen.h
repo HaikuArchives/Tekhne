@@ -30,29 +30,110 @@
 #include "VList.h"
 #include "VLocker.h"
 
+#include "InterfaceDefs.h"
+
 namespace tekhne {
 
-const int32_t V_MAIN_SCREEN_ID = 0;
+typedef struct {
+	int32_t id;
+} screen_id;
+
+extern screen_id V_MAIN_SCREEN_ID;
+
+class VWindow;
+class VBitmap;
 
 typedef struct {
-	int32 id;
-	rgb_color color_list[256];
-	uint8 inversion_map[256];
-	uint8 index_map[32768];
-} color_map;
+	uint32_t pixel_clock;
+	uint16_t h_display;
+	uint16_t h_sync_start;
+	uint16_t h_sync_end;
+	uint16_t h_total;
+	uint16_t v_display;
+	uint16_t v_sync_start;
+	uint16_t v_sync_end;
+	uint16_t v_total;
+	uint32_t flags;
+} display_timing;
+
+// display timing flags
+const int32_t V_BLANK_PEDESTAL = 1;
+const int32_t V_TIMING_INTERLACED = 2;
+const int32_t V_POSITIVE_HSYNC = 4;
+const int32_t V_POSITIVE_VSYNC = 8;
+const int32_t V_SYNC_ON_GREEN = 16;
+
+typedef struct {
+	display_timing timing;
+	uint32_t space;
+	uint16_t virtual_width;
+	uint16_t virtual_height;
+	uint16_t h_display_start;
+	uint16_t v_display_start;
+	uint32_t flags;
+} display_mode;
+
+// display mode flags
+const int32_t V_SCROLL = 1;
+const int32_t V_8_BIT_DAC = 2;
+const int32_t V_HARDWARE_CURSOR = 4;
+const int32_t V_PARALLEL_ACCESS = 8;
+const int32_t V_DPMS = 16;
+const int32_t V_IO_FB_NA = 32;
+
+const int32_t VDPMS_ON = 0;
+const int32_t V_DPMS_STAND_BY = 1;
+const int32_t V_DPMS_SUSPEND = 2;
+const int32_t V_DPMS_OFF = 4;
 
 class VScreen {
-	private:
-	public:
-		VScreen(VWindow *window);
-		VScreen(int32_t id = V_MAIN_SCREEN_ID);
-		~VScreen();
+private:
+public:
+	VScreen(VWindow *window);
+	VScreen(screen_id id = V_MAIN_SCREEN_ID);
+	~VScreen();
 
-		const color_map *ColorMap(void);
-		inline uint8 IndexForColor(rgb_color color);
-		uint8 IndexForColor(uint8 red, uint8 green, uint8 blue, uint8 alpha = 255);
-		rgb_color ColorForIndex(const uint8 index);
-		uint8 InvertIndex(uint8 index);
+	const color_map *ColorMap(void);
+	inline uint8_t IndexForColor(rgb_color color);
+	uint8_t IndexForColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
+	rgb_color ColorForIndex(const uint8_t index);
+	uint8_t InvertIndex(uint8_t index);
+
+	color_space ColorSpace(void);
+
+	VRect Frame(void);
+
+	//  need defs for these fields
+	// status_t GetDeviceInfo(accelerant_device_info *info);
+	// status_t GetTimingConstraints(display_timing_constraints *dtc);
+
+	status_t GetModeList(display_mode **mode_list, uint32_t *count);
+	status_t SetMode(display_mode *mode, bool makeDefault = false);
+	status_t GetMode(display_mode *mode);
+
+	status_t GetPixelClockLimits(display_mode *mode, uint32_t *low, uint32_t *high);
+
+	screen_id ID(void);
+
+	bool IsValid(void);
+
+	status_t ProposeMode(display_mode *candidate, const display_mode *low, const display_mode *high);
+
+
+	status_t ReadBitmap(VBitmap *buffer, bool draw_cursor = true, VRect *bounds = NULL);
+	status_t GetBitmap(VBitmap **buffer, bool draw_cursor = true, VRect *bounds = NULL);
+
+	void SetDesktopColor(rgb_color color, bool makeDefault = true);
+	rgb_color DesktopColor(void);
+
+	status_t SetDPMS(uint32_t dpmsState);
+	uint32_t DPMSState(void);
+	uint32_t DPMSCapabilities(void);
+
+	status_t SetToNext(void) { return V_ERROR; }
+
+	status_t WaitForRetrace(void);
+	status_t WaitForRetrace(bigtime_t timeout);
 };
 
 } // namespace tekhne

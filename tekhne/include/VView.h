@@ -59,6 +59,13 @@ const int32_t V_FOLLOW_V_CENTER = 7;
 const int32_t V_FOLLOW_ALL = 8;
 const int32_t V_FOLLOW_NONE = 9;
 
+const int32_t V_FULL_UPDATE_ON_RESIZE = 0;
+const int32_t V_WILL_DRAW = 1;
+const int32_t V_PULSE_NEEDED = 2;
+const int32_t V_FRAME_EVENTS = 3;
+const int32_t V_NAVIGABLE = 4;
+const int32_t V_NAVIGABLE_JUMP = 5;
+
 } // namespace tekhne
 
 #endif /* _VVIEW_H */

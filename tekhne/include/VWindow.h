@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VWindow.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,48 +23,35 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VWINDOW_H
+#define _VWINDOW_H
 
-#include "StandardDefs.h"
-#include "InterfaceDefs.h"
-#include "GraphicsDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
-#include "VView.h"
-#include "VControl.h"
-#include "VListView.h"
-#include "VMenu.h"
-#include "VMenuBar.h"
-#include "VScrollBar.h"
-#include "VWindow.h"
-#include "VAlert.h"
-#include "VScreen.h"
-#include "VTextView.h"
+#include <stdint.h>
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+const int32_t V_NOT_MOVABLE = 0;
+const int32_t V_NOT_CLOSABLE = 1;
+const int32_t V_NOT_H_RESIZABLE = 2;
+const int32_t V_NOT_ZOOMABLE = 3;
+const int32_t V_NOT_V_RESIZABLE = 4;
+const int32_t V_NOT_MINIMIZABLE = 5;
+const int32_t V_NOT_RESIZABLE = 6;
+const int32_t V_WILL_FLOAT = 7;
+const int32_t V_WILL_ACCEPT_FIRST_CLICK = 8;
+
+const int32_t V_CURRENT_WORKSPACE = 0;
+const int32_t V_ALL_WORKSPACES = 1;
+
+typedef enum {
+	V_TITLED_WINDOW,
+	V_DOCUMENT_WINDOW,
+	V_MODAL_WINDOW,
+	V_FLOATING_WINDOW,
+	V_BORDERED_WINDOW,
+	V_UNTYPED_WINDOW
+} window_type;
+
+} // namespace tekhne
+
+#endif /* _VWINDOW_H */
