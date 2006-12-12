@@ -34,6 +34,8 @@ void VRosterTest::setUp() {
 void VRosterTest::tearDown() {
 }
 void VRosterTest::testIsRunning() {
+	// give the registration process a chance to finish
+	usleep(1000);
 	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-test-app"));
 	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-baldmountain-roster"));
 	CPPUNIT_ASSERT(v_roster->IsRunning("app/x-test-app"));

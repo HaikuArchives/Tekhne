@@ -38,6 +38,7 @@ libtekhne_la_SOURCES = \
 	VShape.cc\
 	VString.cc\
 	VStopWatch.cc\
+	VView.cc\
 	VMessageRunner.cc
 
 libtekhne_la_LDFLAGS = \

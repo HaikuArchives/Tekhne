@@ -27,6 +27,8 @@
 #define _VVIEW_H
 
 #include <stdint.h>
+#include <VRect.h>
+#include <VLooper.h>
 
 namespace tekhne {
 
@@ -65,6 +67,15 @@ const int32_t V_PULSE_NEEDED = 2;
 const int32_t V_FRAME_EVENTS = 3;
 const int32_t V_NAVIGABLE = 4;
 const int32_t V_NAVIGABLE_JUMP = 5;
+
+class VView : public VHandler {
+private:
+public:
+	VView(VRect frame, const char *name, uint32_t resizingMode, uint32_t flags);
+	VView(VMessage *archive);
+	virtual ~VView();
+
+};
 
 } // namespace tekhne
 
