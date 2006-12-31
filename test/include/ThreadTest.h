@@ -40,7 +40,7 @@ private:
 	pthread_t thread[10];
 
 public:
-static CppUnit::Test *ThreadTest::suite() {
+static CppUnit::Test *suite() {
 	CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "ThreadTest" );
 	suiteOfTests->addTest( new CppUnit::TestCaller<ThreadTest>("testLock",
 								&ThreadTest::testLock ) );

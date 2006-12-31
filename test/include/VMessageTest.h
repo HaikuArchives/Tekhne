@@ -36,7 +36,7 @@ using namespace tekhne;
 class VMessageTest : public CppUnit::TestFixture {
 private:
 public:
-	static CppUnit::Test *VMessageTest::suite() {
+	static CppUnit::Test *suite() {
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VMessageTest" );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VMessageTest>("testCreate",
 									&VMessageTest::testCreate ) );

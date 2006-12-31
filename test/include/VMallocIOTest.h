@@ -40,7 +40,7 @@ private:
 	void *buf;
 
 public:
-	static CppUnit::Test *VMallocIOTest::suite() {
+	static CppUnit::Test *suite() {
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VMallocIOTest" );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VMallocIOTest>("testMallocIO",
 									&VMallocIOTest::testMallocIO ) );

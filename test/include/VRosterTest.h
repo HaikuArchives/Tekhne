@@ -36,7 +36,7 @@ using namespace tekhne;
 class VRosterTest : public CppUnit::TestFixture {
 	private:
 	public:
-		static CppUnit::Test *VRosterTest::suite() {
+		static CppUnit::Test *suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VRosterTest" );
 			suiteOfTests->addTest( new CppUnit::TestCaller<VRosterTest>("testIsRunning",
 								   &VRosterTest::testIsRunning ) );

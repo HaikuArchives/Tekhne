@@ -37,7 +37,7 @@ class VListTest : public CppUnit::TestFixture {
 private:
 	VList *l;
 public:
-static CppUnit::Test *VListTest::suite() {
+static CppUnit::Test *suite() {
 	CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VListTest" );
 	suiteOfTests->addTest( new CppUnit::TestCaller<VListTest>("testAddItem",
 								&VListTest::testAddItem ) );

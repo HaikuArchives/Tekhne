@@ -37,7 +37,7 @@ class VStringTest : public CppUnit::TestFixture {
 private:
 	VString *s;
 public:
-static CppUnit::Test *VStringTest::suite() {
+static CppUnit::Test *suite() {
 	CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VStringTest" );
 	suiteOfTests->addTest( new CppUnit::TestCaller<VStringTest>("testCreate",
 								&VStringTest::testCreate ) );

@@ -37,7 +37,7 @@ class VDictionaryTest : public CppUnit::TestFixture {
 	private:
 		VDictionary *bc;
 	public:
-		static CppUnit::Test *VDictionaryTest::suite() {
+		static CppUnit::Test *suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VDictionaryTest" );
 			suiteOfTests->addTest( new CppUnit::TestCaller<VDictionaryTest>("testCreate",
 								   &VDictionaryTest::testCreate ) );

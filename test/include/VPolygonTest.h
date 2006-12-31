@@ -37,7 +37,7 @@ using namespace tekhne;
 class VPolygonTest : public CppUnit::TestFixture {
 	private:
 	public:
-		static CppUnit::Test *VPolygonTest::suite() {
+		static CppUnit::Test *suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VPolygonTest" );
 			suiteOfTests->addTest( new CppUnit::TestCaller<VPolygonTest>("testCreate",
 								   &VPolygonTest::testCreate ) );
@@ -59,7 +59,7 @@ class VPolygonTest : public CppUnit::TestFixture {
 class VRegionTest : public CppUnit::TestFixture {
 	private:
 	public:
-		static CppUnit::Test *VRegionTest::suite() {
+		static CppUnit::Test *suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VRegionTest" );
 			suiteOfTests->addTest( new CppUnit::TestCaller<VRegionTest>("testCreate",
 								   &VRegionTest::testCreate ) );
@@ -75,7 +75,7 @@ class VRegionTest : public CppUnit::TestFixture {
 class VShapeTest : public CppUnit::TestFixture {
 	private:
 	public:
-		static CppUnit::Test *VShapeTest::suite() {
+		static CppUnit::Test *suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VShapeTest" );
 			suiteOfTests->addTest( new CppUnit::TestCaller<VShapeTest>("testCreate",
 								   &VShapeTest::testCreate ) );

@@ -38,7 +38,7 @@ class VPointTest : public CppUnit::TestFixture {
 private:
 	VPoint *p;
 public:
-	static CppUnit::Test *VPointTest::suite() {
+	static CppUnit::Test *suite() {
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VPointTest" );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VPointTest>("testCreate",
 									&VPointTest::testCreate ) );
@@ -58,7 +58,7 @@ class VRectTest : public CppUnit::TestFixture {
 private:
 	VRect *r;
 public:
-	static CppUnit::Test *VRectTest::suite() {
+	static CppUnit::Test *suite() {
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VRectTest" );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VRectTest>("testCreate",
 									&VRectTest::testCreate ) );

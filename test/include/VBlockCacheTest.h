@@ -37,7 +37,7 @@ class VBlockCacheTest : public CppUnit::TestFixture {
 private:
 	VBlockCache *bc;
 public:
-	static CppUnit::Test *VBlockCacheTest::suite() {
+	static CppUnit::Test *suite() {
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VBlockCacheTest" );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VBlockCacheTest>("testCreate",
 									&VBlockCacheTest::testCreate ) );

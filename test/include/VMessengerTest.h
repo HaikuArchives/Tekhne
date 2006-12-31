@@ -37,7 +37,7 @@ class VMessengerTest : public CppUnit::TestFixture {
 private:
 	VMessenger *mgr;
 public:
-	static CppUnit::Test *VMessengerTest::suite() {
+	static CppUnit::Test *suite() {
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VMessengerTest" );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VMessengerTest>("testCreate",
 									&VMessengerTest::testCreate ) );

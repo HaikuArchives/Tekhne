@@ -68,9 +68,9 @@ thread_t VLocker::LockingThread(void) const {
 }
 
 bool VLocker::IsLocked(void) const {
-	return _mutex.__m_count > 0;
+	return _mutex.__data.__count > 0;
 }
 
 int32_t VLocker::CountLocks(void) const {
-	return _mutex.__m_count;
+	return _mutex.__data.__count;
 }

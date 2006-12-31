@@ -38,18 +38,18 @@ class VTListTest : public CppUnit::TestFixture {
 private:
 	VTList<char*> *l;
 public:
-static CppUnit::Test *VTListTest::suite() {
-	CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VTListTest" );
-	suiteOfTests->addTest( new CppUnit::TestCaller<VTListTest>("testAddItem",
-								&VTListTest::testAddItem ) );
-	suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testSortItems",
-								&VTListTest::testSortItems ) );
-	suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testInsertItem",
-								&VTListTest::testInsertItem ) );
-	suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testOperator",
-								&VTListTest::testOperator ) );
-	return suiteOfTests;
-}
+	static CppUnit::Test *suite() {
+		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VTListTest" );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VTListTest>("testAddItem",
+									&VTListTest::testAddItem ) );
+		suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testSortItems",
+									&VTListTest::testSortItems ) );
+		suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testInsertItem",
+									&VTListTest::testInsertItem ) );
+		suiteOfTests->addTest(	new CppUnit::TestCaller<VTListTest>("testOperator",
+									&VTListTest::testOperator ) );
+		return suiteOfTests;
+	}
 
 	void setUp();
 	void tearDown();
