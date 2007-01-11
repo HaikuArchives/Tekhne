@@ -35,6 +35,7 @@ libtekhne_la_SOURCES = \
 	VRegion.cc\
 	VRoster.cc\
 	VScreen.cc\
+	VSerialPort.cc\
 	VShape.cc\
 	VString.cc\
 	VStopWatch.cc\

@@ -47,6 +47,7 @@ libtekhne_include_DATA = \
 	VRoster.h\
 	VScreen.h\
 	VScrollBar.h\
+	VSerialPort.h\
 	VShape.h\
 	VShapeIterator.h\
 	VStopWatch.h\

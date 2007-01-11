@@ -25,7 +25,8 @@ test_SOURCES = \
 	VListTest.cc \
 	VTListTest.cc \
 	VMessengerTest.cc\
-	VRosterTest.cc
+	VRosterTest.cc\
+	VSerialPortTest.cc
 
 test_LDFLAGS = \
 	-pthread -static\
