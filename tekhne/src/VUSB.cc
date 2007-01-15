@@ -1,7 +1,7 @@
 /***************************************************************************
- *            VSerialPortTest.cc
+ *            VUSB.cc
  *
- * Copyright (c) 2006 Geoffrey Clements
+ * Copyright (c) 2007 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,50 +23,40 @@
  *
  ****************************************************************************/
 
-#include "VSerialPortTest.h"
-#include <iostream>
+#include "tekhne.h"
 
-using namespace std;
+#include <usb.h>
 
-void VSerialPortTest::setUp() {
-	sp = new VSerialPort();
+using namespace tekhne;
+
+bool VUSB::_init_called = false;
+
+VUSB::VUSB(void) {
 }
 
-void VSerialPortTest::tearDown() {
-	delete sp;
+VUSB::~VUSB() {
+	Close();
 }
 
-void VSerialPortTest::testCountAndName() {
-	int32_t num = sp->CountDevices();
-	cout << "devices: " << num << endl;
-	for (int i=0; i<=num; i++) {
-		char name[V_NAME_LENGTH];
-		char buf[256];
-		CPPUNIT_ASSERT(sp->GetDeviceName(i, name, V_NAME_LENGTH) == V_OK);
-		sprintf(buf, "/dev/ttyS%d",i);
-		CPPUNIT_ASSERT(strcmp(name, buf) == 0);
-	}
-
+status_t VUSB::Open(const char *name) {
+	return V_ERROR;
 }
 
-void VSerialPortTest::testOpenAndClose() {
-	int32_t num = sp->CountDevices();
-	for (int i=0; i<num; i++) {
-		char name[V_NAME_LENGTH];
-		sp->GetDeviceName(i, name, V_NAME_LENGTH);
-		CPPUNIT_ASSERT(sp->Open(name) == V_OK);
-		sp->Close();
-	}
+void VUSB::Close(void) {
 }
 
-void VUSBTest::setUp() {
-	VUSB::Init();
-	usb = new VUSB();
+ssize_t VUSB::Read(void *buffer, size_t maxBytes) {
+	return V_ERROR;
 }
 
-void VUSBTest::tearDown() {
-	delete usb;
+ssize_t VUSB::Write(const void *data, size_t numBytes) {
+	return V_ERROR;
 }
 
-void VUSBTest::testCreate() {
+
+int32_t VUSB::CountDevices(void) {
+	return 0;
+}
+
+status_t VUSB::GetDeviceName(int32_t index, char *outName, size_t bufSize) {
 }

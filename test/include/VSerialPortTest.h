@@ -31,7 +31,7 @@
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
 
-		using namespace tekhne;
+using namespace tekhne;
 
 class VSerialPortTest : public CppUnit::TestFixture {
 	private:
@@ -39,8 +39,28 @@ class VSerialPortTest : public CppUnit::TestFixture {
 	public:
 		static CppUnit::Test *suite() {
 			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VSerialPortTest" );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VSerialPortTest>("testCreate",
-								   &VSerialPortTest::testCreate ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VSerialPortTest>("testCountAndName",
+								   &VSerialPortTest::testCountAndName ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VSerialPortTest>("testOpenAndClose",
+								   &VSerialPortTest::testOpenAndClose ) );
+			return suiteOfTests;
+		}
+
+		void setUp();
+		void tearDown();
+
+		void testCountAndName();
+		void testOpenAndClose();
+};
+
+class VUSBTest : public CppUnit::TestFixture {
+	private:
+		VUSB *usb;
+	public:
+		static CppUnit::Test *suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VUSBTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VUSBTest>("testCreate",
+								   &VUSBTest::testCreate ) );
 			return suiteOfTests;
 		}
 

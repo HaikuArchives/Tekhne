@@ -65,5 +65,6 @@
 #include "VScreen.h"
 #include "VTextView.h"
 #include "VSerialPort.h"
+#include "VUSB.h"
 
 #endif /* _TEKHNE_H */

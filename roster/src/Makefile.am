@@ -19,6 +19,7 @@ roster_SOURCES = \
 
 roster_LDFLAGS = \
 	-pthread\
+	-lusb\
 	 -L../../tekhne/src
 
 roster_LDADD = \

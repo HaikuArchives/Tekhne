@@ -74,6 +74,7 @@ public:
 		runner.addTest( VMessengerTest::suite() );
 		runner.addTest( VRosterTest::suite() );
 		runner.addTest( VSerialPortTest::suite() );
+		runner.addTest( VUSBTest::suite() );
 		runner.run();
 	}
 

@@ -26,17 +26,18 @@
 #ifndef _VSERIALPORT_H
 #define _VSERIALPORT_H
 
-#include <stdint.h>
+#include <StandardDefs.h>
+#include <termios.h>
 
 namespace tekhne {
 
-typedef enum { V_DATA_BITS_7, V_DATA_BITS_8 } data_bits;
+typedef enum { V_DATA_BITS_7=CS7, V_DATA_BITS_8=CS8 } data_bits;
 typedef enum { V_STOP_BITS_1, V_STOP_BITS_2 } stop_bits;
 typedef enum { V_EVEN_PARITY, V_ODD_PARITY, V_NO_PARITY } parity_mode;
-typedef enum { V_0_BPS, V_50_BPS, V_75_BPS, V_110_BPS, V_134_BPS, V_150_BPS,
-	V_200_BPS, V_300_BPS, V_600_BPS, V_1200_BPS, V_1800_BPS, V_2400_BPS,
-	V_4800_BPS, V_9600_BPS, V_19200_BPS, V_31250_BPS, V_38400_BPS, V_57600_BPS,
-	V_115200_BPS, V_230400_BPS } data_rate;
+typedef enum { V_0_BPS = B0, V_50_BPS = B50, V_75_BPS=B75, V_110_BPS=B110, V_134_BPS=B134, V_150_BPS=B150,
+	V_200_BPS=B200, V_300_BPS=B300, V_600_BPS=B600, V_1200_BPS=B1200, V_1800_BPS=B1800, V_2400_BPS=B2400,
+	V_4800_BPS=B4800, V_9600_BPS=B9600, V_19200_BPS=B19200, V_38400_BPS=B38400, V_57600_BPS=B57600,
+	V_115200_BPS=B115200, V_230400_BPS=B230400 } data_rate;
 
 const int32_t V_SOFTWARE_CONTROL = 1;
 const int32_t V_HARDWARE_CONTROL = 2;
@@ -44,7 +45,15 @@ const int32_t V_HARDWARE_CONTROL = 2;
 class VSerialPort {
 private:
 	char _name[V_NAME_LENGTH];
-	bool _is_open;
+	data_bits _data_bits;
+	stop_bits _stop_bits;
+	parity_mode _parity_mode;
+	int32_t _flow_control;
+	data_rate _data_rate;
+	bigtime_t _timeout;
+	bool _blocking;
+	int32_t _device_count;
+	int32_t _fd; // the port's file descriptor
 public:
 	VSerialPort(void);
 	virtual ~VSerialPort();
@@ -73,7 +82,7 @@ public:
 	data_rate DataRate(void);
 
 	status_t SetDTR(bool pinAsserted);
-	
+
 	void SetFlowControl(uint32_t mask);
 	uint32_t FlowControl(void);
 
@@ -82,6 +91,9 @@ public:
 	ssize_t WaitForInput(void);
 
 	ssize_t Write(const void *data, size_t numBytes);
+
+	int32_t CountDevices(void);
+	status_t GetDeviceName(int32_t index, char *outName, size_t bufSize = V_NAME_LENGTH);
 };
 
 

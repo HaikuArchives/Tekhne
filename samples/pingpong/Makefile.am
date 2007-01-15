@@ -26,6 +26,7 @@ pong_SOURCES = pong.cc pingpong.h
 
 pong_LDFLAGS = \
 	-pthread\
+	-lusb\
 	-L../../tekhne/src
 
 pong_LDADD = \

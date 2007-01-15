@@ -40,7 +40,7 @@ typedef pthread_t team_t;
 typedef int32_t status_t;
 typedef pthread_t thread_t;
 
-const bigtime_t V_INFINITE_TIMEOUT = INT64_MAX;
+const bigtime_t V_INFINITE_TIMEOUT = 0;
 
 const int32_t V_LOW_PRIORITY = -1;
 const int32_t V_NORMAL_PRIORITY = 0;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            VSerialPortTest.cc
+ *            VUSB.h
  *
- * Copyright (c) 2006 Geoffrey Clements
+ * Copyright (c) 2007 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,50 +23,33 @@
  *
  ****************************************************************************/
 
-#include "VSerialPortTest.h"
-#include <iostream>
+#ifndef _VUSB_H
+#define _VUSB_H
 
-using namespace std;
+#include <StandardDefs.h>
+#include <usb.h>
 
-void VSerialPortTest::setUp() {
-	sp = new VSerialPort();
-}
+namespace tekhne {
 
-void VSerialPortTest::tearDown() {
-	delete sp;
-}
+class VUSB {
+	static bool _init_called;
+private:
+public:
+	VUSB(void);
+	virtual ~VUSB();
 
-void VSerialPortTest::testCountAndName() {
-	int32_t num = sp->CountDevices();
-	cout << "devices: " << num << endl;
-	for (int i=0; i<=num; i++) {
-		char name[V_NAME_LENGTH];
-		char buf[256];
-		CPPUNIT_ASSERT(sp->GetDeviceName(i, name, V_NAME_LENGTH) == V_OK);
-		sprintf(buf, "/dev/ttyS%d",i);
-		CPPUNIT_ASSERT(strcmp(name, buf) == 0);
-	}
+	status_t Open(const char *name);
+	void Close(void);
+	ssize_t Read(void *buffer, size_t maxBytes);
+	ssize_t Write(const void *data, size_t numBytes);
 
-}
+	int32_t CountDevices(void);
+	status_t GetDeviceName(int32_t index, char *outName, size_t bufSize = V_NAME_LENGTH);
 
-void VSerialPortTest::testOpenAndClose() {
-	int32_t num = sp->CountDevices();
-	for (int i=0; i<num; i++) {
-		char name[V_NAME_LENGTH];
-		sp->GetDeviceName(i, name, V_NAME_LENGTH);
-		CPPUNIT_ASSERT(sp->Open(name) == V_OK);
-		sp->Close();
-	}
-}
+	static void Init() { if (!_init_called) { usb_init(); _init_called = true; } }
+};
 
-void VUSBTest::setUp() {
-	VUSB::Init();
-	usb = new VUSB();
-}
 
-void VUSBTest::tearDown() {
-	delete usb;
-}
+} // namespace tekhne
 
-void VUSBTest::testCreate() {
-}
+#endif /* _VUSB_H */

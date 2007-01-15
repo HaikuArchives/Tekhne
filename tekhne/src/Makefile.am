@@ -39,11 +39,13 @@ libtekhne_la_SOURCES = \
 	VShape.cc\
 	VString.cc\
 	VStopWatch.cc\
+	VUSB.cc\
 	VView.cc\
 	VMessageRunner.cc
 
 libtekhne_la_LDFLAGS = \
-	-pthread
+	-pthread\
+	-lusb
 
 libtekhne_la_LIBADD =
 

@@ -29,7 +29,9 @@ test_SOURCES = \
 	VSerialPortTest.cc
 
 test_LDFLAGS = \
-	-pthread -static\
+	-pthread\
+	-static\
+	-lusb\
 	-L../../tekhne/src
 
 test_LDADD = \
