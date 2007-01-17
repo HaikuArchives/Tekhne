@@ -17,6 +17,7 @@ libtekhne_la_SOURCES = \
 	VApplication.cc\
 	VArchivable.cc\
 	VBlockCache.cc\
+	VClipboard.cc\
 	VDictionary.cc\
 	VFont.cc\
 	VHandler.cc\

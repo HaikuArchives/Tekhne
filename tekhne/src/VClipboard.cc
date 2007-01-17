@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VClipboard.cc
+ *
+ * Copyright (c) 2006-2007 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,51 +23,67 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#include "tekhne.h"
+#include <iostream>
 
-#include "StandardDefs.h"
-#include "InterfaceDefs.h"
-#include "GraphicsDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
-#include "VView.h"
-#include "VControl.h"
-#include "VListView.h"
-#include "VMenu.h"
-#include "VMenuBar.h"
-#include "VScrollBar.h"
-#include "VWindow.h"
-#include "VAlert.h"
-#include "VScreen.h"
-#include "VTextView.h"
-#include "VSerialPort.h"
-#include "VUSB.h"
-#include "VClipboard.h"
+using namespace tekhne;
+using namespace std;
 
-#endif /* _TEKHNE_H */
+VClipboard *tekhne::v_clipboard = 0;
+
+VClipboard::VClipboard(const char *name, bool discard) {
+	memset(_name, 0, V_NAME_LENGTH);
+	strncpy(_name, name, V_NAME_LENGTH-1);
+	if (v_clipboard == 0 && strcmp(name, "system") == 0) {
+		v_clipboard = this;
+	}
+}
+
+VClipboard::~VClipboard() {
+}
+
+status_t VClipboard::Clear(void) {
+	return V_OK;
+}
+status_t VClipboard::Commit(void) {
+	return V_OK;
+}
+
+status_t VClipboard::Revert(void) {
+	return V_OK;
+}
+
+VMessage *VClipboard::Data(void) const {
+	return _data;
+}
+
+VMessenger *VClipboard::DataSource(void) const {
+	return NULL;
+}
+
+
+uint32_t VClipboard::LocalCount(void) const {
+	return 0;
+}
+
+uint32_t VClipboard::SystemCount(void) const {
+	return 0;
+}
+
+bool VClipboard::Lock(void) {
+	return false;
+}
+
+void VClipboard::Unlock(void) {
+}
+
+bool VClipboard::IsLocked(void) {
+}
+
+status_t VClipboard::StartWatching(VMessenger *target) {
+	return V_OK;
+}
+
+status_t VClipboard::StopWatching(VMessenger *target) {
+	return V_OK;
+}

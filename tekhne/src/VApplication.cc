@@ -179,6 +179,7 @@ VApplication::VApplication(const char *signature) :
 	setup_termination_handler();
 	_main_thread = pthread_self();
 	v_app = this;
+	new VClipboard("system");
 	int32_t err;
 	v_app_messenger = new VMessenger(this, this, &err);
 	// this will resgister with the roster app

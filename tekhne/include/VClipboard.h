@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VClipboard.h
+ *
+ * Copyright (c) 2006-2007 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,51 +23,44 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VCLIPBOARD_H
+#define _VCLIPBOARD_H
 
-#include "StandardDefs.h"
-#include "InterfaceDefs.h"
-#include "GraphicsDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
-#include "VView.h"
-#include "VControl.h"
-#include "VListView.h"
-#include "VMenu.h"
-#include "VMenuBar.h"
-#include "VScrollBar.h"
-#include "VWindow.h"
-#include "VAlert.h"
-#include "VScreen.h"
-#include "VTextView.h"
-#include "VSerialPort.h"
-#include "VUSB.h"
-#include "VClipboard.h"
+namespace tekhne {
 
-#endif /* _TEKHNE_H */
+class VMessage;
+class VMessenger;
+
+class VClipboard {
+private:
+	char _name[V_NAME_LENGTH];
+	VMessage *_data;
+public:
+	VClipboard(const char *name, bool discard = false);
+	~VClipboard();
+
+	status_t Clear(void);
+	status_t Commit(void);
+	status_t Revert(void);
+
+	VMessage *Data(void) const;
+	VMessenger *DataSource(void) const;
+
+	uint32_t LocalCount(void) const;
+	uint32_t SystemCount(void) const;
+
+	bool Lock(void);
+	void Unlock(void);
+	bool IsLocked(void);
+
+	const char *Name(void) const { return _name; }
+
+	status_t StartWatching(VMessenger *target);
+	status_t StopWatching(VMessenger *target);
+};
+
+extern VClipboard *v_clipboard;
+
+} // namespace tekhne
+
+#endif /* _VCLIPBOARD_H */
