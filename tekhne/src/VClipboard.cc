@@ -31,7 +31,9 @@ using namespace std;
 
 VClipboard *tekhne::v_clipboard = 0;
 
-VClipboard::VClipboard(const char *name, bool discard) {
+/* TODO THis class should store and retreive the clipbooard message from a shared memory space. */
+
+VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), _lock(new VLocker()) {
 	memset(_name, 0, V_NAME_LENGTH);
 	strncpy(_name, name, V_NAME_LENGTH-1);
 	if (v_clipboard == 0 && strcmp(name, "system") == 0) {
@@ -40,17 +42,31 @@ VClipboard::VClipboard(const char *name, bool discard) {
 }
 
 VClipboard::~VClipboard() {
+	delete _data;
+	delete _lock;
+	if (_watchers) {
+		delete _watchers;
+	}
 }
 
 status_t VClipboard::Clear(void) {
-	return V_OK;
+	if (_lock->IsLocked()) {
+		return _data->MakeEmpty();
+	}
+	return V_ERROR;
 }
 status_t VClipboard::Commit(void) {
-	return V_OK;
+	if (_lock->IsLocked()) {
+		return V_OK;
+	}
+	return V_ERROR;
 }
 
 status_t VClipboard::Revert(void) {
-	return V_OK;
+	if (_lock->IsLocked()) {
+		return V_OK;
+	}
+	return V_ERROR;
 }
 
 VMessage *VClipboard::Data(void) const {
@@ -58,7 +74,7 @@ VMessage *VClipboard::Data(void) const {
 }
 
 VMessenger *VClipboard::DataSource(void) const {
-	return NULL;
+	return v_app_messenger;
 }
 
 
@@ -71,16 +87,24 @@ uint32_t VClipboard::SystemCount(void) const {
 }
 
 bool VClipboard::Lock(void) {
-	return false;
+	return _lock->Lock() ? V_OK : V_ERROR;
 }
 
 void VClipboard::Unlock(void) {
+	_lock->Unlock();
 }
 
 bool VClipboard::IsLocked(void) {
+	return _lock->IsLocked();
 }
 
 status_t VClipboard::StartWatching(VMessenger *target) {
+	if (!_watchers) {
+		_watchers = new VList();
+	}
+	if (!_watchers->HasItem(target)) {
+		_watchers->AddItem(target);
+	}
 	return V_OK;
 }
 

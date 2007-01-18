@@ -1,7 +1,7 @@
 /***************************************************************************
- *            VClipboard.h
+ *            VClipboardTest.h
  *
- * Copyright (c) 2006-2007 Geoffrey Clements
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,48 +23,34 @@
  *
  ****************************************************************************/
 
-#ifndef _VCLIPBOARD_H
-#define _VCLIPBOARD_H
+#ifndef VCLIPBOARDTEST_H_
+#define VCLIPBOARDTEST_H_
 
-namespace tekhne {
+#include "tekhne.h"
+#include <cppunit/TestCase.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/TestCaller.h>
 
-class VMessage;
-class VMessenger;
-class VLocker;
+using namespace tekhne;
 
-class VClipboard {
-private:
-	char _name[V_NAME_LENGTH];
-	VMessage *_data;
-	VLocker *_lock;
-	VList *_watchers;
+class VClipboardTest : public CppUnit::TestFixture {
+	private:
+	public:
+		static CppUnit::Test *suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VClipboardTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VClipboardTest>("testLockUnlock",
+								   &VClipboardTest::testLockUnlock ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VClipboardTest>("testData",
+								   &VClipboardTest::testData ) );
+			return suiteOfTests;
+		}
 
-public:
-	VClipboard(const char *name, bool discard = false);
-	~VClipboard();
+		void setUp();
+		void tearDown();
 
-	status_t Clear(void);
-	status_t Commit(void);
-	status_t Revert(void);
-
-	VMessage *Data(void) const;
-	VMessenger *DataSource(void) const;
-
-	uint32_t LocalCount(void) const;
-	uint32_t SystemCount(void) const;
-
-	bool Lock(void);
-	void Unlock(void);
-	bool IsLocked(void);
-
-	const char *Name(void) const { return _name; }
-
-	status_t StartWatching(VMessenger *target);
-	status_t StopWatching(VMessenger *target);
+		void testLockUnlock();
+		void testData();
 };
 
-extern VClipboard *v_clipboard;
 
-} // namespace tekhne
-
-#endif /* _VCLIPBOARD_H */
+#endif /*VCLIPBOARDTEST_H_*/

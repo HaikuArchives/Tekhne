@@ -1,7 +1,7 @@
 /***************************************************************************
- *            VClipboard.h
+ *            VClipboardTest.cc
  *
- * Copyright (c) 2006-2007 Geoffrey Clements
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,48 +23,34 @@
  *
  ****************************************************************************/
 
-#ifndef _VCLIPBOARD_H
-#define _VCLIPBOARD_H
+#include "VClipboardTest.h"
+#include <iostream>
 
-namespace tekhne {
+using namespace std;
 
-class VMessage;
-class VMessenger;
-class VLocker;
+void VClipboardTest::setUp() {
+}
 
-class VClipboard {
-private:
-	char _name[V_NAME_LENGTH];
-	VMessage *_data;
-	VLocker *_lock;
-	VList *_watchers;
+void VClipboardTest::tearDown() {
+}
 
-public:
-	VClipboard(const char *name, bool discard = false);
-	~VClipboard();
+void VClipboardTest::testLockUnlock() {
+	CPPUNIT_ASSERT(v_clipboard->Clear() == V_ERROR);
+	CPPUNIT_ASSERT(v_clipboard->Revert() == V_ERROR);
+	CPPUNIT_ASSERT(v_clipboard->Commit() == V_ERROR);
+	CPPUNIT_ASSERT(!v_clipboard->IsLocked());
+	CPPUNIT_ASSERT(v_clipboard->Lock() == V_OK);
+	CPPUNIT_ASSERT(v_clipboard->IsLocked());
+	CPPUNIT_ASSERT(v_clipboard->Clear() == V_OK);
+	CPPUNIT_ASSERT(v_clipboard->Revert() == V_OK);
+	CPPUNIT_ASSERT(v_clipboard->Commit() == V_OK);
+	v_clipboard->Unlock();
+}
 
-	status_t Clear(void);
-	status_t Commit(void);
-	status_t Revert(void);
-
-	VMessage *Data(void) const;
-	VMessenger *DataSource(void) const;
-
-	uint32_t LocalCount(void) const;
-	uint32_t SystemCount(void) const;
-
-	bool Lock(void);
-	void Unlock(void);
-	bool IsLocked(void);
-
-	const char *Name(void) const { return _name; }
-
-	status_t StartWatching(VMessenger *target);
-	status_t StopWatching(VMessenger *target);
-};
-
-extern VClipboard *v_clipboard;
-
-} // namespace tekhne
-
-#endif /* _VCLIPBOARD_H */
+void VClipboardTest::testData() {
+	CPPUNIT_ASSERT(v_clipboard->Lock() == V_OK);
+	VMessage *data = v_clipboard->Data();
+	CPPUNIT_ASSERT(data);
+	CPPUNIT_ASSERT(v_clipboard->Commit() == V_OK);
+	v_clipboard->Unlock();
+}

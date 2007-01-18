@@ -36,6 +36,7 @@
 #include "VMessengerTest.h"
 #include "VRosterTest.h"
 #include "VSerialPortTest.h"
+#include "VClipboardTest.h"
 
 #include "VApplication.h"
 
@@ -75,6 +76,7 @@ public:
 		runner.addTest( VRosterTest::suite() );
 		runner.addTest( VSerialPortTest::suite() );
 		runner.addTest( VUSBTest::suite() );
+		runner.addTest( VClipboardTest::suite() );
 		runner.run();
 	}
 
