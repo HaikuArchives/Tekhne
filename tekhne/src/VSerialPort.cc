@@ -349,9 +349,9 @@ ssize_t VSerialPort::WaitForInput(void) {
 			struct timeval timeout;
 			timeout.tv_sec = int(_timeout/1000000LL);
 			timeout.tv_usec = int(_timeout%1000000LL);
-			return select(max_fd, &input, NULL, NULL, &timeout);
+			return select(max_fd, &input, 0, 0, &timeout);
 		} else {
-			return select(max_fd, &input, NULL, NULL, NULL);
+			return select(max_fd, &input, 0, 0, 0);
 		}
 	}
 	return V_ERROR;

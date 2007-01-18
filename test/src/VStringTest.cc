@@ -2,17 +2,17 @@
  *            VStringTest.cc
  *
  * Copyright (c) 2006 Geoffrey Clements
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- * 
+ *
  ****************************************************************************/
 
 #include "VStringTest.h"
@@ -39,7 +39,7 @@ void VStringTest::testCreate() {
 	const char *str = s->String();
 	CPPUNIT_ASSERT( strlen(str) == 0 );
 	delete s;
-	
+
 	s = new VString("foo");
 	str = s->String();
 	CPPUNIT_ASSERT( strlen(str) == 3 );
@@ -57,12 +57,12 @@ void VStringTest::testCreate() {
 	CPPUNIT_ASSERT( strlen(str) == 6 );
 	CPPUNIT_ASSERT( strcmp(str, "This i") == 0 );
 	delete s;
-	
+
 	VString s2("floppy");
 	str = s2.String();
 	CPPUNIT_ASSERT( strlen(str) == 6 );
 	CPPUNIT_ASSERT( strcmp(str, "floppy") == 0 );
-	
+
 	VString s3(s2);
 	str = s3.String();
 	CPPUNIT_ASSERT( strlen(str) == 6 );
@@ -77,7 +77,7 @@ void VStringTest::testAppend() {
 	CPPUNIT_ASSERT( strlen(str) == 6 );
 	CPPUNIT_ASSERT( strcmp(str, "foobar") == 0 );
 	delete s;
-	
+
 	s = new VString("foo");
 	s->Append("bar");
 	str = s->String();
@@ -87,7 +87,7 @@ void VStringTest::testAppend() {
 
 	s = new VString("foo");
 	VString s3("A longer string");
-	
+
 	str = s3.LockBuffer(0);
 	CPPUNIT_ASSERT( strlen(str) == 15 );
 	CPPUNIT_ASSERT( strcmp(str, "A longer string") == 0 );
@@ -105,7 +105,7 @@ void VStringTest::testAppend() {
 	CPPUNIT_ASSERT( strlen(str) == 3 );
 	CPPUNIT_ASSERT( strcmp(str, "foo") == 0 );
 	delete s;
-	
+
 	s = new VString("foo");
 	s->Append("A longer string", 6);
 	str = s->String();
@@ -129,7 +129,7 @@ void VStringTest::testPrepend() {
 	CPPUNIT_ASSERT( strlen(str) == 6 );
 	CPPUNIT_ASSERT( strcmp(str, "barfoo") == 0 );
 	delete s;
-	
+
 	s = new VString("foo");
 	s->Prepend("bar");
 	str = s->String();
@@ -151,7 +151,7 @@ void VStringTest::testPrepend() {
 	CPPUNIT_ASSERT( strlen(str) == 3 );
 	CPPUNIT_ASSERT( strcmp(str, "foo") == 0 );
 	delete s;
-	
+
 	s = new VString("foo");
 	s->Prepend("A longer string", 6);
 	str = s->String();
@@ -175,21 +175,21 @@ void VStringTest::testInsert() {
 	CPPUNIT_ASSERT( strlen(str) == 27 );
 	CPPUNIT_ASSERT( strcmp(str, "A bitbarnyard longer string") == 0 );
 	delete s;
-	
+
 	s = new VString("A bit longer string");
 	s->Insert(s2, 4, 5);
 	str = s->String();
 	CPPUNIT_ASSERT( strlen(str) == 23 );
 	CPPUNIT_ASSERT( strcmp(str, "A bitbarn longer string") == 0 );
 	delete s;
-	
+
 	s = new VString("A bit longer string");
 	s->Insert(s2, 3, 4, 5);
 	str = s->String();
 	CPPUNIT_ASSERT( strlen(str) == 23 );
 	CPPUNIT_ASSERT( strcmp(str, "A bitnyar longer string") == 0 );
 	delete s;
-	
+
 	s = new VString("A bit longer string");
 	s->Insert("barnyard",7);
 	str = s->String();
@@ -221,7 +221,7 @@ void VStringTest::testInsert() {
 	s = new VString("A bit longer string");
 	s->Insert('c', 3, 4);
 	str = s->String();
-	CPPUNIT_ASSERT( str != NULL );
+	CPPUNIT_ASSERT( str );
 	CPPUNIT_ASSERT( strlen(str) == 22 );
 	CPPUNIT_ASSERT( strcmp(str, "A biccct longer string") == 0 );
 	delete s;
@@ -260,39 +260,39 @@ void VStringTest::testCompare() {
 	VString *s6 = new VString("aaaa");
 	VString s7("aaa");
 	VString *s8 = new VString("aaa");
-	
+
 	CPPUNIT_ASSERT(s1.Compare(s2) == -1);
 	CPPUNIT_ASSERT(s2.Compare(s1) == 1);
 	CPPUNIT_ASSERT(s1.Compare(s7) == 0);
-	
+
 	CPPUNIT_ASSERT(s1.Compare(s3, 2) == -1);
 	CPPUNIT_ASSERT(s3.Compare(s1, 2) == 1);
 	CPPUNIT_ASSERT(s1.Compare(s7, 2) == 0);
-	
+
 	CPPUNIT_ASSERT(s1.Compare("aaaa") == -1);
 	CPPUNIT_ASSERT(s2.Compare("aaa") == 1);
 	CPPUNIT_ASSERT(s1.Compare("aaa") == 0);
-	
+
 	CPPUNIT_ASSERT(s1.Compare("bbb", 2) == -1);
 	CPPUNIT_ASSERT(s3.Compare("aaa", 2) == 1);
 	CPPUNIT_ASSERT(s1.Compare("aaa", 2) == 0);
-	
+
 	CPPUNIT_ASSERT(VString::Compare(s1, s2) == -1);
 	CPPUNIT_ASSERT(VString::Compare(s2, s1) == 1);
 	CPPUNIT_ASSERT(VString::Compare(s1, s7) == 0);
-	
+
 	CPPUNIT_ASSERT(VString::Compare(s6, s5) == 1);
 	CPPUNIT_ASSERT(VString::Compare(s5, s6) == -1);
 	CPPUNIT_ASSERT(VString::Compare(s5, s8) == 0);
-	
+
 	CPPUNIT_ASSERT(s1.ICompare("AaAa") == -1);
 	CPPUNIT_ASSERT(s2.ICompare("AaA") == 1);
 	CPPUNIT_ASSERT(s1.ICompare("aAa") == 0);
-	
+
 	CPPUNIT_ASSERT(s1.ICompare("bBb", 2) == -1);
 	CPPUNIT_ASSERT(s3.ICompare("aAa", 2) == 1);
 	CPPUNIT_ASSERT(s1.ICompare("AaA", 2) == 0);
-	
+
 	delete s5;
 	delete s6;
 	delete s8;
@@ -302,13 +302,13 @@ void VStringTest::testCopyInto() {
 	VString s1("foo");
 	VString s2;
 	char s3[256];
-	
+
 	s1.CopyInto(s2, 1, 2);
 	const char *str = s2.String();
 	CPPUNIT_ASSERT( strlen(str) == 2 );
 	CPPUNIT_ASSERT( strcmp(str, "oo") == 0 );
 	s2.Clear();
-	
+
 	s1.CopyInto(s3, 1, 2);
 	str = s3;
 	CPPUNIT_ASSERT( strlen(str) == 2 );
@@ -318,7 +318,7 @@ void VStringTest::testCopyInto() {
 	str = s2.String();
 	CPPUNIT_ASSERT( strlen(str) == 2 );
 	CPPUNIT_ASSERT( strcmp(str, "oo") == 0 );
-	
+
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 0 );
 
@@ -344,7 +344,7 @@ void VStringTest::testFind() {
 	CPPUNIT_ASSERT( s1.FindFirst('g', 8) == 14 );
 	CPPUNIT_ASSERT( s1.FindFirst('g', 43) == V_ERROR );
 	CPPUNIT_ASSERT( s1.FindFirst('z') == -1 );
-	
+
 	CPPUNIT_ASSERT( s1.FindLast(VString("ger")) == 5 );
 	CPPUNIT_ASSERT( s1.FindLast(VString("ger"), 3) == 5 );
 	CPPUNIT_ASSERT( s1.FindLast(VString("ger"), 43) == V_ERROR );
@@ -366,7 +366,7 @@ void VStringTest::testFind() {
 	CPPUNIT_ASSERT( s1.IFindFirst("gEr") == 5 );
 	CPPUNIT_ASSERT( s1.IFindFirst("Ger", 3) == 5 );
 	CPPUNIT_ASSERT( s1.IFindFirst("geR", 43) == V_ERROR );
-	
+
 	CPPUNIT_ASSERT( s1.IFindLast(VString("Ger")) == 5 );
 	CPPUNIT_ASSERT( s1.IFindLast(VString("gEr"), 3) == 5 );
 	CPPUNIT_ASSERT( s1.IFindLast(VString("geR"), 43) == V_ERROR );
@@ -378,30 +378,30 @@ void VStringTest::testFind() {
 
 void VStringTest::testRemove() {
 	VString s1("Abbb longer bbbstring");
-	
+
 	s1.Remove(4, 5);
 	const char *str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 16 );
 	CPPUNIT_ASSERT( strcmp(str, "Abbber bbbstring") == 0 );
-	
+
 	s1.SetTo("Abbb longer bbbstring");
 	s1.RemoveFirst(VString("bbb"));
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 18 );
 	CPPUNIT_ASSERT( strcmp(str, "A longer bbbstring") == 0 );
-	
+
 	s1.SetTo("Abbb longer bbbstring");
 	s1.RemoveFirst("bbb");
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 18 );
 	CPPUNIT_ASSERT( strcmp(str, "A longer bbbstring") == 0 );
-	
+
 	s1.SetTo("Abbb longer bbbstring");
 	s1.RemoveLast("bbb");
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 18 );
 	CPPUNIT_ASSERT( strcmp(str, "Abbb longer string") == 0 );
-	
+
 	s1.SetTo("Abbb longer bbbstring");
 	s1.RemoveLast(VString("bbb"));
 	str = s1.String();
@@ -434,7 +434,7 @@ void VStringTest::testReplace() {
 	const char *str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 45 );
 	CPPUNIT_ASSERT( strcmp(str, "A catlonger stdoggyring fodoggyr thcatis test") == 0 );
-	
+
 	s1.Replace('g', 'f', 4, 10);
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 45 );
@@ -454,7 +454,7 @@ void VStringTest::testReplace() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 32 );
 	CPPUNIT_ASSERT( strcmp(str, "A batlonger string for this test") == 0 );
-	
+
 	s1.ReplaceLast('i', 'a');
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 32 );
@@ -464,7 +464,7 @@ void VStringTest::testReplace() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 29 );
 	CPPUNIT_ASSERT( strcmp(str, "A longer string for thas test") == 0 );
-	
+
 	s1.ReplaceAll('e', 'z');
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 29 );
@@ -485,7 +485,7 @@ void VStringTest::testReplace() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 45 );
 	CPPUNIT_ASSERT( strcmp(str, "A catlonger stdoggyring fodoggyr thcatis test") == 0 );
-	
+
 	s1.IReplace('G', 'f', 4, 10);
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 45 );
@@ -505,7 +505,7 @@ void VStringTest::testReplace() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 32 );
 	CPPUNIT_ASSERT( strcmp(str, "A batlonger string for this test") == 0 );
-	
+
 	s1.IReplaceLast('I', 'a');
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 32 );
@@ -515,12 +515,12 @@ void VStringTest::testReplace() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 29 );
 	CPPUNIT_ASSERT( strcmp(str, "A longer string for thas test") == 0 );
-	
+
 	s1.IReplaceAll('E', 'Z');
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 29 );
 	CPPUNIT_ASSERT( strcmp(str, "A longZr string for thas tZst") == 0 );
-	
+
 	s1.IReplaceAll('z', 'e');
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 29 );
@@ -530,13 +530,13 @@ void VStringTest::testReplace() {
 void VStringTest::testSetTo() {
 	VString s("A bit longer string");
 	VString s1;
-	
+
 	s1.SetTo(s);
 	const char *str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 19 );
 	CPPUNIT_ASSERT( strcmp(str, "A bit longer string") == 0 );
 	s1.Clear();
-	
+
 	s1.SetTo(s, 83);
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 19 );
@@ -560,7 +560,7 @@ void VStringTest::testSetTo() {
 	CPPUNIT_ASSERT( strlen(str) == 19 );
 	CPPUNIT_ASSERT( strcmp(str, "A bit longer string") == 0 );
 	s1.Clear();
-	
+
 	s1.SetTo(s2, 83);
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 19 );
@@ -586,11 +586,11 @@ void VStringTest::testAdopt() {
 	CPPUNIT_ASSERT( strlen(str) == 19 );
 	CPPUNIT_ASSERT( strcmp(str, "A bit longer string") == 0 );
 	str = s->String();
-	
+
 	CPPUNIT_ASSERT( strlen(str) == 0 );
 	delete s;
 	s1.Clear();
-	
+
 	s = new VString("A bit longer string");
 	s1.Adopt(*s, 8);
 	str = s1.String();
@@ -610,7 +610,7 @@ void VStringTest::testAdopt() {
 	CPPUNIT_ASSERT( strlen(str) == 0 );
 	delete s;
 	s1.Clear();
-	
+
 	s = new VString("A bit longer string");
 	s1.Adopt(*s, -4);
 	str = s1.String();
@@ -619,7 +619,7 @@ void VStringTest::testAdopt() {
 	CPPUNIT_ASSERT( strlen(str) == 0 );
 	delete s;
 	s1.Clear();
-	
+
 	VString s3("A bit longer string");
 	s1.Adopt(s3);
 	str = s1.String();
@@ -641,7 +641,7 @@ void VStringTest::testCountChars() {
 	CPPUNIT_ASSERT( s->ByteAt(1) == 'o' );
 	CPPUNIT_ASSERT( s->ByteAt(2) == 'o' );
 	delete s;
-	
+
 	VString s1("This is a LonGer string");
 	s1.Truncate(43);
 	const char *str = s1.String();
@@ -684,27 +684,27 @@ void VStringTest::testSubstring() {
 	const char *str = ans.String();
 	CPPUNIT_ASSERT( strlen(str) == 4 );
 	CPPUNIT_ASSERT( strcmp(str, "nger") == 0 );
-	
+
 	ans = s->Substring(4);
 	str = ans.String();
 	CPPUNIT_ASSERT( strlen(str) == 11 );
 	CPPUNIT_ASSERT( strcmp(str, "nger string") == 0 );
-	
+
 	ans = s->Substring(8, 4);
 	str = ans.String();
 	CPPUNIT_ASSERT( strlen(str) == 4 );
 	CPPUNIT_ASSERT( strcmp(str, "nger") == 0 );
-	
+
 	ans = s->Substring(-8, 4);
 	str = ans.String();
 	CPPUNIT_ASSERT( strlen(str) == 4 );
 	CPPUNIT_ASSERT( strcmp(str, "A lo") == 0 );
-	
+
 	ans = s->Substring(-8, -4);
 	str = ans.String();
 	CPPUNIT_ASSERT( strlen(str) == 0 );
 	CPPUNIT_ASSERT( ans.Length() == 0 );
-	
+
 	delete s;
 	VString s1("foo");
 	ans = s1.Substring(1, 3);
@@ -719,7 +719,7 @@ void VStringTest::testOperators() {
 	const char *str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 16 );
 	CPPUNIT_ASSERT( strcmp(str, "This is a string") == 0 );
-	
+
 	s1 = 'A';
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 1 );
@@ -749,7 +749,7 @@ void VStringTest::testOperators() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 23 );
 	CPPUNIT_ASSERT( strcmp(str, "A longer string to test") == 0 );
-	
+
 	s1 << '.';
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 24 );
@@ -766,7 +766,7 @@ void VStringTest::testOperators() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 30 );
 	CPPUNIT_ASSERT( strcmp(str, "A longer string to test.786-97") == 0 );
-	
+
 	s1 ="short";
 	uint64_t c = 786;
 	s1 << c;
@@ -779,13 +779,13 @@ void VStringTest::testOperators() {
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 11 );
 	CPPUNIT_ASSERT( strcmp(str, "short786-97") == 0 );
-	
+
 	float e = -83.76;
 	s1 << e;
 	str = s1.String();
 	CPPUNIT_ASSERT( strlen(str) == 21 );
 	CPPUNIT_ASSERT( strcmp(str, "short786-97-83.760002") == 0 );
-	
+
 	CPPUNIT_ASSERT( s1[5] == '7' );
 	CPPUNIT_ASSERT( s1[-1] == 0 );
 	CPPUNIT_ASSERT( s1[65] == 0 );
@@ -805,7 +805,7 @@ void VStringTest::testOperators() {
 
 	CPPUNIT_ASSERT( s1 != VString("bleah") );
 	CPPUNIT_ASSERT( s1 != "bleah" );
-	
+
 	CPPUNIT_ASSERT( s1 < VString("shorter") );
 	CPPUNIT_ASSERT( s1 < "shorter" );
 
@@ -813,7 +813,7 @@ void VStringTest::testOperators() {
 	CPPUNIT_ASSERT( s1 <= VString("short") );
 	CPPUNIT_ASSERT( s1 <= "shorter" );
 	CPPUNIT_ASSERT( s1 <= "short" );
-	
+
 	CPPUNIT_ASSERT( s1 > VString("bleah") );
 	CPPUNIT_ASSERT( s1 > "bleah" );
 

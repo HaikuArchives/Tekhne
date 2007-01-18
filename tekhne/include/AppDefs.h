@@ -110,6 +110,41 @@ const int32_t V_ANY_SOURCE = 1071;
 const int32_t V_LOCAL_SOURCE = 1072;
 const int32_t V_REMOTE_SOURCE = 1073;
 
+const int32_t V_ARGV_ONLY = 5100;
+
+const int32_t V_BACKGROUND_APP = 0x1;
+const int32_t V_EXCLUSIVE_LAUNCH = 0x2;
+const int32_t V_SINGLE_LAUNCH = 0x4;
+const int32_t V_MULTIPLE_LAUNCH = 0x8;
+const int32_t V_LAUNCH_MASK = 0xF;
+
+const int32_t V_CREATE_PROPERTY = 5000;
+const int32_t V_DELETE_PROPERTY = 5001;
+const int32_t V_GET_PROPERTY = 5002;
+const int32_t V_SET_PROPERTY = 5003;
+
+const int32_t V_NO_SPECIFIER = 0;
+const int32_t V_DIRECT_SPECIFIER = 1;
+const int32_t V_ID_SPECIFIER = 2;
+const int32_t V_INDEX_SPECIFIER = 3;
+const int32_t V_NAME_SPECIFIER = 4;
+const int32_t V_RANGE_SPECIFIER = 5;
+const int32_t V_REVERSE_INDEX_SPECIFIER = 6;
+const int32_t V_REVERSE_RANGE_SPECIFIER = 7;
+const int32_t V_SPECIFIERS_END  = 128;
+
+const int32_t V_COPY = 2000;
+const int32_t V_CUT = 2001;
+const int32_t V_PASTE = 2002;
+const int32_t V_SELECT_ALL = 2003;
+
+const int32_t V_MIME_DATA = 2020;
+const int32_t V_SIMPLE_DATA = 2021;
+
+const int32_t V_SAVE_REQUESTED = 3000;
+
+const int32_t V_GET_SUPPORTED_SUITES = 4000;
+
 const int32_t V_ANY_COMMAND = 0;
 
 const int32_t V_DISPATCH_MESSAGE = 1074;
@@ -118,6 +153,10 @@ const int32_t V_SKIP_MESSAGE = 1075;
 const int32_t V_MILLISECOND = 1000;
 const int32_t V_SECOND = 1000*V_MILLISECOND;
 const int32_t V_MINUTE = 60*V_SECOND;
+
+// V_HAND_CURSOR
+// V_I_BEAM_CURSOR
+
 }
 
 #endif /* _APPDEFS_H */
