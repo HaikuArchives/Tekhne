@@ -246,6 +246,8 @@ VApplication::~VApplication() {
 	v_app = 0;
 	delete v_app_messenger;
 	v_app_messenger = 0;
+	delete v_clipboard;
+	v_clipboard = 0;
 }
 
 //VResources *VApplication::AppResources(void) {

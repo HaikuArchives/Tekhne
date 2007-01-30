@@ -25,23 +25,31 @@
 
 #include "tekhne.h"
 #include <iostream>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
 
 using namespace tekhne;
 using namespace std;
 
 VClipboard *tekhne::v_clipboard = 0;
 
-/* TODO THis class should store and retreive the clipbooard message from a shared memory space. */
-
-VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), _lock(new VLocker()) {
+VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), _shared_mem(0), _page_size(0), _lock(new VLocker()) {
 	memset(_name, 0, V_NAME_LENGTH);
 	strncpy(_name, name, V_NAME_LENGTH-1);
 	if (v_clipboard == 0 && strcmp(name, "system") == 0) {
 		v_clipboard = this;
 	}
+	_page_size = (size_t) sysconf (_SC_PAGESIZE);
+	_shared_mem = mmap(0, 16*_page_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_SHARED, 0, 0);
+	cout << "shared mem: " << _shared_mem << endl;
 }
 
 VClipboard::~VClipboard() {
+	cout << "unmapping..." << endl;
+	msync (_shared_mem, 16*_page_size, MS_SYNC);
+	munmap(_shared_mem, 16*_page_size);
 	delete _data;
 	delete _lock;
 	if (_watchers) {

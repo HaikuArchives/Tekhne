@@ -36,6 +36,8 @@ class VClipboard {
 private:
 	char _name[V_NAME_LENGTH];
 	VMessage *_data;
+	void *_shared_mem;
+	size_t _page_size;
 	VLocker *_lock;
 	VList *_watchers;
 
