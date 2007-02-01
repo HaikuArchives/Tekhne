@@ -42,6 +42,16 @@ Roster::~Roster() {
 }
 
 void Roster::ReadyToRun(void) {
+	if (v_clipboard->Lock()) {
+		v_clipboard->Clear();
+		VMessage *clip = v_clipboard->Data();
+		if (clip) {
+			char *asciiText = "app/x-baldmountain-roster";
+			clip->AddString("text/plain", asciiText);
+			v_clipboard->Commit();
+		}
+		v_clipboard->Unlock();
+	}
 }
 
 ApplicationInfo *Roster::FindAppBySignature(VString& sig) {

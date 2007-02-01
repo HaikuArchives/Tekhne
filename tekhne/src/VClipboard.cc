@@ -25,31 +25,37 @@
 
 #include "tekhne.h"
 #include <iostream>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/fcntl.h>
 
 using namespace tekhne;
 using namespace std;
 
 VClipboard *tekhne::v_clipboard = 0;
 
-VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), _shared_mem(0), _page_size(0), _lock(new VLocker()) {
+VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), _shared_mem(0), _shmid(0), _page_size(0), _lock(new VLocker()) {
 	memset(_name, 0, V_NAME_LENGTH);
 	strncpy(_name, name, V_NAME_LENGTH-1);
 	if (v_clipboard == 0 && strcmp(name, "system") == 0) {
 		v_clipboard = this;
 	}
 	_page_size = (size_t) sysconf (_SC_PAGESIZE);
-	_shared_mem = mmap(0, 16*_page_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_SHARED, 0, 0);
-	cout << "shared mem: " << _shared_mem << endl;
+	struct stat buf;
+	int32_t id = stat ("/tmp/v_clipboard", &buf );
+	if ( id != 0 ) {
+		close(open("/tmp/v_clipboard", O_CREAT|O_TRUNC|O_RDWR, 0));
+		chmod("/tmp/v_clipboard", 0666);
+	}
+	key_t mykey=ftok("/tmp/v_clipboard", 1);
+	_shmid = shmget(mykey, 16*_page_size, (IPC_CREAT|0640));
+//	shmctl(_shmid, IPC_RMID, 0);
+	_shared_mem = shmat(_shmid, 0, 0);
 }
 
 VClipboard::~VClipboard() {
-	cout << "unmapping..." << endl;
-	msync (_shared_mem, 16*_page_size, MS_SYNC);
-	munmap(_shared_mem, 16*_page_size);
+	shmdt(_shared_mem);
+	_shared_mem = 0;
 	delete _data;
 	delete _lock;
 	if (_watchers) {
@@ -65,6 +71,9 @@ status_t VClipboard::Clear(void) {
 }
 status_t VClipboard::Commit(void) {
 	if (_lock->IsLocked()) {
+		ssize_t bytes;
+		VMemoryIO mem(_shared_mem, 16*_page_size);
+		_data->Flatten(&mem, &bytes);
 		return V_OK;
 	}
 	return V_ERROR;
@@ -72,6 +81,8 @@ status_t VClipboard::Commit(void) {
 
 status_t VClipboard::Revert(void) {
 	if (_lock->IsLocked()) {
+		VMemoryIO mem(_shared_mem, 16*_page_size);
+		_data->Unflatten(&mem);
 		return V_OK;
 	}
 	return V_ERROR;
@@ -95,7 +106,7 @@ uint32_t VClipboard::SystemCount(void) const {
 }
 
 bool VClipboard::Lock(void) {
-	return _lock->Lock() ? V_OK : V_ERROR;
+	return _lock->Lock();
 }
 
 void VClipboard::Unlock(void) {

@@ -35,22 +35,21 @@ void VClipboardTest::tearDown() {
 }
 
 void VClipboardTest::testLockUnlock() {
-	CPPUNIT_ASSERT(v_clipboard->Clear() == V_ERROR);
-	CPPUNIT_ASSERT(v_clipboard->Revert() == V_ERROR);
-	CPPUNIT_ASSERT(v_clipboard->Commit() == V_ERROR);
 	CPPUNIT_ASSERT(!v_clipboard->IsLocked());
-	CPPUNIT_ASSERT(v_clipboard->Lock() == V_OK);
+	CPPUNIT_ASSERT(v_clipboard->Lock());
 	CPPUNIT_ASSERT(v_clipboard->IsLocked());
-	CPPUNIT_ASSERT(v_clipboard->Clear() == V_OK);
-	CPPUNIT_ASSERT(v_clipboard->Revert() == V_OK);
-	CPPUNIT_ASSERT(v_clipboard->Commit() == V_OK);
 	v_clipboard->Unlock();
 }
-
 void VClipboardTest::testData() {
-	CPPUNIT_ASSERT(v_clipboard->Lock() == V_OK);
+	CPPUNIT_ASSERT(v_clipboard->Lock());
+	CPPUNIT_ASSERT(v_clipboard->Clear() == V_OK);
+	CPPUNIT_ASSERT(v_clipboard->Revert() == V_OK);
 	VMessage *data = v_clipboard->Data();
 	CPPUNIT_ASSERT(data);
-	CPPUNIT_ASSERT(v_clipboard->Commit() == V_OK);
+	char *text;
+	status_t status = data->FindString("text/plain", (const char **)&text);
+	CPPUNIT_ASSERT(status == V_OK);
 	v_clipboard->Unlock();
+	// this is preset by the Roster Application
+	CPPUNIT_ASSERT(strcmp("app/x-baldmountain-roster", text) == 0);
 }

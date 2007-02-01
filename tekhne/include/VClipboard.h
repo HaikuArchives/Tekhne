@@ -37,6 +37,7 @@ private:
 	char _name[V_NAME_LENGTH];
 	VMessage *_data;
 	void *_shared_mem;
+	int32_t _shmid;
 	size_t _page_size;
 	VLocker *_lock;
 	VList *_watchers;

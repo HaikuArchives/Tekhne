@@ -343,6 +343,7 @@ status_t VMessage::FindData(const char *name, type_code type, int32_t index, con
 				case V_RECT_TYPE:
 					(*((VRect**)data))->Set(si->data.r.left, si->data.r.top, si->data.r.right, si->data.r.bottom);
 					break;
+				case V_STRING_TYPE:
 				case V_POINTER_TYPE:
 				case V_RAW_TYPE:
 				case V_MESSAGE_TYPE:
