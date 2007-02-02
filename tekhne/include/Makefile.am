@@ -19,6 +19,7 @@ libtekhne_include_DATA = \
 	VControl.h\
 	VDataIO.h\
 	VDictionary.h\
+	VEntry.h\
 	VErrors.h\
 	VFindDirectory.h\
 	VFont.h\
@@ -51,6 +52,7 @@ libtekhne_include_DATA = \
 	VSerialPort.h\
 	VShape.h\
 	VShapeIterator.h\
+	VStatable.h\
 	VStopWatch.h\
 	VString.h\
 	VTextView.h\
