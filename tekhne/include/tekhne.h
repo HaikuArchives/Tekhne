@@ -69,5 +69,7 @@
 #include "VClipboard.h"
 #include "VStatable.h"
 #include "VEntry.h"
+#include "VEntryList.h"
+#include "VDirectory.h"
 
 #endif /* _TEKHNE_H */

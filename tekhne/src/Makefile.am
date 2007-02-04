@@ -44,7 +44,8 @@ libtekhne_la_SOURCES = \
 	VView.cc\
 	VMessageRunner.cc\
 	VStatable.cc\
-	VEntry.cc
+	VEntry.cc\
+	VDirectory.cc
 
 libtekhne_la_LDFLAGS = \
 	-pthread\
