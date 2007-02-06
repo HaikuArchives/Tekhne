@@ -36,13 +36,13 @@ private:
 public:
 	virtual ~VFlattenable(){}
 
-	virtual bool AllowsTypeCode(type_code code) = 0;
+	virtual bool AllowsTypeCode(type_code code) const = 0;
 
-	virtual status_t Flatten(const void *address, ssize_t size) = 0;
+	virtual status_t Flatten(void *address, ssize_t size) const = 0;
 
-	virtual ssize_t FlattenedSize(void) = 0;
+	virtual ssize_t FlattenedSize(void) const = 0;
 
-	virtual type_code TypeCode() = 0;
+	virtual type_code TypeCode() const = 0;
 
 	virtual status_t Unflatten(type_code code, const void *buffer, ssize_t size) = 0;
 

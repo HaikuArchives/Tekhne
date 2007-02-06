@@ -24,15 +24,23 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include <iostream>
+using namespace std;
 
 using namespace tekhne;
 
-bool VPath::normalize_me (void) {
-	if ('.' != _path.ByteAt(0) && '/' != _path.ByteAt(1)) {
+inline void VPath::split_me() {
+	int32_t idx = _path.FindLast("/");
+	_leaf = _path.Substring(idx+1);
+	_path.Remove(idx, INT16_MAX);
+}
+
+bool VPath::normalize_me () {
+	if ('.' == _path.ByteAt(0) && '/' == _path.ByteAt(1)) {
 		_path.Remove(0, 2);
 	}
 	// relative pathnames are reckoned off of the current working directory
-	if (('.' != _path.ByteAt(0) && '.' != _path.ByteAt(1) && '/' != _path.ByteAt(2)) || '/' != _path.ByteAt(0)) {
+	if (('.' == _path.ByteAt(0) && '.' == _path.ByteAt(1) && '/' == _path.ByteAt(2)) || '/' != _path.ByteAt(0)) {
 		char buf[B_PATH_NAME_LENGTH];
 		if (getcwd(buf, B_PATH_NAME_LENGTH)) {
 			_path.Prepend("/");
@@ -103,7 +111,9 @@ const char *VPath::Leaf(void) const {
 status_t VPath::SetTo(const char *path, const char *leaf, bool normalize) {
 	_path = path;
 	_path.Append("/");
-	_path.Append(leaf);
+	if (leaf) {
+		_path.Append(leaf);
+	}
 	_leaf.Clear();
 	if (normalize || must_normalize_me()) {
 		if (!normalize_me()) {

@@ -39,12 +39,8 @@ private:
 		if ('/' != _path.ByteAt(0) || _path.FindFirst("/./")!=V_ERROR || _path.FindFirst("/../")!=V_ERROR || _path.FindFirst("//")!=V_ERROR || '/' == _path.ByteAt(_path.Length()-1)) return true;
 		return false;
 	}
-	inline void split_me() {
-		int32_t idx = _path.FindLast("/");
-		_leaf = _path.Substring(idx+1);
-		_path.Remove(idx, INT16_MAX);
-	}
-	bool normalize_me(void);
+	void split_me();
+	bool normalize_me();
 public:
 	VPath(const char *path, const char *leaf = 0, bool normalize = false){
 		SetTo(path, leaf, normalize);
@@ -85,6 +81,7 @@ public:
 	virtual type_code TypeCode() const;
 
 	virtual status_t Unflatten(type_code code, const void *buffer, ssize_t size);
+	virtual bool IsFixedSize(void) const { return false; }
 
 	VPath& operator=(const VPath &path);
 	VPath& operator=(const char *string);

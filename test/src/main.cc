@@ -37,6 +37,7 @@
 #include "VRosterTest.h"
 #include "VSerialPortTest.h"
 #include "VClipboardTest.h"
+#include "VStorageTest.h"
 
 #include "VApplication.h"
 
@@ -77,6 +78,7 @@ public:
 		runner.addTest( VSerialPortTest::suite() );
 		runner.addTest( VUSBTest::suite() );
 		runner.addTest( VClipboardTest::suite() );
+		runner.addTest( VPathTest::suite() );
 		runner.run();
 	}
 

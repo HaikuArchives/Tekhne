@@ -601,7 +601,11 @@ VString &VString::Remove(int32_t startingAt, int32_t charCount) {
 		int32_t oldLen = bufferLen;
 		makeBuffer(bufferLen - charCount, false);
 		memmove(buf, oldBuf, startingAt);
-		memmove(buf+startingAt, oldBuf+startingAt+charCount, oldLen-startingAt-charCount-1);
+		int32_t l = oldLen-startingAt-charCount-1;
+		// only copy if there is something to copy
+		if (l > 0) {
+			memmove(buf+startingAt, oldBuf+startingAt+charCount, l);
+		}
 		delete [] oldBuf;
 	}
 	return *this;

@@ -28,13 +28,14 @@
 
 #include <stdint.h>
 #include <fcntl.h>
+#include <linux/limits.h>
 
 namespace tekhne {
 
-	const int32_t B_FILE_NAME_LENGTH = 256;
-	const int32_t B_PATH_NAME_LENGTH = 1024;
+	const int32_t B_FILE_NAME_LENGTH = NAME_MAX;
+	const int32_t B_PATH_NAME_LENGTH = PATH_MAX;
 	const int32_t B_MIME_TYPE_LENGTH = 256;
-	const int32_t B_MAX_SYMLINKS = 1024;
+	const int32_t B_MAX_SYMLINKS = 127; // LINK_MAX;
 
 	const int32_t B_READ_ONLY = O_RDONLY;
 	const int32_t B_WRITE_ONLY = O_WRONLY;
