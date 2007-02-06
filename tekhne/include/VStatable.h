@@ -26,6 +26,7 @@
 #ifndef _VSTATABLE_H
 #define _VSTATABLE_H
 
+#include "StorageDefs.h"
 #include <sys/stat.h>
 
 namespace tekhne {

@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VFlattenable.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,54 +23,32 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VFLATTENABLE_H
+#define _VFLATTENABLE_H
+
+namespace tekhne {
 
 #include "StandardDefs.h"
-#include "InterfaceDefs.h"
-#include "GraphicsDefs.h"
-#include "StorageDefs.h"
-#include "AppDefs.h"
-#include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
-#include "VView.h"
-#include "VControl.h"
-#include "VListView.h"
-#include "VMenu.h"
-#include "VMenuBar.h"
-#include "VScrollBar.h"
-#include "VWindow.h"
-#include "VAlert.h"
-#include "VScreen.h"
-#include "VTextView.h"
-#include "VSerialPort.h"
-#include "VUSB.h"
-#include "VClipboard.h"
-#include "VPath.h"
-#include "VDirectory.h"
 
-#endif /* _TEKHNE_H */
+class VFlattenable {
+private:
+
+public:
+	virtual ~VFlattenable(){}
+
+	virtual bool AllowsTypeCode(type_code code) = 0;
+
+	virtual status_t Flatten(const void *address, ssize_t size) = 0;
+
+	virtual ssize_t FlattenedSize(void) = 0;
+
+	virtual type_code TypeCode() = 0;
+
+	virtual status_t Unflatten(type_code code, const void *buffer, ssize_t size) = 0;
+
+	virtual bool IsFixedSize(void) const = 0;
+};
+
+}// namespace tekhne
+
+#endif /* _VFLATTENABLE_H */

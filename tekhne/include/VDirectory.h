@@ -26,15 +26,21 @@
 #ifndef _VDIRECTORY_H
 #define _VDIRECTORY_H
 
-#include <sys/stat.h>
+#include "VEntry.h"
+#include "VEntryList.h"
 
 namespace tekhne {
 
-class VDictionary : VEntry, VEntryList {
+class VFile;
+class VPath;
+class VSymLink;
+class VVolvume;
+
+class VDirectory : VEntry, VEntryList {
 private:
 
 public:
-	VDirectory(const BEntry *entry);
+	VDirectory(const VEntry *entry);
 	VDirectory(const char *path);
 	VDirectory(const VDirectory *dir, const char *path);
 	VDirectory(void);
@@ -42,28 +48,27 @@ public:
 
 	virtual ~VDirectory(){}
 
-	bool Contains(const char *path, int32 nodeFlags = B_ANY_NODE) const;
-	bool Contains(const BEntry *entry, int32 nodeFlags = B_ANY_NODE) const;
+	bool Contains(const char *path, int32_t nodeFlags = V_ANY_NODE) const;
+	bool Contains(const VEntry *entry, int32_t nodeFlags = V_ANY_NODE) const;
 
-	status_t CreateFile(const char *path, BFile *file, bool failIfExists = false);
+	status_t CreateFile(const char *path, VFile *file, bool failIfExists = false);
 	status_t CreateDirectory(const char *path, VDirectory *dir);
-	status_t CreateSymLink(const char *path, const char *linkToPath, BSymLink *link);
+	status_t CreateSymLink(const char *path, const char *linkToPath, VSymLink *link);
 
-	status_t FindEntry(const char *path, BEntry *entry, bool traverse = false) const;
+	status_t FindEntry(const char *path, VEntry *entry, bool traverse = false) const;
 
-	status_t GetEntry(BEntry *entry) const;
+	status_t GetEntry(VEntry *entry) const;
 
-	virtual status_t GetNextEntry(BEntry *entry, bool traverse = false);
-	virtual status_t GetNextRef(entry_ref *ref);
-	virtual int32 GetNextDirents(dirent *buf, size_t bufsize, int32 count = INT_MAX);
-	virtual int32 CountEntries(void);
+	virtual status_t GetNextEntry(VEntry *entry, bool traverse = false);
+	virtual int32_t GetNextDirents(dirent *buf, size_t bufsize, int32_t count = INT_MAX);
+	virtual int32_t CountEntries(void);
 	virtual status_t Rewind(void);
 
-	status_t GetStatFor(const char *path, stat *st) const;
+	status_t GetStatFor(const char *path, struct stat *st) const;
 
 	bool IsRootDirectory(void) const;
 
-	status_t SetTo(const BEntry *entry);
+	status_t SetTo(const VEntry *entry);
 	status_t SetTo(const char *path);
 	status_t SetTo(const VDirectory *dir, const char *path);
 	void Unset(void);
@@ -74,8 +79,8 @@ public:
 
 status_t create_directory(const char *path, mode_t mode);
 
-status_t find_directory(directory_which which, dev_t volume, bool create_it, char *path_string, int32 length);
-status_t find_directory(directory_which which, BPath *path_obj, bool create_it = false, BVolume *volume = NULL);
+//status_t find_directory(directory_which which, dev_t volume, bool create_it, char *path_string, int32_t length);
+//status_t find_directory(directory_which which, VPath *path_obj, bool create_it = false, BVolume *volume = NULL);
 }// namespace tekhne
 
 #endif /* _VDIRECTORY_H */

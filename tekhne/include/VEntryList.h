@@ -32,7 +32,6 @@ namespace tekhne {
 
 class VEntryList {
 private:
-	VString path;
 
 public:
 	virtual ~VEntryList(){}

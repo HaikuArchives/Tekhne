@@ -6,6 +6,7 @@ libtekhne_include_DATA = \
 	AppDefs.h\
 	GraphicsDefs.h\
 	InterfaceDefs.h\
+	StorageDefs.h\
 	ClassInfo.h\
 	StandardDefs.h\
 	tekhne.h\
@@ -24,6 +25,7 @@ libtekhne_include_DATA = \
 	VEntryList.h\
 	VErrors.h\
 	VFindDirectory.h\
+	VFlattenable.h\
 	VFont.h\
 	VHandler.h\
 	VHashable.h\
@@ -42,6 +44,7 @@ libtekhne_include_DATA = \
 	VMessenger.h\
 	VMime.h\
 	VNodeMonitor.h\
+	VPath.h\
 	VPoint.h\
 	VPolygon.h\
 	VPositionIO.h\
