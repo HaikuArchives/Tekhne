@@ -29,16 +29,14 @@ using namespace std;
 
 using namespace tekhne;
 
-inline void VPath::split_me() {
-	int32_t idx = _path.FindLast("/");
-	_leaf = _path.Substring(idx+1);
-	_path.Remove(idx, INT16_MAX);
-}
+bool debug = true;
 
 bool VPath::normalize_me () {
+	if (debug) cout << "1> " << _path.String() << endl;
 	if ('.' == _path.ByteAt(0) && '/' == _path.ByteAt(1)) {
 		_path.Remove(0, 2);
 	}
+	if (debug) cout << "2> " << _path.String() << endl;
 	// relative pathnames are reckoned off of the current working directory
 	if (('.' == _path.ByteAt(0) && '.' == _path.ByteAt(1) && '/' == _path.ByteAt(2)) || '/' != _path.ByteAt(0)) {
 		char buf[B_PATH_NAME_LENGTH];
@@ -47,25 +45,36 @@ bool VPath::normalize_me () {
 			_path.Prepend(buf);
 		}
 	}
+	if (debug) cout << "3> " << _path.String() << endl;
 	// "." is ignored (at the head of a path, it's taken as the cwd).
 	_path.ReplaceAll("/./", "/");
+	if (debug) cout << "4> " << _path.String() << endl;
 	// redundant slashes are coalesced
 	_path.ReplaceAll("//", "/");
-	// a trailing slash is removed.
-	if ('/' == _path.ByteAt(_path.Length()-1)) _path.RemoveLast("/");
 	// ".." bumps up one directory level
+	if (debug) cout << "5> " << _path.String() << endl;
 	int32_t idx = _path.FindFirst("/../");
+	if (debug) cout << "idx: " << idx << endl;
 	while(idx != V_ERROR) {
 		if (idx == 0) return false;
-		int32_t i = _path.FindLast("/", idx-1);
+		const char *buf = _path.String();
+		int32_t i = idx-1;
+		while(i > 0 && buf[i] != '/') i--;
+		if (debug) cout << "i: " << i << endl;
 		if (i == V_ERROR) return false;
 		_path.Remove(i, idx+3-i);
 		idx = _path.FindFirst("/../");
+		if (debug) cout << "idx: " << idx << endl;
+		if (debug) cout << "6> " << _path.String() << endl;
 	}
+	if (debug) cout << "7> " << _path.String() << endl;
+	// a trailing slash is removed.
+	if ('/' == _path.ByteAt(_path.Length()-1)) _path.RemoveLast("/");
+	if (debug) cout << "8> " << _path.String() << endl;
 	return true;
 }
 
-VPath::VPath(const VPath &path) : _path(path._path) {
+VPath::VPath(const VPath &path) : _path(path._path), _leaf(path._leaf) {
 	// no need to normalize since it already is
 }
 
@@ -73,12 +82,19 @@ VPath::~VPath() {
 }
 
 status_t VPath::Append(const char *path, bool normalize) {
-	if (!InitCheck()) return V_NO_INIT;
+	if (InitCheck() != V_OK) return V_NO_INIT;
 	if(!path || *path == '/') return V_BAD_VALUE;
+	cout << "p: " << path << endl;
+	cout << "l: " << _leaf.String() << endl;
 	_leaf.Append("/");
+	cout << "l: " << _leaf.String() << endl;
 	_leaf.Append(path);
+	cout << "l: " << _leaf.String() << endl;
+	cout << "p: " << _path.String() << endl;
 	_path.Append(_leaf);
 	_leaf.Clear();
+	cout << "l: " << _leaf.String() << endl;
+	cout << "p: " << _path.String() << endl;
 	if (normalize || must_normalize_me()) {
 		if (!normalize_me()) {
 			_path.Clear();
@@ -90,7 +106,7 @@ status_t VPath::Append(const char *path, bool normalize) {
 }
 
 status_t VPath::GetParent(VPath *path) const {
-	if (!InitCheck()) return V_NO_INIT;
+	if (InitCheck() != V_OK) return V_NO_INIT;
 	return path->SetTo(_path.String());
 }
 

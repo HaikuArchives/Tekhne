@@ -39,7 +39,11 @@ private:
 		if ('/' != _path.ByteAt(0) || _path.FindFirst("/./")!=V_ERROR || _path.FindFirst("/../")!=V_ERROR || _path.FindFirst("//")!=V_ERROR || '/' == _path.ByteAt(_path.Length()-1)) return true;
 		return false;
 	}
-	void split_me();
+	inline void split_me() {
+		int32_t idx = _path.FindLast("/");
+		_leaf = _path.Substring(idx+1);
+		_path.Truncate(idx);
+	}
 	bool normalize_me();
 public:
 	VPath(const char *path, const char *leaf = 0, bool normalize = false){
