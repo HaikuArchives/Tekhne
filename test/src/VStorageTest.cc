@@ -72,24 +72,21 @@ void VPathTest::testCreate() {
 	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne", p6.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("trunk", p6.Leaf()) == 0);
 
+	VPath p7("/");
+	CPPUNIT_ASSERT(p7.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/", p7.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("", p7.Leaf()) == 0);
+
 	// we needtests to check creation with Directory and Entry
 }
 
 void VPathTest::testAppend() {
 //	status_t Append(const char *path, bool normalize = false);
 	VPath p5(".");
-	display_path(p5);
 	CPPUNIT_ASSERT(p5.Append("src/VStorageTest.cc") == V_OK);
 	CPPUNIT_ASSERT(p5.InitCheck() == V_OK);
-	display_path(p5);
 	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne/trunk/test/src", p5.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("VStorageTest.cc", p5.Leaf()) == 0);
-
-	VPath p("/home/clements/");
-	CPPUNIT_ASSERT(p.Append(".") == V_OK);
-	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("clements", p.Leaf()) == 0);
-	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
 
 	VPath p2("/home/clements/");
 	CPPUNIT_ASSERT(p2.Append("..") == V_OK);
@@ -101,11 +98,23 @@ void VPathTest::testAppend() {
 	CPPUNIT_ASSERT(p3.Append("../..") == V_OK);
 	CPPUNIT_ASSERT(p3.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp("tekhne", p3.Leaf()) == 0);
-	CPPUNIT_ASSERT(strcmp("/home/clements/workspace", p5.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/clements/workspace", p3.Path()) == 0);
+
+	VPath p("/home/clements/");
+	CPPUNIT_ASSERT(p.Append(".") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("clements", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
 }
 
 void VPathTest::testGetParent() {
 //	status_t GetParent(VPath *path) const;
+	VPath ans;
+	VPath p("/home/clements/");
+	CPPUNIT_ASSERT(p.GetParent(&ans) == V_OK);
+	CPPUNIT_ASSERT(ans.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("home", ans.Leaf()) == 0);
+	CPPUNIT_ASSERT(strcmp("/", ans.Path()) == 0);
 }
 
 void VPathTest::testSetTo() {

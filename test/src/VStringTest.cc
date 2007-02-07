@@ -119,6 +119,13 @@ void VStringTest::testAppend() {
 	CPPUNIT_ASSERT( strlen(str) == 7 );
 	CPPUNIT_ASSERT( strcmp(str, "foocccc") == 0 );
 	delete s;
+
+	s = new VString("test");
+	s->Append("/");
+	str = s->String();
+	CPPUNIT_ASSERT( strlen(str) == 5 );
+	CPPUNIT_ASSERT( strcmp(str, "test/") == 0 );
+	delete s;
 }
 
 void VStringTest::testPrepend() {

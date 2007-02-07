@@ -36,13 +36,18 @@ private:
 	VString _path;
 	VString _leaf;
 	inline bool must_normalize_me () {
-		if ('/' != _path.ByteAt(0) || _path.FindFirst("/./")!=V_ERROR || _path.FindFirst("/../")!=V_ERROR || _path.FindFirst("//")!=V_ERROR || '/' == _path.ByteAt(_path.Length()-1)) return true;
+		if ('/' != _path.ByteAt(0) || _path.FindFirst("/./")!=V_ERROR || _path.FindFirst("/..")!=V_ERROR ||
+				  _path.FindFirst("//")!=V_ERROR || _path.FindLast("/.") == _path.Length()-2 ||
+				  '/' == _path.ByteAt(_path.Length()-1)) return true;
 		return false;
 	}
 	inline void split_me() {
-		int32_t idx = _path.FindLast("/");
-		_leaf = _path.Substring(idx+1);
-		_path.Truncate(idx);
+		if (_path != "/") {
+			int32_t idx = _path.FindLast("/");
+			_leaf = _path.Substring(idx+1);
+			if (idx == 0) idx = 1;
+			_path.Truncate(idx);
+		}
 	}
 	bool normalize_me();
 public:

@@ -32,6 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
+#include <iostream>
 
 namespace tekhne {
 
@@ -61,8 +62,8 @@ public:
 	VString &Append(const VString &source, int32_t charCount);
 	inline VString &Append(const char *source) {
 		assert(!bufferLocked);
-		if (source != 0) {
-			int32_t oldLen = bufferLen -1;
+		if (source) {
+			int32_t oldLen = bufferLen - 1;
 			int32_t sourceLen = strlen(source);
 			int32_t newLen = oldLen + sourceLen + 1;
 			char* oldBuf = buf;
@@ -270,8 +271,8 @@ public:
 		if (start > end) { int32_t tmp=start;start=end;end=tmp; }
 		if (start < 0) start = 0;
 		if (end < 0) end = 0;
-		if (end > bufferLen) end = bufferLen;
-		if (start > bufferLen) start = end = 0;
+		if (end >= bufferLen) end = bufferLen-1;
+		if (start >= bufferLen) start = end = 0;
 		VString *s = new VString();
 		s->makeBuffer(end-start+1);
 		memmove(s->buf, buf+start, end-start);

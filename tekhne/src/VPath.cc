@@ -29,7 +29,7 @@ using namespace std;
 
 using namespace tekhne;
 
-bool debug = true;
+bool debug = false;
 
 bool VPath::normalize_me () {
 	if (debug) cout << "1> " << _path.String() << endl;
@@ -53,7 +53,7 @@ bool VPath::normalize_me () {
 	_path.ReplaceAll("//", "/");
 	// ".." bumps up one directory level
 	if (debug) cout << "5> " << _path.String() << endl;
-	int32_t idx = _path.FindFirst("/../");
+	int32_t idx = _path.FindFirst("/..");
 	if (debug) cout << "idx: " << idx << endl;
 	while(idx != V_ERROR) {
 		if (idx == 0) return false;
@@ -63,13 +63,16 @@ bool VPath::normalize_me () {
 		if (debug) cout << "i: " << i << endl;
 		if (i == V_ERROR) return false;
 		_path.Remove(i, idx+3-i);
-		idx = _path.FindFirst("/../");
+		idx = _path.FindFirst("/..");
 		if (debug) cout << "idx: " << idx << endl;
 		if (debug) cout << "6> " << _path.String() << endl;
 	}
 	if (debug) cout << "7> " << _path.String() << endl;
 	// a trailing slash is removed.
-	if ('/' == _path.ByteAt(_path.Length()-1)) _path.RemoveLast("/");
+	int32_t len = _path.Length();
+	if (len > 1 && '/' == _path.ByteAt(len-1)) _path.RemoveLast("/");
+	len = _path.Length();
+	if (len > 1 && '.' == _path.ByteAt(len-1) && '/' == _path.ByteAt(len-2)) _path.RemoveLast("/.");
 	if (debug) cout << "8> " << _path.String() << endl;
 	return true;
 }
@@ -84,17 +87,12 @@ VPath::~VPath() {
 status_t VPath::Append(const char *path, bool normalize) {
 	if (InitCheck() != V_OK) return V_NO_INIT;
 	if(!path || *path == '/') return V_BAD_VALUE;
-	cout << "p: " << path << endl;
-	cout << "l: " << _leaf.String() << endl;
 	_leaf.Append("/");
-	cout << "l: " << _leaf.String() << endl;
 	_leaf.Append(path);
-	cout << "l: " << _leaf.String() << endl;
-	cout << "p: " << _path.String() << endl;
+	_path.Append("/");
 	_path.Append(_leaf);
 	_leaf.Clear();
-	cout << "l: " << _leaf.String() << endl;
-	cout << "p: " << _path.String() << endl;
+	if (debug) cout << "p: " << _path.String() << endl;
 	if (normalize || must_normalize_me()) {
 		if (!normalize_me()) {
 			_path.Clear();
@@ -107,6 +105,7 @@ status_t VPath::Append(const char *path, bool normalize) {
 
 status_t VPath::GetParent(VPath *path) const {
 	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (_path == "/") return V_BAD_VALUE;
 	return path->SetTo(_path.String());
 }
 
@@ -126,8 +125,8 @@ const char *VPath::Leaf(void) const {
 
 status_t VPath::SetTo(const char *path, const char *leaf, bool normalize) {
 	_path = path;
-	_path.Append("/");
 	if (leaf) {
+		_path.Append("/");
 		_path.Append(leaf);
 	}
 	_leaf.Clear();
@@ -137,7 +136,9 @@ status_t VPath::SetTo(const char *path, const char *leaf, bool normalize) {
 			return V_BAD_VALUE;
 		}
 	}
+	if (debug) cout << "1>>> " << _path.String() << endl;
 	split_me();
+	if (debug) cout << "2>>> " << _path.String() << " " << _leaf.String() << endl;
 	return V_OK;
 }
 
