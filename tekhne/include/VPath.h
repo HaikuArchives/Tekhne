@@ -71,15 +71,28 @@ public:
 
 	status_t GetParent(VPath *path) const;
 
-	status_t InitCheck(void) const;
+	inline status_t InitCheck(void) const {
+		return _path.Length() > 0 ? V_OK : V_NO_INIT;
+	}
 
-	const char *Path(void) const;
-	const char *Leaf(void) const;
+	inline const char *Path(void) const {
+		if (InitCheck() != V_OK) return 0;
+		return _path.String();
+	}
+
+	inline const char *Leaf(void) const {
+		if (InitCheck() != V_OK) return 0;
+		return _leaf.String();
+	}
+
 
 	status_t SetTo(const char *path, const char *leaf = 0, bool normalize = false);
 	status_t SetTo(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
 	status_t SetTo(const VEntry *entry);
-	void Unset(void);
+	inline void Unset(void) {
+		_leaf.Clear();
+		_path.Clear();
+	}
 
 	virtual bool AllowsTypeCode(type_code code) const;
 

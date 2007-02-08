@@ -32,18 +32,18 @@
 
 namespace tekhne {
 
-	const int32_t B_FILE_NAME_LENGTH = NAME_MAX;
-	const int32_t B_PATH_NAME_LENGTH = PATH_MAX;
-	const int32_t B_MIME_TYPE_LENGTH = 256;
-	const int32_t B_MAX_SYMLINKS = 127; // LINK_MAX;
+	const int32_t V_FILE_NAME_LENGTH = NAME_MAX;
+	const int32_t V_PATH_NAME_LENGTH = PATH_MAX;
+	const int32_t V_MIME_TYPE_LENGTH = 256;
+	const int32_t V_MAX_SYMLINKS = 127; // LINK_MAX;
 
-	const int32_t B_READ_ONLY = O_RDONLY;
-	const int32_t B_WRITE_ONLY = O_WRONLY;
-	const int32_t B_READ_WRITE = O_RDWR;
-	const int32_t B_FAIL_IF_EXISTS = O_EXCL;
-	const int32_t B_CREATE_FILE = O_CREAT;
-	const int32_t B_ERASE_FILE = O_TRUNC;
-	const int32_t B_OPEN_AT_END = O_APPEND;
+	const int32_t V_READ_ONLY = O_RDONLY;
+	const int32_t V_WRITE_ONLY = O_WRONLY;
+	const int32_t V_READ_WRITE = O_RDWR;
+	const int32_t V_FAIL_IF_EXISTS = O_EXCL;
+	const int32_t V_CREATE_FILE = O_CREAT;
+	const int32_t V_ERASE_FILE = O_TRUNC;
+	const int32_t V_OPEN_AT_END = O_APPEND;
 
 	const int32_t V_FILE_NODE = 1;
 	const int32_t V_SYMLINK_NODE = 2;

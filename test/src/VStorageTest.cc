@@ -28,6 +28,16 @@
 
 using namespace std;
 
+static char *cwd = 0;
+
+char *get_cwd() {
+	if (!cwd) {
+		cwd = (char*)malloc(V_PATH_NAME_LENGTH);
+		getcwd(cwd, V_PATH_NAME_LENGTH);
+	}
+	return cwd;
+}
+
 void VPathTest::setUp() {
 }
 
@@ -35,7 +45,8 @@ void VPathTest::tearDown() {
 }
 
 inline void display_path(VPath &p) {
-	cout << "'" << p.Path() << "' '" << p.Leaf() << "'\n";
+	if (p.InitCheck() == V_OK) cout << "'" << p.Path() << "' '" << p.Leaf() << "'\n";
+	else cout << "Path is not initialized" << endl;
 }
 
 void VPathTest::testCreate() {
@@ -78,6 +89,8 @@ void VPathTest::testCreate() {
 	CPPUNIT_ASSERT(strcmp("", p7.Leaf()) == 0);
 
 	// we needtests to check creation with Directory and Entry
+	// VPath(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
+	// VPath(const VEntry *entry);
 }
 
 void VPathTest::testAppend() {
@@ -115,35 +128,109 @@ void VPathTest::testGetParent() {
 	CPPUNIT_ASSERT(ans.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp("home", ans.Leaf()) == 0);
 	CPPUNIT_ASSERT(strcmp("/", ans.Path()) == 0);
+	p.SetTo("/");
+	CPPUNIT_ASSERT(p.GetParent(&ans) == V_BAD_VALUE);
+	CPPUNIT_ASSERT(ans.InitCheck() == V_NO_INIT);
+	p.SetTo("/");
+	CPPUNIT_ASSERT(p.GetParent(&ans) == V_BAD_VALUE);
+	CPPUNIT_ASSERT(ans.InitCheck() == V_NO_INIT);
 }
 
 void VPathTest::testSetTo() {
+	VPath p;
 //	status_t SetTo(const char *path, const char *leaf = 0, bool normalize = false);
+	CPPUNIT_ASSERT(p.SetTo("/") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(p.SetTo("/", "foo") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("foo", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(p.SetTo(".", "foo") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne/trunk/test", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("foo", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(p.SetTo(".") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne/trunk", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("test", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(p.SetTo("/home", "foo") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("foo", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(p.SetTo("/home/bar", "foo/bar/baz.tar.gz") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/home/bar/foo/bar", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("baz.tar.gz", p.Leaf()) == 0);
+	// some bad values
+	CPPUNIT_ASSERT(p.SetTo("/home", "./../../foo") == V_BAD_VALUE);
+	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
+	CPPUNIT_ASSERT(p.SetTo("/home", "/foo") == V_BAD_VALUE);
+	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
 //	status_t SetTo(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
 //	status_t SetTo(const VEntry *entry);
 }
 
 void VPathTest::testFlatten() {
+	VPath p(".");
 //	virtual bool AllowsTypeCode(type_code code) const;
-
-//	virtual status_t Flatten(void *buffer, ssize_t size) const;
-
+	CPPUNIT_ASSERT(p.AllowsTypeCode(V_STRING_TYPE));
 //	virtual ssize_t FlattenedSize() const;
-
+	ssize_t len = p.FlattenedSize();
+	CPPUNIT_ASSERT(len == (ssize_t)strlen(get_cwd())+1);
+//	virtual status_t Flatten(void *buffer, ssize_t size) const;
+	char *buf = (char *)malloc(len);
+	CPPUNIT_ASSERT(p.Flatten(buf, len) == V_OK);
 //	virtual type_code TypeCode() const;
-
+	CPPUNIT_ASSERT(p.TypeCode() == V_STRING_TYPE);
 //	virtual status_t Unflatten(type_code code, const void *buffer, ssize_t size);
+	VPath q;
+	CPPUNIT_ASSERT(q.Unflatten(V_STRING_TYPE, buf, len) == V_OK);
+	CPPUNIT_ASSERT(q.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(q == p);
 //	virtual bool IsFixedSize(void) const { return false; }
+	CPPUNIT_ASSERT(!p.IsFixedSize());
 }
 
 void VPathTest::testAssignment() {
 //	VPath& operator=(const VPath &path);
+	VPath p("/home/clements");
+	VPath q;
+	q = p;
+	CPPUNIT_ASSERT(p == q);
+	CPPUNIT_ASSERT(!(p != q));
+	q.Unset();
 //	VPath& operator=(const char *string);
+	q = "/home/clements";
+	CPPUNIT_ASSERT(p == q);
+	CPPUNIT_ASSERT(!(p != q));
+	q.Unset();
+	q = "/home/foo";
+	CPPUNIT_ASSERT(p != q);
+	CPPUNIT_ASSERT(!(p == q));
+	q.Unset();
 }
 
 void VPathTest::testBoolean() {
-//	bool operator==(const VPath &path) const;
-//	bool operator==(const char *string) const;
-//	bool operator!=(const VPath &path) const;
-//	bool operator!=(const char *string) const;
+	VPath p("/home/clements");
+	VPath q("/home/clements");
+	CPPUNIT_ASSERT(p == q);
+	CPPUNIT_ASSERT(!(p != q));
+	p.SetTo(".","foo");
+	q.SetTo(".","bar");
+	CPPUNIT_ASSERT(p != q);
+	CPPUNIT_ASSERT(!(p == q));
+	p.SetTo(".","../foo");
+	q.SetTo(".","./foo");
+	CPPUNIT_ASSERT(p != q);
+	CPPUNIT_ASSERT(!(p == q));
+	p.SetTo(".","./foo");
+	q.SetTo(".","./foo");
+	CPPUNIT_ASSERT(p == q);
+	CPPUNIT_ASSERT(!(p != q));
+	p.SetTo("/home/clements");
+	q.SetTo("/home/clementsd");
+	CPPUNIT_ASSERT(p != q);
+	CPPUNIT_ASSERT(!(p == q));
 }

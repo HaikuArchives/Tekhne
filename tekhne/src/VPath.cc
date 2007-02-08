@@ -39,8 +39,8 @@ bool VPath::normalize_me () {
 	if (debug) cout << "2> " << _path.String() << endl;
 	// relative pathnames are reckoned off of the current working directory
 	if (('.' == _path.ByteAt(0) && '.' == _path.ByteAt(1) && '/' == _path.ByteAt(2)) || '/' != _path.ByteAt(0)) {
-		char buf[B_PATH_NAME_LENGTH];
-		if (getcwd(buf, B_PATH_NAME_LENGTH)) {
+		char buf[V_PATH_NAME_LENGTH];
+		if (getcwd(buf, V_PATH_NAME_LENGTH)) {
 			_path.Prepend("/");
 			_path.Prepend(buf);
 		}
@@ -104,32 +104,27 @@ status_t VPath::Append(const char *path, bool normalize) {
 }
 
 status_t VPath::GetParent(VPath *path) const {
-	if (InitCheck() != V_OK) return V_NO_INIT;
-	if (_path == "/") return V_BAD_VALUE;
-	return path->SetTo(_path.String());
-}
-
-status_t VPath::InitCheck(void) const {
-	return _path.Length() > 0 ? V_OK : V_NO_INIT;
-}
-
-const char *VPath::Path(void) const {
-	if (InitCheck() != V_OK) return 0;
-	return _path.String();
-}
-
-const char *VPath::Leaf(void) const {
-	if (InitCheck() != V_OK) return 0;
-	return _leaf.String();
+	if (path) {
+		path->Unset();
+		if (InitCheck() != V_OK) return V_NO_INIT;
+		if (_path == "/") return V_BAD_VALUE;
+		return path->SetTo(_path.String());
+	}
+	return V_BAD_VALUE;
 }
 
 status_t VPath::SetTo(const char *path, const char *leaf, bool normalize) {
+	Unset();
+	if (!path || strlen(path) == 0) return V_BAD_VALUE;
 	_path = path;
 	if (leaf) {
+		if (*leaf == '/') {
+			_path.Clear();
+			return V_BAD_VALUE;
+		}
 		_path.Append("/");
 		_path.Append(leaf);
 	}
-	_leaf.Clear();
 	if (normalize || must_normalize_me()) {
 		if (!normalize_me()) {
 			_path.Clear();
@@ -146,11 +141,6 @@ status_t VPath::SetTo(const VDirectory *dir, const char *leaf, bool normalize) {
 }
 
 status_t VPath::SetTo(const VEntry *entry) {
-}
-
-void VPath::Unset(void) {
-	_leaf.Clear();
-	_path.Clear();
 }
 
 bool VPath::AllowsTypeCode(type_code code) const {
@@ -178,25 +168,41 @@ type_code VPath::TypeCode() const {
 }
 
 status_t VPath::Unflatten(type_code code, const void *buffer, ssize_t size) {
-	if (AllowsTypeCode(code)) return V_BAD_VALUE;
+	if (!AllowsTypeCode(code)) return V_BAD_VALUE;
 	return SetTo((const char *)buffer);
 }
 
 VPath& VPath::operator=(const VPath &path) {
+	Unset();
+	if (path.InitCheck() == V_OK) {
+		_path = path._path;
+		_leaf = path._leaf;
+	}
+	return *this;
 }
 
 VPath& VPath::operator=(const char *string) {
+	Unset();
+	SetTo(string);
+	return *this;
 }
 
 bool VPath::operator==(const VPath &path) const {
+	if (InitCheck() != V_OK || path.InitCheck() != V_OK) return false;
+	return _path == path._path && _leaf == path._leaf;
 }
 
 bool VPath::operator==(const char *string) const {
+	VPath p(string);
+	return *this == p;
 }
 
 bool VPath::operator!=(const VPath &path) const {
+	if (InitCheck() != V_OK || path.InitCheck() != V_OK) return true;
+	return _path != path._path || _leaf != path._leaf;
 }
 
 bool VPath::operator!=(const char *string) const {
+	VPath p(string);
+	return *this != p;
 }
-

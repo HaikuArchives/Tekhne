@@ -72,7 +72,6 @@ const type_code V_ANY_TYPE = 100;
 
 // random constants
 const int32_t V_NAME_LENGTH = 255;
-const int32_t V_MIME_TYPE_LENGTH = 255;
 const int32_t V_LOOPER_PORT_DEFAULT_CAPACITY = 100;
 
 }
