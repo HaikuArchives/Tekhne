@@ -88,7 +88,10 @@ public:
 
 	status_t SetTo(const char *path, const char *leaf = 0, bool normalize = false);
 	status_t SetTo(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
-	status_t SetTo(const VEntry *entry);
+	inline status_t SetTo(const VEntry *entry) {
+		if (entry && entry->_path) return SetTo(entry->_path->Path(), entry->_path->Leaf());
+		return V_BAD_VALUE;
+	}
 	inline void Unset(void) {
 		_leaf.Clear();
 		_path.Clear();

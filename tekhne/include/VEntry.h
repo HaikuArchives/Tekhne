@@ -35,7 +35,6 @@ class VPath;
 
 class VEntry : public VStatable {
 private:
-
 public:
 	VEntry(const VDirectory *dir, const char *path, bool traverse = false);
 	VEntry(const char *path, bool traverse = false);

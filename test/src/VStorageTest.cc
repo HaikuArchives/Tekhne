@@ -234,3 +234,32 @@ void VPathTest::testBoolean() {
 	CPPUNIT_ASSERT(p != q);
 	CPPUNIT_ASSERT(!(p == q));
 }
+
+void VEntryTest::setUp() {
+}
+
+void VEntryTest::tearDown() {
+}
+
+void VEntryTest::testCreate() {
+	VEntry e;
+	CPPUNIT_ASSERT(e.InitCheck() == V_NO_INIT);
+	//VEntry(const VDirectory *dir, const char *path, bool traverse = false);
+	//VEntry(const char *path, bool traverse = false);
+	VEntry e1("/home/clements/.bashrc");
+	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(e1.Exists());
+	e1.SetTo("/home/clements/this-doesn't-exist");
+	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(!e1.Exists());
+
+	//VEntry(const VEntry &entry);
+}
+
+void VEntryTest::testStatable() {
+	VEntry e1("/home/clements/.bashrc");
+	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
+	struct stat st;
+	CPPUNIT_ASSERT(e1.GetStat(&st) == V_OK);
+	cout << "size: " << st.st_size << endl;
+}

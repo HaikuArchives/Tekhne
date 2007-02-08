@@ -140,9 +140,6 @@ status_t VPath::SetTo(const char *path, const char *leaf, bool normalize) {
 status_t VPath::SetTo(const VDirectory *dir, const char *leaf, bool normalize) {
 }
 
-status_t VPath::SetTo(const VEntry *entry) {
-}
-
 bool VPath::AllowsTypeCode(type_code code) const {
 	return (code == V_STRING_TYPE);
 }

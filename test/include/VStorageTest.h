@@ -67,5 +67,23 @@ public:
 	void testBoolean();
 };
 
+class VEntryTest : public CppUnit::TestFixture {
+	private:
+	public:
+		static CppUnit::Test *suite() {
+			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VEntryTest" );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testCreate",
+								   &VEntryTest::testCreate ) );
+			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testStatable",
+								   &VEntryTest::testStatable ) );
+			return suiteOfTests;
+		}
+
+		void setUp();
+		void tearDown();
+
+		void testCreate();
+		void testStatable();
+};
 
 #endif /*VSTORAGETEST_H_*/

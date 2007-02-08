@@ -79,6 +79,7 @@ public:
 		runner.addTest( VUSBTest::suite() );
 		runner.addTest( VClipboardTest::suite() );
 		runner.addTest( VPathTest::suite() );
+		runner.addTest( VEntryTest::suite() );
 		runner.run();
 	}
 

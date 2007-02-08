@@ -24,74 +24,158 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include "utime.h"
 
 using namespace tekhne;
 
+VStatable::~VStatable() {
+	delete _path;
+}
 
 status_t VStatable::GetCreationTime(time_t *ctime) const {
-	return V_ERROR;
+	if (!ctime) return V_BAD_VALUE;
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		*ctime = st.st_ctime;
+	}
+	return s;
 }
 
 status_t VStatable::SetCreationTime(time_t ctime) {
+	// we cant change this...
 	return V_ERROR;
 }
 
 status_t VStatable::GetModificationTime(time_t *mtime) const {
-	return V_ERROR;
+	if (!mtime) return V_BAD_VALUE;
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		*mtime = st.st_mtime;
+	}
+	return s;
 }
 
 status_t VStatable::SetModificationTime(time_t mtime) {
-	return V_ERROR;
+	struct utimbuf utb;
+	struct stat st;
+	if (!_path) return V_NO_INIT;
+	VString p(_path->Path());
+	p += "/";
+	p += _path->Leaf();
+	if (stat(p.String(), &st)) return errno;
+	utb.actime = st.st_atime;
+	utb.modtime = mtime;
+	if (utime(p.String(), &utb)) return errno;
+	return V_OK;
 }
 
 status_t VStatable::GetAccessTime(time_t *atime) const {
-	return V_ERROR;
+	if (!atime) return V_BAD_VALUE;
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		*atime = st.st_atime;
+	}
+	return s;
 }
 
 status_t VStatable::SetAccessTime(time_t atime) {
-	return V_ERROR;
+	struct utimbuf utb;
+	struct stat st;
+	if (!_path) return V_NO_INIT;
+	VString p(_path->Path());
+	p += "/";
+	p += _path->Leaf();
+	if (stat(p.String(), &st)) return errno;
+	utb.actime = atime;
+	utb.modtime = st.st_mtime;
+	if (utime(p.String(), &utb)) return errno;
+	return V_OK;
 }
 
 status_t VStatable::GetOwner(uid_t *owner) const {
-	return V_ERROR;
+	if (!owner) return V_BAD_VALUE;
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		*owner = st.st_uid;
+	}
+	return s;
 }
 
 status_t VStatable::SetOwner(uid_t owner) {
-	return V_ERROR;
+	if (!_path) return V_NO_INIT;
+	gid_t g;
+	status_t err = GetGroup(&g);
+	if (err == V_OK) {
+		VString p(_path->Path());
+		p += "/";
+		p += _path->Leaf();
+		if (chown (p.String(), owner, g)) err = errno;
+	}
+	return err;
 }
 
 status_t VStatable::GetGroup(gid_t *group) const {
-	return V_ERROR;
+	if (!group) return V_BAD_VALUE;
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		*group = st.st_gid;
+	}
+	return s;
 }
 
 status_t VStatable::SetGroup(gid_t group) {
-	return V_ERROR;
+	if (!_path) return V_NO_INIT;
+	uid_t o;
+	status_t err = GetOwner(&o);
+	if (err == V_OK) {
+		VString p(_path->Path());
+		p += "/";
+		p += _path->Leaf();
+		if (chown (p.String(), o, group)) err = errno;
+	}
+	return err;
 }
 
 status_t VStatable::GetPermissions(mode_t *perms) const {
-	return V_ERROR;
+	if (!perms) return V_BAD_VALUE;
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		*perms = st.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO);
+	}
+	return s;
 }
 
 status_t VStatable::SetPermissions(mode_t perms) {
-	return V_ERROR;
+	if (!_path) return V_NO_INIT;
+	perms = perms & (S_IRWXU|S_IRWXG|S_IRWXO);
+	VString p(_path->Path());
+	p += "/";
+	p += _path->Leaf();
+	if (chmod(p.String(), perms)) return errno;
+	return V_OK;
 }
 
 status_t VStatable::GetSize(off_t *size) const {
-	return V_ERROR;
+	if (!size) return V_BAD_VALUE;
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		*size = st.st_size;
+	}
+	return s;
 }
 
 status_t VStatable::GetStat(struct stat *st) const {
-	return stat(path.String(), st);
-}
-
-bool VStatable::IsFile(void) const {
-	return false;
-}
-
-bool VStatable::IsDirectory(void) const {
-	return false;
-}
-
-bool VStatable::IsSymLink(void) const {
-	return false;
+	if (!_path) return V_NO_INIT;
+	VString p(_path->Path());
+	p += "/";
+	p += _path->Leaf();
+	if (stat(p.String(), st)) return errno;
+	return V_OK;
 }

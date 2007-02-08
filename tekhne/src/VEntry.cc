@@ -24,24 +24,30 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include <iostream>
 
 using namespace tekhne;
-
+using namespace std;
 
 VEntry::VEntry(const VDirectory *dir, const char *path, bool traverse) {
+	_path = new VPath(dir, path, traverse);
 }
 
 VEntry::VEntry(const char *path, bool traverse) {
+	SetTo(path, traverse);
 }
 
 VEntry::VEntry(void) {
 }
 
 VEntry::VEntry(const VEntry &entry) {
+	_path = new VPath(&entry);
 }
 
 bool VEntry::Exists(void) const {
-	return false;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	struct stat st;
+	return GetStat(&st) == V_OK;
 }
 
 status_t VEntry::GetName(char *buffer) const {
@@ -61,7 +67,7 @@ status_t VEntry::GetParent(VDirectory *dir) const {
 }
 
 status_t VEntry::InitCheck(void) const {
-	return V_ERROR;
+	return (_path) ? _path->InitCheck() : V_NO_INIT;
 }
 
 status_t VEntry::Remove(void) {
@@ -77,7 +83,8 @@ status_t VEntry::MoveTo(VDirectory *dir, const char *path, bool clobber) {
 }
 
 status_t VEntry::SetTo(const char *path, bool traverse) {
-	return V_ERROR;
+	_path = new VPath(path, 0, traverse);
+	return _path->InitCheck();
 }
 
 status_t VEntry::SetTo(const VDirectory *dir, const char *path, bool traverse) {
@@ -98,3 +105,4 @@ bool VEntry::operator==(const VEntry &entry) const {
 bool VEntry::operator!=(const VEntry &entry) const {
 	return false;
 }
+

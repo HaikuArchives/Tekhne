@@ -28,15 +28,17 @@
 
 #include "StorageDefs.h"
 #include <sys/stat.h>
-
+#include <iostream>
 namespace tekhne {
 
-class VStatable {
-private:
-	VString path;
+class VPath;
 
+class VStatable {
+protected:
+	VPath *_path;
 public:
-	virtual ~VStatable(){}
+	VStatable() : _path(0) {}
+	virtual ~VStatable();
 	status_t GetCreationTime(time_t *ctime) const;
 	status_t SetCreationTime(time_t ctime);
 	status_t GetModificationTime(time_t *mtime) const;
@@ -58,6 +60,7 @@ public:
 	bool IsFile(void) const;
 	bool IsDirectory(void) const;
 	bool IsSymLink(void) const;
+	friend class VPath;
 };
 
 }// namespace tekhne
