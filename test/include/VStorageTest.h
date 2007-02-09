@@ -68,22 +68,31 @@ public:
 };
 
 class VEntryTest : public CppUnit::TestFixture {
-	private:
-	public:
-		static CppUnit::Test *suite() {
-			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VEntryTest" );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testCreate",
-								   &VEntryTest::testCreate ) );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testStatable",
-								   &VEntryTest::testStatable ) );
-			return suiteOfTests;
-		}
+private:
+public:
+	static CppUnit::Test *suite() {
+		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VEntryTest" );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testCreate",
+								&VEntryTest::testCreate ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testStatable",
+							   &VEntryTest::testStatable ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testPathOps",
+							   &VEntryTest::testPathOps ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testFileOps",
+							   &VEntryTest::testFileOps ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testOperator",
+							   &VEntryTest::testOperator ) );
+		return suiteOfTests;
+	}
 
-		void setUp();
-		void tearDown();
+	void setUp();
+	void tearDown();
 
-		void testCreate();
-		void testStatable();
+	void testCreate();
+	void testStatable();
+	void testPathOps();
+	void testFileOps();
+	void testOperator();
 };
 
 #endif /*VSTORAGETEST_H_*/

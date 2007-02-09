@@ -236,24 +236,52 @@ void VPathTest::testBoolean() {
 }
 
 void VEntryTest::setUp() {
+	const char *s = "This is a sample string for the test file.\n";
+	int32_t len = strlen(s);
+	int32_t f = open("/tmp/test_file", O_CREAT|O_TRUNC|O_RDWR, 0600);
+	for (int i=0;i<35;i++) {
+		write(f, s, len);
+	}
+	close(f);
+	symlink ("/tmp/test_file", "/tmp/test_file_sym");
+	close(open("/tmp/test_file2", O_RDWR | O_CREAT | O_TRUNC, 0644));
 }
 
 void VEntryTest::tearDown() {
+	VEntry e1("/tmp/test_file_sym");
+	e1.Remove();
+	VEntry e2("/tmp/test_file");
+	e2.Remove();
+	VEntry e3("/tmp/test_file2");
+	e3.Remove();
 }
 
 void VEntryTest::testCreate() {
 	VEntry e;
 	CPPUNIT_ASSERT(e.InitCheck() == V_NO_INIT);
 	//VEntry(const VDirectory *dir, const char *path, bool traverse = false);
-	//VEntry(const char *path, bool traverse = false);
+
 	VEntry e1("/home/clements/.bashrc");
 	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(e1.Exists());
+	e1.Unset();
+	CPPUNIT_ASSERT(e1.InitCheck() == V_NO_INIT);
 	e1.SetTo("/home/clements/this-doesn't-exist");
 	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(!e1.Exists());
 
-	//VEntry(const VEntry &entry);
+	VEntry e3(e1);
+	CPPUNIT_ASSERT(e3.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(!e3.Exists());
+	VPath p;
+	CPPUNIT_ASSERT(e3.GetPath(&p) == V_OK);
+	CPPUNIT_ASSERT(strcmp("/home/clements", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("this-doesn't-exist", p.Leaf()) == 0);
+
+	e1.SetTo("/tmp/test_file", true);
+	CPPUNIT_ASSERT(e1.Exists());
+
+	//status_t SetTo(const VDirectory *dir, const char *path, bool traverse = false);
 }
 
 void VEntryTest::testStatable() {
@@ -262,4 +290,119 @@ void VEntryTest::testStatable() {
 	struct stat st;
 	CPPUNIT_ASSERT(e1.GetStat(&st) == V_OK);
 	cout << "size: " << st.st_size << endl;
+	CPPUNIT_ASSERT(e1.SetTo("/tmp/test_file", true) == V_OK);
+	CPPUNIT_ASSERT(e1.Exists());
+	CPPUNIT_ASSERT(e1.GetStat(&st) == V_OK);
+	CPPUNIT_ASSERT(st.st_size == 35*strlen("This is a sample string for the test file.\n"));
+
+	time_t t;
+	CPPUNIT_ASSERT(e1.GetCreationTime(&t) == V_OK);
+	cout << "Creation time: " << ctime(&t);
+
+	CPPUNIT_ASSERT(e1.SetCreationTime(t) == V_ERROR);
+
+	CPPUNIT_ASSERT(e1.GetModificationTime(&t) == V_OK);
+	cout << "Modification time: " << ctime(&t);
+	t += 5;
+	CPPUNIT_ASSERT(e1.SetModificationTime(t) == V_OK);
+	CPPUNIT_ASSERT(e1.GetModificationTime(&t) == V_OK);
+	cout << "Modification time: " << ctime(&t);
+
+	CPPUNIT_ASSERT(e1.GetAccessTime(&t) == V_OK);
+	cout << "Access time: " << ctime(&t);
+	t += 5;
+	CPPUNIT_ASSERT(e1.SetAccessTime(t) == V_OK);
+	CPPUNIT_ASSERT(e1.GetAccessTime(&t) == V_OK);
+	cout << "Access time: " << ctime(&t);
+
+	uid_t o;
+	CPPUNIT_ASSERT(e1.GetOwner(&o) == V_OK);
+	CPPUNIT_ASSERT(getuid() == o);
+//	status_t SetOwner(uid_t owner);
+	gid_t g;
+	CPPUNIT_ASSERT(e1.GetGroup(&g) == V_OK);
+	CPPUNIT_ASSERT(getgid() == g);
+//	status_t SetGroup(gid_t group);
+
+	mode_t m;
+	CPPUNIT_ASSERT(e1.GetPermissions(&m) == V_OK);
+	CPPUNIT_ASSERT(0600 == m);
+
+	CPPUNIT_ASSERT(e1.SetPermissions(0644) == V_OK);
+	CPPUNIT_ASSERT(e1.GetPermissions(&m) == V_OK);
+	CPPUNIT_ASSERT(0644 == m);
+
+	CPPUNIT_ASSERT(e1.IsFile());
+	CPPUNIT_ASSERT(!e1.IsDirectory());
+	CPPUNIT_ASSERT(!e1.IsSymLink());
+
+	CPPUNIT_ASSERT(e1.SetTo("/tmp/", true) == V_OK);
+	CPPUNIT_ASSERT(!e1.IsFile());
+	CPPUNIT_ASSERT(e1.IsDirectory());
+	CPPUNIT_ASSERT(!e1.IsSymLink());
+
+	CPPUNIT_ASSERT(e1.SetTo("/tmp/test_file_sym", true) == V_OK);
+	CPPUNIT_ASSERT(e1.IsFile());
+	CPPUNIT_ASSERT(!e1.IsDirectory());
+	CPPUNIT_ASSERT(e1.IsSymLink());
+}
+
+void VEntryTest::testPathOps() {
+	char buf[V_FILE_NAME_LENGTH];
+
+	VEntry e1("/tmp/test_file");
+	CPPUNIT_ASSERT(e1.Exists());
+	CPPUNIT_ASSERT(e1.GetName(buf) == V_OK);
+	CPPUNIT_ASSERT(strcmp(buf, "test_file") == V_OK);
+	VPath p("/home");
+	CPPUNIT_ASSERT(e1.GetPath(&p) == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.Path(), "/tmp") == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.Leaf(), "test_file") == V_OK);
+	VEntry e;
+	CPPUNIT_ASSERT(e.GetPath(&p) == V_NO_INIT);
+	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
+
+	CPPUNIT_ASSERT(e1.SetTo("/home/clements/.bashrc") == V_OK);
+	CPPUNIT_ASSERT(e.SetTo("/tmp") == V_OK);
+	CPPUNIT_ASSERT(e1.GetParent(&e) == V_OK);
+	CPPUNIT_ASSERT(e.GetPath(&p) == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.Path(), "/home") == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.Leaf(), "clements") == V_OK);
+
+//	status_t GetParent(VDirectory *dir) const;
+}
+
+void VEntryTest::testFileOps() {
+	VEntry e1("/tmp/test_file");
+	VEntry e2("/tmp/test_file2");
+	CPPUNIT_ASSERT(e1.Exists());
+	CPPUNIT_ASSERT(e2.Exists());
+	CPPUNIT_ASSERT(e1.Rename("/tmp/test_file2") == V_FILE_EXISTS);
+	CPPUNIT_ASSERT(e1.Exists());
+	CPPUNIT_ASSERT(e2.Exists());
+	CPPUNIT_ASSERT(e1.Rename("/tmp/test_file2", true) == V_OK);
+	CPPUNIT_ASSERT(!e1.Exists());
+	CPPUNIT_ASSERT(e2.Exists());
+	CPPUNIT_ASSERT(e2.Rename("/tmp/test_file") == V_OK);
+	CPPUNIT_ASSERT(e1.Exists());
+	CPPUNIT_ASSERT(!e2.Exists());
+
+//	status_t MoveTo(VDirectory *dir, const char *path = NULL, bool clobber = false);
+}
+
+void VEntryTest::testOperator() {
+	VEntry e1("/tmp/test_file");
+	VEntry e2;
+	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(e2.InitCheck() == V_NO_INIT);
+
+	CPPUNIT_ASSERT(e2 != e1);
+	CPPUNIT_ASSERT(!(e2 == e1));
+	e2 = e1;
+	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(e2.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(e2 == e1);
+	CPPUNIT_ASSERT(!(e2 != e1));
 }

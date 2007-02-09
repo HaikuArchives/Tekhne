@@ -51,15 +51,26 @@ bool VEntry::Exists(void) const {
 }
 
 status_t VEntry::GetName(char *buffer) const {
-	return V_ERROR;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (!buffer) return V_BAD_VALUE;
+	strcpy(buffer, _path->Leaf());
+	return V_OK;
 }
 
 status_t VEntry::GetPath(VPath *path) const {
-	return V_ERROR;
+	if (!path) return V_BAD_VALUE;
+	path->Unset();
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	*path = *_path;
+	return V_OK;
 }
 
 status_t VEntry::GetParent(VEntry *entry) const {
-	return V_ERROR;
+	if (!entry) return V_BAD_VALUE;
+	entry->Unset();
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	entry->_path = new VPath(_path->Path());
+	return entry->_path->InitCheck();
 }
 
 status_t VEntry::GetParent(VDirectory *dir) const {
@@ -71,11 +82,30 @@ status_t VEntry::InitCheck(void) const {
 }
 
 status_t VEntry::Remove(void) {
-	return V_ERROR;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	VString p(_path->Path());
+	p += "/";
+	p += _path->Leaf();
+	if (remove(p.String())) return errno;
+	return V_OK;
 }
 
 status_t VEntry::Rename(const char *path, bool clobber) {
-	return V_ERROR;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (!path) return V_BAD_VALUE;
+	VEntry e(path);
+	if (e.Exists()) {
+		if (clobber) {
+			remove(path);
+		} else {
+			return V_FILE_EXISTS;
+		}
+	}
+	VString p(_path->Path());
+	p += "/";
+	p += _path->Leaf();
+	if (rename(p.String(), path)) return errno;
+	return V_OK;
 }
 
 status_t VEntry::MoveTo(VDirectory *dir, const char *path, bool clobber) {
@@ -92,17 +122,23 @@ status_t VEntry::SetTo(const VDirectory *dir, const char *path, bool traverse) {
 }
 
 void VEntry::Unset(void) {
+	delete _path;
+	_path = 0;
 }
 
 VEntry& VEntry::operator=(const VEntry &entry) {
+	Unset();
+	if (entry.InitCheck() == V_OK) _path = new VPath(*entry._path);
 	return *this;
 }
 
 bool VEntry::operator==(const VEntry &entry) const {
-	return false;
+	if (InitCheck() != V_OK || entry.InitCheck() != V_OK) return false;
+	return 	*_path == *entry._path;
 }
 
 bool VEntry::operator!=(const VEntry &entry) const {
-	return false;
+	if (InitCheck() != V_OK || entry.InitCheck() != V_OK) return true;
+	return 	*_path != *entry._path;
 }
 

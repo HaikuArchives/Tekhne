@@ -58,9 +58,9 @@ status_t VStatable::GetModificationTime(time_t *mtime) const {
 }
 
 status_t VStatable::SetModificationTime(time_t mtime) {
+	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
 	struct utimbuf utb;
 	struct stat st;
-	if (!_path) return V_NO_INIT;
 	VString p(_path->Path());
 	p += "/";
 	p += _path->Leaf();
@@ -82,9 +82,9 @@ status_t VStatable::GetAccessTime(time_t *atime) const {
 }
 
 status_t VStatable::SetAccessTime(time_t atime) {
+	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
 	struct utimbuf utb;
 	struct stat st;
-	if (!_path) return V_NO_INIT;
 	VString p(_path->Path());
 	p += "/";
 	p += _path->Leaf();
@@ -106,7 +106,6 @@ status_t VStatable::GetOwner(uid_t *owner) const {
 }
 
 status_t VStatable::SetOwner(uid_t owner) {
-	if (!_path) return V_NO_INIT;
 	gid_t g;
 	status_t err = GetGroup(&g);
 	if (err == V_OK) {
@@ -129,7 +128,6 @@ status_t VStatable::GetGroup(gid_t *group) const {
 }
 
 status_t VStatable::SetGroup(gid_t group) {
-	if (!_path) return V_NO_INIT;
 	uid_t o;
 	status_t err = GetOwner(&o);
 	if (err == V_OK) {
@@ -152,7 +150,7 @@ status_t VStatable::GetPermissions(mode_t *perms) const {
 }
 
 status_t VStatable::SetPermissions(mode_t perms) {
-	if (!_path) return V_NO_INIT;
+	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
 	perms = perms & (S_IRWXU|S_IRWXG|S_IRWXO);
 	VString p(_path->Path());
 	p += "/";
@@ -172,10 +170,40 @@ status_t VStatable::GetSize(off_t *size) const {
 }
 
 status_t VStatable::GetStat(struct stat *st) const {
-	if (!_path) return V_NO_INIT;
+	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
 	VString p(_path->Path());
 	p += "/";
 	p += _path->Leaf();
 	if (stat(p.String(), st)) return errno;
 	return V_OK;
+}
+
+bool VStatable::IsFile(void) const {
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		return S_ISREG(st.st_mode);
+	}
+	return false;
+}
+
+bool VStatable::IsDirectory(void) const {
+	struct stat st;
+	status_t s = GetStat(&st);
+	if (s == V_OK) {
+		return S_ISDIR(st.st_mode);
+	}
+	return false;
+}
+
+bool VStatable::IsSymLink(void) const {
+	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
+	VString p(_path->Path());
+	p += "/";
+	p += _path->Leaf();
+	struct stat st;
+	if (!lstat(p.String(), &st)){
+		return S_ISLNK(st.st_mode);
+	}
+	return false;
 }

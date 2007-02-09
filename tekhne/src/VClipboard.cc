@@ -44,8 +44,8 @@ VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), 
 	struct stat buf;
 	int32_t id = stat ("/tmp/v_clipboard", &buf );
 	if ( id != 0 ) {
-		close(open("/tmp/v_clipboard", O_CREAT|O_TRUNC|O_RDWR, 0));
-		chmod("/tmp/v_clipboard", 0666);
+		close(open("/tmp/v_clipboard", O_CREAT|O_TRUNC|O_RDWR, 0600));
+		//chmod("/tmp/v_clipboard", 0600);
 	}
 	key_t mykey=ftok("/tmp/v_clipboard", 1);
 	_shmid = shmget(mykey, 16*_page_size, (IPC_CREAT|0640));
