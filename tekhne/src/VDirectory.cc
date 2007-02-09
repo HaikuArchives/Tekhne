@@ -28,18 +28,19 @@
 using namespace tekhne;
 
 VDirectory::VDirectory(const VEntry *entry) {
+	SetTo(entry);
 }
 
-VDirectory::VDirectory(const char *path) {
+VDirectory::VDirectory(const char *path) : VEntry(path) {
 }
 
-VDirectory::VDirectory(const VDirectory *dir, const char *path) {
+VDirectory::VDirectory(const VDirectory *dir, const char *path) : VEntry (dir, path) {
 }
 
 VDirectory::VDirectory(void) {
 }
 
-VDirectory::VDirectory(const VDirectory &directory) {
+VDirectory::VDirectory(const VDirectory &directory) : VEntry(directory) {
 }
 
 bool VDirectory::Contains(const char *path, int32_t nodeFlags) const {
