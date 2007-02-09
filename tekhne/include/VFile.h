@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VFile.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,55 +23,50 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VFILE_H
+#define _VFILE_H
 
-#include "StandardDefs.h"
-#include "InterfaceDefs.h"
-#include "GraphicsDefs.h"
-#include "StorageDefs.h"
-#include "AppDefs.h"
 #include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
-#include "VView.h"
-#include "VControl.h"
-#include "VListView.h"
-#include "VMenu.h"
-#include "VMenuBar.h"
-#include "VScrollBar.h"
-#include "VWindow.h"
-#include "VAlert.h"
-#include "VScreen.h"
-#include "VTextView.h"
-#include "VSerialPort.h"
-#include "VUSB.h"
-#include "VClipboard.h"
-#include "VPath.h"
-#include "VDirectory.h"
-#include "VFile.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VPath;
+class VDirectory;
+
+class VFile : public VEntry, VPositionIO {
+public:
+	VFile(void);
+	VFile(const VFile &file);
+	VFile(const VEntry *entry, uint32_t openMode);
+	VFile(const char *path, uint32_t openMode);
+	VFile(VDirectory *dir, const char *path, uint32_t openMode);
+
+	virtual ~VFile();
+
+	virtual status_t GetSize(off_t *size) const;
+	virtual status_t SetSize(off_t size);
+
+	status_t InitCheck(void) const;
+
+	bool IsReadable(void) const;
+	bool IsWritable(void) const;
+
+	virtual ssize_t Read(void *buffer, size_t size);
+	virtual ssize_t ReadAt(off_t location, void *buffer, size_t size);
+	virtual ssize_t Write(const void *buffer, size_t size);
+	virtual ssize_t WriteAt(off_t location, const void *buffer, size_t size);
+
+	virtual off_t Seek(off_t offset, int32_t seekMode);
+	virtual off_t Position(void) const;
+
+	status_t SetTo(const VEntry *entry, uint32_t openMode);
+	status_t SetTo(const char *path, uint32_t openMode);
+	status_t SetTo(const VDirectory *dir, const char *path, uint32_t openMode);
+	void Unset(void);
+
+	VFile& operator=(const VFile &File);
+};
+
+} // namespace tekhne
+
+#endif /* _VFILE_H */

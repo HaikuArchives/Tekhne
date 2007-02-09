@@ -24,6 +24,7 @@ libtekhne_include_DATA = \
 	VEntry.h\
 	VEntryList.h\
 	VErrors.h\
+	VFile.h\
 	VFindDirectory.h\
 	VFlattenable.h\
 	VFont.h\

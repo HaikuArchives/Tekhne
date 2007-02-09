@@ -44,15 +44,42 @@ VDirectory::VDirectory(const VDirectory &directory) : VEntry(directory) {
 }
 
 bool VDirectory::Contains(const char *path, int32_t nodeFlags) const {
-	return false;
+	if (!path) return false;
+	VEntry e(path);
+	return Contains(&e);
 }
 
 bool VDirectory::Contains(const VEntry *entry, int32_t nodeFlags) const {
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (!entry) return V_BAD_VALUE;
+	if (entry->InitCheck() != V_OK) return V_NO_INIT;
+	if (!entry->Exists()) return false;
+	// seach this and subdirectories for this path
+	VEntry e1(*entry);
+	VEntry e2;
+	while(e1.GetParent(&e2) == V_OK) {
+		if (*this == e2) {
+			if (nodeFlags == V_ANY_NODE) return true;
+			if (nodeFlags == V_SYMLINK_NODE && entry->IsSymLink()) return true;
+			if (nodeFlags == V_DIRECTORY_NODE && entry->IsDirectory()) return true;
+			if (nodeFlags == V_FILE_NODE && entry->IsFile()) return true;
+			return false;
+		}
+		e1 = e2;
+	}
 	return false;
 }
 
 status_t VDirectory::CreateFile(const char *path, VFile *file, bool failIfExists) {
-	return V_ERROR;
+	status_t err;
+	if (!path) return V_BAD_VALUE;
+	VPath p;
+	if (*path == '/') p.SetTo(path);
+	else p.SetTo(this, path);
+	err = p.InitCheck();
+	if (err == V_OK) {
+	}
+	return err;
 }
 
 status_t VDirectory::CreateDirectory(const char *path, VDirectory *dir) {
@@ -88,33 +115,47 @@ status_t VDirectory::Rewind(void) {
 }
 
 status_t VDirectory::GetStatFor(const char *path, struct stat *st) const {
-	return V_ERROR;
+	VEntry e(this, path);
+	return e.GetStat(st);
 }
 
 bool VDirectory::IsRootDirectory(void) const {
-	return false;
+	if (InitCheck() != V_OK) return false;
+	return strcmp(_path->Path(), "/") == 0 && strlen(_path->Leaf()) == 0;
 }
 
 status_t VDirectory::SetTo(const VEntry *entry) {
-	return V_ERROR;
+	if (!entry) return V_BAD_VALUE;
+	if (entry->InitCheck() != V_OK) return V_NO_INIT;
+	VPath p;
+	entry->GetPath(&p);
+	VString s(p.Path());
+	s += "/";
+	s += p.Leaf();
+	return VEntry::SetTo(s.String());
 }
 
 status_t VDirectory::SetTo(const char *path) {
-	return V_ERROR;
+	return VEntry::SetTo(path);
 }
 
 status_t VDirectory::SetTo(const VDirectory *dir, const char *path) {
-	return V_ERROR;
+	VEntry e(dir, path);
+	return SetTo(&e);
 }
 
 void VDirectory::Unset(void) {
+	VEntry::Unset();
 }
 
 VDirectory& VDirectory::operator=(const VDirectory &directory) {
+	Unset();
+	SetTo(&directory);
 	return *this;
 }
 
 status_t create_directory(const char *path, mode_t mode) {
-	return V_ERROR;
+	if(mkdir (path, mode)) return errno;
+	return V_OK;
 }
 

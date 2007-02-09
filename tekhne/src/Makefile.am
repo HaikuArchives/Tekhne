@@ -46,7 +46,8 @@ libtekhne_la_SOURCES = \
 	VStatable.cc\
 	VEntry.cc\
 	VDirectory.cc\
-	VPath.cc
+	VPath.cc\
+	VFile.cc
 
 libtekhne_la_LDFLAGS = \
 	-pthread\
