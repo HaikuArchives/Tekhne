@@ -31,38 +31,49 @@ VFile::VFile(void) {
 }
 
 VFile::VFile(const VFile &file) {
+	//SetTo(&file);
 }
 
 VFile::VFile(const VEntry *entry, uint32_t openMode) {
+	SetTo(entry, openMode);
 }
 
 VFile::VFile(const char *path, uint32_t openMode) {
+	SetTo(path, openMode);
 }
 
 VFile::VFile(VDirectory *dir, const char *path, uint32_t openMode) {
+	SetTo(dir, path, openMode);
 }
 
 VFile::~VFile() {
+	Unset();
 }
 
 status_t VFile::GetSize(off_t *size) const {
-	return V_ERROR;
+	return VEntry::GetSize(size);
 }
 
 status_t VFile::SetSize(off_t size) {
-	return V_ERROR;
+	if (InitCheck() == V_OK) return V_NO_INIT;
+	VString s(_path->Path());
+	s += "/";
+	s += _path->Leaf();
+	if (truncate(s.String(), size)) return errno;
+	return V_OK;
 }
 
 status_t VFile::InitCheck(void) const {
-	return V_ERROR;
+	if (_fd < 0 || openMode == 0 || VEntry::InitCheck() != V_OK) return V_NO_INIT;
+	return V_OK;
 }
 
 bool VFile::IsReadable(void) const {
-	return false;
+	return !(openMod & O_WRONLY);
 }
 
 bool VFile::IsWritable(void) const {
-	return false;
+	return openMode & O_WRONLY || openMode & O_RDWR;
 }
 
 
@@ -83,7 +94,10 @@ ssize_t VFile::WriteAt(off_t location, const void *buffer, size_t size) {
 }
 
 off_t VFile::Seek(off_t offset, int32_t seekMode) {
-	return 0;
+	if (InitCheck() == V_OK) {
+		return lseek(_fd, offset, seekMode);
+	}
+	return -1;
 }
 
 off_t VFile::Position(void) const {
@@ -95,7 +109,19 @@ status_t VFile::SetTo(const VEntry *entry, uint32_t openMode) {
 }
 
 status_t VFile::SetTo(const char *path, uint32_t openMode) {
-	return V_ERROR;
+	VEntry::SetTo(path);
+	if (VEntry::InitCheck()) {
+		_openMode = openMode;
+		_fd = open(path, openMode);
+		if (_fd < 0) {
+			Unset();
+			return errno;
+		}
+	} else {
+		Unset();
+		return V_NO_INIT;
+	}
+	return V_OK;
 }
 
 status_t VFile::SetTo(const VDirectory *dir, const char *path, uint32_t openMode) {
@@ -103,9 +129,14 @@ status_t VFile::SetTo(const VDirectory *dir, const char *path, uint32_t openMode
 }
 
 void VFile::Unset(void) {
+	if (_fd > 0) {
+		close(_fd);
+		_fd = -1;
+	}
+	_openMode = 0;
+	VEntry::Unset();
 }
 
 VFile& VFile::operator=(const VFile &File) {
 	return *this;
 }
-

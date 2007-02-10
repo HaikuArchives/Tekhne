@@ -34,6 +34,9 @@ class VPath;
 class VDirectory;
 
 class VFile : public VEntry, VPositionIO {
+private:
+	int32_t _openMode;
+	int32_t _fd;
 public:
 	VFile(void);
 	VFile(const VFile &file);
