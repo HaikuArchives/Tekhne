@@ -168,8 +168,15 @@ void VPathTest::testSetTo() {
 	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
 	CPPUNIT_ASSERT(p.SetTo("/home", "/foo") == V_BAD_VALUE);
 	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
+	CPPUNIT_ASSERT(p.SetTo("/home/foo/", "bar/..baz/") == V_BAD_VALUE);
+	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
 //	status_t SetTo(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
 //	status_t SetTo(const VEntry *entry);
+	VEntry e("/home/clements");
+	CPPUNIT_ASSERT(p.SetTo(&e) == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("clements", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
 }
 
 void VPathTest::testFlatten() {
@@ -405,4 +412,22 @@ void VEntryTest::testOperator() {
 	CPPUNIT_ASSERT(e2.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(e2 == e1);
 	CPPUNIT_ASSERT(!(e2 != e1));
+}
+
+void VDirectoryTest::setUp() {
+}
+
+void VDirectoryTest::tearDown() {
+}
+
+void VDirectoryTest::testCreate() {
+}
+
+void VFileTest::setUp() {
+}
+
+void VFileTest::tearDown() {
+}
+
+void VFileTest::testCreate() {
 }

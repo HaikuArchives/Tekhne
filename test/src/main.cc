@@ -80,6 +80,8 @@ public:
 		runner.addTest( VClipboardTest::suite() );
 		runner.addTest( VPathTest::suite() );
 		runner.addTest( VEntryTest::suite() );
+		runner.addTest( VDirectoryTest::suite() );
+		runner.addTest( VFileTest::suite() );
 		runner.run();
 	}
 

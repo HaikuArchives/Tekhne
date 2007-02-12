@@ -24,25 +24,41 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include "stdio_ext.h"
 
 using namespace tekhne;
 
-VFile::VFile(void) {
+VFile::VFile(void) : _fd(0), _f(0) {
 }
 
-VFile::VFile(const VFile &file) {
-	//SetTo(&file);
+VFile::VFile(const VFile &file) : _fd(0), _f(0) {
+	if (file.InitCheck() == V_OK) {
+		VPath p;
+		if (file.GetPath(&p) == V_OK) {
+			VString s(p.Path());
+			s.Append("/");
+			s.Append(p.Leaf());
+			VEntry::SetTo(s.String());
+			_fd = dup(file._fd);
+			_open_stream();
+			if (!_f) {
+				Unset();
+			}
+		} else {
+			Unset();
+		}
+	}
 }
 
-VFile::VFile(const VEntry *entry, uint32_t openMode) {
+VFile::VFile(const VEntry *entry, uint32_t openMode) : _fd(0), _f(0) {
 	SetTo(entry, openMode);
 }
 
-VFile::VFile(const char *path, uint32_t openMode) {
+VFile::VFile(const char *path, uint32_t openMode) : _fd(0), _f(0) {
 	SetTo(path, openMode);
 }
 
-VFile::VFile(VDirectory *dir, const char *path, uint32_t openMode) {
+VFile::VFile(VDirectory *dir, const char *path, uint32_t openMode) : _fd(0), _f(0) {
 	SetTo(dir, path, openMode);
 }
 
@@ -64,33 +80,41 @@ status_t VFile::SetSize(off_t size) {
 }
 
 status_t VFile::InitCheck(void) const {
-	if (_fd < 0 || openMode == 0 || VEntry::InitCheck() != V_OK) return V_NO_INIT;
+	if (_fd < 0 || _openMode == 0 || VEntry::InitCheck() != V_OK) return V_NO_INIT;
 	return V_OK;
 }
 
 bool VFile::IsReadable(void) const {
-	return !(openMod & O_WRONLY);
+	if (InitCheck() != V_OK) return false;
+	return __freadable(_f);
 }
 
 bool VFile::IsWritable(void) const {
-	return openMode & O_WRONLY || openMode & O_RDWR;
+	if (InitCheck() != V_OK) return false;
+	return __fwritable(_f);
 }
 
 
 ssize_t VFile::Read(void *buffer, size_t size) {
-	return 0;
+	if (!buffer) return V_BAD_VALUE;
+	return read(_fd, buffer, size);
 }
 
 ssize_t VFile::ReadAt(off_t location, void *buffer, size_t size) {
-	return 0;
+	if (!buffer) return V_BAD_VALUE;
+	lseek(_fd, location, SEEK_SET);
+	return read(_fd, buffer, size);
 }
 
 ssize_t VFile::Write(const void *buffer, size_t size) {
-	return 0;
+	if (!buffer || size < 0) return V_BAD_VALUE;
+	return write(_fd, buffer, size);
 }
 
 ssize_t VFile::WriteAt(off_t location, const void *buffer, size_t size) {
-	return 0;
+	if (!buffer || size < 0) return V_BAD_VALUE;
+	lseek(_fd, location, SEEK_SET);
+	return write(_fd, buffer, size);
 }
 
 off_t VFile::Seek(off_t offset, int32_t seekMode) {
@@ -101,11 +125,21 @@ off_t VFile::Seek(off_t offset, int32_t seekMode) {
 }
 
 off_t VFile::Position(void) const {
-	return 0;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	return lseek(_fd, 0, SEEK_CUR);
 }
 
 status_t VFile::SetTo(const VEntry *entry, uint32_t openMode) {
-	return V_ERROR;
+	if (!entry) return V_BAD_VALUE;
+	VPath p;
+	status_t err = entry->GetPath(&p);
+	if (err == V_OK) {
+		VString s(p.Path());
+		s.Append("/");
+		s.Append(p.Leaf());
+		err = SetTo(s.String(), openMode);
+	}
+	return err;
 }
 
 status_t VFile::SetTo(const char *path, uint32_t openMode) {
@@ -113,9 +147,17 @@ status_t VFile::SetTo(const char *path, uint32_t openMode) {
 	if (VEntry::InitCheck()) {
 		_openMode = openMode;
 		_fd = open(path, openMode);
+		int32_t err;
 		if (_fd < 0) {
+			err = errno;
 			Unset();
-			return errno;
+			return err;
+		}
+		_open_stream();
+		if (!_f) {
+			err = errno;
+			Unset();
+			return err;
 		}
 	} else {
 		Unset();
@@ -125,11 +167,24 @@ status_t VFile::SetTo(const char *path, uint32_t openMode) {
 }
 
 status_t VFile::SetTo(const VDirectory *dir, const char *path, uint32_t openMode) {
-	return V_ERROR;
+	if (!dir || !path) return V_BAD_VALUE;
+	VPath p(dir, path);
+	int32_t err = p.InitCheck();
+	if (err == V_OK) {
+		VString s(p.Path());
+		s.Append("/");
+		s.Append(p.Leaf());
+		err = SetTo(s.String(), openMode);
+	}
+	return err;
 }
 
 void VFile::Unset(void) {
-	if (_fd > 0) {
+	if (_f) {
+		fclose(_f);
+		_fd = -1;
+		_f = 0;
+	} else if (_fd > 0) {
 		close(_fd);
 		_fd = -1;
 	}
@@ -137,6 +192,23 @@ void VFile::Unset(void) {
 	VEntry::Unset();
 }
 
-VFile& VFile::operator=(const VFile &File) {
+VFile& VFile::operator=(const VFile &file) {
+	Unset();
+	if (file.InitCheck() == V_OK) {
+		VPath p;
+		if (file.GetPath(&p) == V_OK) {
+			VString s(p.Path());
+			s.Append("/");
+			s.Append(p.Leaf());
+			VEntry::SetTo(s.String());
+			_fd = dup(file._fd);
+			_open_stream();
+			if (!_f) {
+				Unset();
+			}
+		} else {
+			Unset();
+		}
+	}
 	return *this;
 }

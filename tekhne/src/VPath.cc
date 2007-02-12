@@ -57,6 +57,11 @@ bool VPath::normalize_me () {
 	if (debug) cout << "idx: " << idx << endl;
 	while(idx != V_ERROR) {
 		if (idx == 0) return false;
+		if (_path.ByteAt(idx+3) != '/' && idx+3 < _path.Length()) {
+			// just 2 random dots at the beginning of a file name
+			// return error (I think that's right)
+			return false;
+		}
 		const char *buf = _path.String();
 		int32_t i = idx-1;
 		while(i > 0 && buf[i] != '/') i--;

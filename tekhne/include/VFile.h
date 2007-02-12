@@ -37,6 +37,15 @@ class VFile : public VEntry, VPositionIO {
 private:
 	int32_t _openMode;
 	int32_t _fd;
+	FILE *_f;
+
+	inline void _open_stream() {
+		VString mode("");
+		if (_openMode & O_RDWR) mode.SetTo("rw");
+		else if (_openMode & O_RDONLY) mode.SetTo("r");
+		else if (_openMode & O_WRONLY) mode.Append("w");
+		_f = fdopen(_fd, mode.String());
+	}
 public:
 	VFile(void);
 	VFile(const VFile &file);
