@@ -27,6 +27,7 @@
 #define _VFILE_H
 
 #include "VErrors.h"
+#include <iostream>
 
 namespace tekhne {
 
@@ -41,9 +42,10 @@ private:
 
 	inline void _open_stream() {
 		VString mode("");
-		if (_openMode & O_RDWR) mode.SetTo("rw");
-		else if (_openMode & O_RDONLY) mode.SetTo("r");
-		else if (_openMode & O_WRONLY) mode.Append("w");
+		if ((_openMode & O_ACCMODE) == O_RDWR) mode.SetTo("rw");
+		else if ((_openMode & O_ACCMODE) == O_RDONLY) mode.SetTo("r");
+		else if ((_openMode & O_ACCMODE) == O_WRONLY) mode.Append("w");
+		// std::cout << "mode: " << mode.String() << std::endl;
 		_f = fdopen(_fd, mode.String());
 	}
 public:
@@ -67,6 +69,12 @@ public:
 	virtual ssize_t ReadAt(off_t location, void *buffer, size_t size);
 	virtual ssize_t Write(const void *buffer, size_t size);
 	virtual ssize_t WriteAt(off_t location, const void *buffer, size_t size);
+	// wrapper for GNU getline
+	inline ssize_t ReadLine(char **buffer, size_t *size) {
+		if (!buffer || InitCheck() != V_OK) return -1;
+		return getline(buffer, size, _f);
+	}
+
 
 	virtual off_t Seek(off_t offset, int32_t seekMode);
 	virtual off_t Position(void) const;

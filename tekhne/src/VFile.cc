@@ -24,9 +24,13 @@
  ****************************************************************************/
 
 #include "tekhne.h"
-#include "stdio_ext.h"
+#include <stdio_ext.h>
+#include <iostream>
 
 using namespace tekhne;
+using namespace std;
+
+static bool debug = false;
 
 VFile::VFile(void) : _fd(0), _f(0) {
 }
@@ -71,7 +75,7 @@ status_t VFile::GetSize(off_t *size) const {
 }
 
 status_t VFile::SetSize(off_t size) {
-	if (InitCheck() == V_OK) return V_NO_INIT;
+	if (InitCheck() != V_OK) return V_NO_INIT;
 	VString s(_path->Path());
 	s += "/";
 	s += _path->Leaf();
@@ -80,7 +84,8 @@ status_t VFile::SetSize(off_t size) {
 }
 
 status_t VFile::InitCheck(void) const {
-	if (_fd < 0 || _openMode == 0 || VEntry::InitCheck() != V_OK) return V_NO_INIT;
+	if (debug) cout << "ic: " << _fd << " " << VEntry::InitCheck() << endl;
+	if (_fd < 0 || VEntry::InitCheck() != V_OK) return V_NO_INIT;
 	return V_OK;
 }
 
@@ -96,12 +101,12 @@ bool VFile::IsWritable(void) const {
 
 
 ssize_t VFile::Read(void *buffer, size_t size) {
-	if (!buffer) return V_BAD_VALUE;
+	if (!buffer || InitCheck() != V_OK) return -1;
 	return read(_fd, buffer, size);
 }
 
 ssize_t VFile::ReadAt(off_t location, void *buffer, size_t size) {
-	if (!buffer) return V_BAD_VALUE;
+	if (!buffer || InitCheck() != V_OK) return -1;
 	lseek(_fd, location, SEEK_SET);
 	return read(_fd, buffer, size);
 }
@@ -144,17 +149,25 @@ status_t VFile::SetTo(const VEntry *entry, uint32_t openMode) {
 
 status_t VFile::SetTo(const char *path, uint32_t openMode) {
 	VEntry::SetTo(path);
-	if (VEntry::InitCheck()) {
+	if (VEntry::InitCheck() == V_OK) {
 		_openMode = openMode;
-		_fd = open(path, openMode);
+		if (openMode & O_CREAT) {
+			_fd = open(path, openMode, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		} else {
+			_fd = open(path, openMode);
+		}
+		if (debug) cout << "_fd: " << _fd << endl;
 		int32_t err;
 		if (_fd < 0) {
+			if (debug) cout << "errno: " << strerror(errno) << endl;
 			err = errno;
 			Unset();
 			return err;
 		}
 		_open_stream();
 		if (!_f) {
+			if (debug) cout << "_f: " << _f << endl;
+			if (debug) cout << "errno: " << strerror(errno) << endl;
 			err = errno;
 			Unset();
 			return err;

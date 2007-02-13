@@ -36,7 +36,7 @@ class VPath;
 class VSymLink;
 class VVolvume;
 
-class VDirectory : VEntry, VEntryList {
+class VDirectory : public VEntry, VEntryList {
 private:
 
 public:

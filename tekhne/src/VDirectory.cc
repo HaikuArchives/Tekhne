@@ -32,15 +32,24 @@ VDirectory::VDirectory(const VEntry *entry) {
 }
 
 VDirectory::VDirectory(const char *path) : VEntry(path) {
+	if (!IsDirectory()) {
+		Unset();
+	}
 }
 
 VDirectory::VDirectory(const VDirectory *dir, const char *path) : VEntry (dir, path) {
+	if (!IsDirectory()) {
+		Unset();
+	}
 }
 
 VDirectory::VDirectory(void) {
 }
 
 VDirectory::VDirectory(const VDirectory &directory) : VEntry(directory) {
+	if (!IsDirectory()) {
+		Unset();
+	}
 }
 
 bool VDirectory::Contains(const char *path, int32_t nodeFlags) const {
@@ -71,13 +80,27 @@ bool VDirectory::Contains(const VEntry *entry, int32_t nodeFlags) const {
 }
 
 status_t VDirectory::CreateFile(const char *path, VFile *file, bool failIfExists) {
-	status_t err;
 	if (!path) return V_BAD_VALUE;
-	VPath p;
-	if (*path == '/') p.SetTo(path);
-	else p.SetTo(this, path);
-	err = p.InitCheck();
+	status_t err;
+	VEntry e;
+	if (*path == '/') e.SetTo(path);
+	else e.SetTo(this, path);
+	err = e.InitCheck();
 	if (err == V_OK) {
+		if (file) {
+			if (failIfExists) {
+				err = file->SetTo(&e, O_RDWR|O_CREAT|O_TRUNC|O_EXCL);
+			} else {
+				err = file->SetTo(&e, O_RDWR|O_CREAT|O_TRUNC);
+			}
+		} else {
+			VFile f;
+			if (failIfExists) {
+				err = f.SetTo(&e, O_RDWR|O_CREAT|O_TRUNC|O_EXCL);
+			} else {
+				err = f.SetTo(&e, O_RDWR|O_CREAT|O_TRUNC);
+			}
+		}
 	}
 	return err;
 }
@@ -128,20 +151,43 @@ status_t VDirectory::SetTo(const VEntry *entry) {
 	if (!entry) return V_BAD_VALUE;
 	if (entry->InitCheck() != V_OK) return V_NO_INIT;
 	VPath p;
-	entry->GetPath(&p);
-	VString s(p.Path());
-	s += "/";
-	s += p.Leaf();
-	return VEntry::SetTo(s.String());
+	status_t err = entry->GetPath(&p);
+	if (err == V_OK) {
+		VString s(p.Path());
+		s += "/";
+		s += p.Leaf();
+		err = VEntry::SetTo(s.String());
+		if (err == V_OK) {
+			if (!IsDirectory()) {
+				Unset();
+				err = V_ENTRY_NOT_FOUND;
+			}
+		}
+	}
+	return err;
 }
 
 status_t VDirectory::SetTo(const char *path) {
-	return VEntry::SetTo(path);
+	status_t err = VEntry::SetTo(path);
+	if (err == V_OK) {
+		if (!IsDirectory()) {
+			Unset();
+			err = V_ENTRY_NOT_FOUND;
+		}
+	}
+	return err;
 }
 
 status_t VDirectory::SetTo(const VDirectory *dir, const char *path) {
 	VEntry e(dir, path);
-	return SetTo(&e);
+	status_t err = e.InitCheck();
+	if (err == V_OK) {
+		if (!IsDirectory()) {
+			Unset();
+			err = V_ENTRY_NOT_FOUND;
+		}
+	}
+	return err;
 }
 
 void VDirectory::Unset(void) {

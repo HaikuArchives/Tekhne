@@ -30,12 +30,18 @@ using namespace std;
 
 static char *cwd = 0;
 
-char *get_cwd() {
+inline char *get_cwd() {
 	if (!cwd) {
 		cwd = (char*)malloc(V_PATH_NAME_LENGTH);
 		getcwd(cwd, V_PATH_NAME_LENGTH);
 	}
 	return cwd;
+}
+
+inline void output_octal(int32_t x) {
+	cout.setf(ios_base::oct, ios_base::basefield);
+	cout << x;
+	cout.setf(ios_base::dec, ios_base::basefield);
 }
 
 void VPathTest::setUp() {
@@ -88,13 +94,20 @@ void VPathTest::testCreate() {
 	CPPUNIT_ASSERT(strcmp("/", p7.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("", p7.Leaf()) == 0);
 
-	// we needtests to check creation with Directory and Entry
-	// VPath(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
-	// VPath(const VEntry *entry);
+	VDirectory d("/tmp");
+	VPath p8(&d);
+	CPPUNIT_ASSERT(p8.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/", p8.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("tmp", p8.Leaf()) == 0);
+
+	VEntry e("/tmp");
+	VPath p9(&e);
+	CPPUNIT_ASSERT(p9.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/", p9.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("tmp", p9.Leaf()) == 0);
 }
 
 void VPathTest::testAppend() {
-//	status_t Append(const char *path, bool normalize = false);
 	VPath p5(".");
 	CPPUNIT_ASSERT(p5.Append("src/VStorageTest.cc") == V_OK);
 	CPPUNIT_ASSERT(p5.InitCheck() == V_OK);
@@ -121,7 +134,6 @@ void VPathTest::testAppend() {
 }
 
 void VPathTest::testGetParent() {
-//	status_t GetParent(VPath *path) const;
 	VPath ans;
 	VPath p("/home/clements/");
 	CPPUNIT_ASSERT(p.GetParent(&ans) == V_OK);
@@ -138,7 +150,6 @@ void VPathTest::testGetParent() {
 
 void VPathTest::testSetTo() {
 	VPath p;
-//	status_t SetTo(const char *path, const char *leaf = 0, bool normalize = false);
 	CPPUNIT_ASSERT(p.SetTo("/") == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp("/", p.Path()) == 0);
@@ -170,8 +181,18 @@ void VPathTest::testSetTo() {
 	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
 	CPPUNIT_ASSERT(p.SetTo("/home/foo/", "bar/..baz/") == V_BAD_VALUE);
 	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
-//	status_t SetTo(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
-//	status_t SetTo(const VEntry *entry);
+
+	VDirectory d("/home/clements");
+	CPPUNIT_ASSERT(p.SetTo(&d) == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("clements", p.Leaf()) == 0);
+	d.SetTo("/home/clements");
+	CPPUNIT_ASSERT(p.SetTo(&d, ".bashrc") == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp("/home/clements", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp(".bashrc", p.Leaf()) == 0);
+
 	VEntry e("/home/clements");
 	CPPUNIT_ASSERT(p.SetTo(&e) == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
@@ -181,34 +202,26 @@ void VPathTest::testSetTo() {
 
 void VPathTest::testFlatten() {
 	VPath p(".");
-//	virtual bool AllowsTypeCode(type_code code) const;
 	CPPUNIT_ASSERT(p.AllowsTypeCode(V_STRING_TYPE));
-//	virtual ssize_t FlattenedSize() const;
 	ssize_t len = p.FlattenedSize();
 	CPPUNIT_ASSERT(len == (ssize_t)strlen(get_cwd())+1);
-//	virtual status_t Flatten(void *buffer, ssize_t size) const;
 	char *buf = (char *)malloc(len);
 	CPPUNIT_ASSERT(p.Flatten(buf, len) == V_OK);
-//	virtual type_code TypeCode() const;
 	CPPUNIT_ASSERT(p.TypeCode() == V_STRING_TYPE);
-//	virtual status_t Unflatten(type_code code, const void *buffer, ssize_t size);
 	VPath q;
 	CPPUNIT_ASSERT(q.Unflatten(V_STRING_TYPE, buf, len) == V_OK);
 	CPPUNIT_ASSERT(q.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(q == p);
-//	virtual bool IsFixedSize(void) const { return false; }
 	CPPUNIT_ASSERT(!p.IsFixedSize());
 }
 
 void VPathTest::testAssignment() {
-//	VPath& operator=(const VPath &path);
 	VPath p("/home/clements");
 	VPath q;
 	q = p;
 	CPPUNIT_ASSERT(p == q);
 	CPPUNIT_ASSERT(!(p != q));
 	q.Unset();
-//	VPath& operator=(const char *string);
 	q = "/home/clements";
 	CPPUNIT_ASSERT(p == q);
 	CPPUNIT_ASSERT(!(p != q));
@@ -245,11 +258,10 @@ void VPathTest::testBoolean() {
 void VEntryTest::setUp() {
 	const char *s = "This is a sample string for the test file.\n";
 	int32_t len = strlen(s);
-	int32_t f = open("/tmp/test_file", O_CREAT|O_TRUNC|O_RDWR, 0600);
+	VFile f("/tmp/test_file", O_CREAT|O_TRUNC|O_RDWR);
 	for (int i=0;i<35;i++) {
-		write(f, s, len);
+		f.Write(s, len);
 	}
-	close(f);
 	symlink ("/tmp/test_file", "/tmp/test_file_sym");
 	close(open("/tmp/test_file2", O_RDWR | O_CREAT | O_TRUNC, 0644));
 }
@@ -266,7 +278,11 @@ void VEntryTest::tearDown() {
 void VEntryTest::testCreate() {
 	VEntry e;
 	CPPUNIT_ASSERT(e.InitCheck() == V_NO_INIT);
-	//VEntry(const VDirectory *dir, const char *path, bool traverse = false);
+	VDirectory d("/tmp");
+	VEntry e11(&d, "test_file");
+	CPPUNIT_ASSERT(e11.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(e11.Exists());
+	e11.Unset();
 
 	VEntry e1("/home/clements/.bashrc");
 	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
@@ -287,8 +303,11 @@ void VEntryTest::testCreate() {
 
 	e1.SetTo("/tmp/test_file", true);
 	CPPUNIT_ASSERT(e1.Exists());
+	e1.Unset();
 
-	//status_t SetTo(const VDirectory *dir, const char *path, bool traverse = false);
+	e1.SetTo(&d, "test_file");
+	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(e1.Exists());
 }
 
 void VEntryTest::testStatable() {
@@ -333,11 +352,11 @@ void VEntryTest::testStatable() {
 
 	mode_t m;
 	CPPUNIT_ASSERT(e1.GetPermissions(&m) == V_OK);
-	CPPUNIT_ASSERT(0600 == m);
+	CPPUNIT_ASSERT(S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH == m);
 
-	CPPUNIT_ASSERT(e1.SetPermissions(0644) == V_OK);
+	CPPUNIT_ASSERT(e1.SetPermissions(0600) == V_OK);
 	CPPUNIT_ASSERT(e1.GetPermissions(&m) == V_OK);
-	CPPUNIT_ASSERT(0644 == m);
+	CPPUNIT_ASSERT(0600 == m);
 
 	CPPUNIT_ASSERT(e1.IsFile());
 	CPPUNIT_ASSERT(!e1.IsDirectory());
@@ -378,7 +397,16 @@ void VEntryTest::testPathOps() {
 	CPPUNIT_ASSERT(strcmp(p.Path(), "/home") == V_OK);
 	CPPUNIT_ASSERT(strcmp(p.Leaf(), "clements") == V_OK);
 
-//	status_t GetParent(VDirectory *dir) const;
+	VDirectory d;
+	CPPUNIT_ASSERT(e1.GetParent(&d) == V_OK);
+	CPPUNIT_ASSERT(d.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(d.Exists());
+	CPPUNIT_ASSERT(d.GetPath(&p) == V_OK);
+	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.Path(), "/home") == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.Leaf(), "clements") == V_OK);
+
+
 }
 
 void VEntryTest::testFileOps() {
@@ -386,17 +414,33 @@ void VEntryTest::testFileOps() {
 	VEntry e2("/tmp/test_file2");
 	CPPUNIT_ASSERT(e1.Exists());
 	CPPUNIT_ASSERT(e2.Exists());
-	CPPUNIT_ASSERT(e1.Rename("/tmp/test_file2") == V_FILE_EXISTS);
+	CPPUNIT_ASSERT(e1.Rename("test_file2") == V_FILE_EXISTS);
 	CPPUNIT_ASSERT(e1.Exists());
 	CPPUNIT_ASSERT(e2.Exists());
-	CPPUNIT_ASSERT(e1.Rename("/tmp/test_file2", true) == V_OK);
+	CPPUNIT_ASSERT(e1.Rename("test_file2", true) == V_OK);
 	CPPUNIT_ASSERT(!e1.Exists());
 	CPPUNIT_ASSERT(e2.Exists());
 	CPPUNIT_ASSERT(e2.Rename("/tmp/test_file") == V_OK);
 	CPPUNIT_ASSERT(e1.Exists());
 	CPPUNIT_ASSERT(!e2.Exists());
 
-//	status_t MoveTo(VDirectory *dir, const char *path = NULL, bool clobber = false);
+	VDirectory home("/home/clements");
+	VDirectory tmp("/tmp");
+	VEntry eHome("/home/clements/test_file");
+	VEntry eTmp("/home/clements/test_file3");
+	CPPUNIT_ASSERT(e1.MoveTo(&home) == V_OK);
+	CPPUNIT_ASSERT(!e1.Exists());
+	CPPUNIT_ASSERT(eHome.Exists());
+	CPPUNIT_ASSERT(!eTmp.Exists());
+	eHome.MoveTo(&tmp, "test_file3");
+	VEntry eTmp2("/tmp/test_file3");
+	CPPUNIT_ASSERT(eTmp2.Exists());
+	CPPUNIT_ASSERT(eTmp2.Rename("test_file") == V_OK);
+	VPath tmpPath(&eTmp2);
+	tmpPath.SetTo(&e1);
+	CPPUNIT_ASSERT(e1.Exists());
+	CPPUNIT_ASSERT(!e2.Exists());
+
 }
 
 void VEntryTest::testOperator() {
@@ -424,10 +468,65 @@ void VDirectoryTest::testCreate() {
 }
 
 void VFileTest::setUp() {
+	const char *s = "This is a sample string for the test file.\n";
+	int32_t len = strlen(s);
+	VFile f("/tmp/test_file", O_CREAT|O_TRUNC|O_RDWR);
+	for (int i=0;i<35;i++) {
+		f.Write(s, len);
+	}
 }
 
 void VFileTest::tearDown() {
+	VEntry e("/tmp/test_file");
+	e.Remove();
 }
 
 void VFileTest::testCreate() {
+	VFile bashrc("/home/clements/.bashrc", O_RDONLY);
+	CPPUNIT_ASSERT(bashrc.InitCheck() == V_OK);
+	//size_t len = 16;
+	//char *buf = (char *)malloc(len);
+	//while (bashrc.ReadLine(&buf, &len) > 0) {
+	//	cout << buf;
+	//}
+	//free(buf);
+
+	//VFile(void);
+	//VFile(const VFile &file);
+	//VFile(const VEntry *entry, uint32_t openMode);
+	//VFile(VDirectory *dir, const char *path, uint32_t openMode);
 }
+
+void VFileTest::testSize() {
+	off_t size;
+	VFile f("/tmp/test_file", O_RDONLY);
+	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(f.GetSize(&size) == V_OK);
+	CPPUNIT_ASSERT(f.SetSize(6000) == V_OK);
+	CPPUNIT_ASSERT(f.GetSize(&size) == V_OK);
+	CPPUNIT_ASSERT(size == 6000);
+	CPPUNIT_ASSERT(f.SetSize(100) == V_OK);
+	CPPUNIT_ASSERT(f.GetSize(&size) == V_OK);
+	CPPUNIT_ASSERT(size == 100);
+}
+
+void VFileTest::testReadWrite() {
+	//bool IsReadable(void) const;
+	//bool IsWritable(void) const;
+	//virtual ssize_t Read(void *buffer, size_t size);
+	//virtual ssize_t ReadAt(off_t location, void *buffer, size_t size);
+	//virtual ssize_t Write(const void *buffer, size_t size);
+	//virtual ssize_t WriteAt(off_t location, const void *buffer, size_t size);
+	//inline ssize_t ReadLine(char **buffer, size_t *size)
+	//virtual off_t Seek(off_t offset, int32_t seekMode);
+	//virtual off_t Position(void) const;
+}
+
+void VFileTest::testSetTo() {
+	//status_t SetTo(const VEntry *entry, uint32_t openMode);
+	//status_t SetTo(const char *path, uint32_t openMode);
+	//status_t SetTo(const VDirectory *dir, const char *path, uint32_t openMode);
+	//void Unset(void);
+	//VFile& operator=(const VFile &File);
+}
+

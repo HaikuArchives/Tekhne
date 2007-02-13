@@ -30,7 +30,7 @@ using namespace tekhne;
 using namespace std;
 
 VEntry::VEntry(const VDirectory *dir, const char *path, bool traverse) {
-	_path = new VPath(dir, path, traverse);
+	SetTo(dir, path, traverse);
 }
 
 VEntry::VEntry(const char *path, bool traverse) {
@@ -69,12 +69,14 @@ status_t VEntry::GetParent(VEntry *entry) const {
 	if (!entry) return V_BAD_VALUE;
 	entry->Unset();
 	if (InitCheck() != V_OK) return V_NO_INIT;
-	entry->_path = new VPath(_path->Path());
-	return entry->_path->InitCheck();
+	return entry->SetTo(_path->Path());
 }
 
 status_t VEntry::GetParent(VDirectory *dir) const {
-	return V_ERROR;
+	if (!dir) return V_BAD_VALUE;
+	dir->Unset();
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	return dir->SetTo(_path->Path());
 }
 
 status_t VEntry::InitCheck(void) const {
@@ -93,7 +95,15 @@ status_t VEntry::Remove(void) {
 status_t VEntry::Rename(const char *path, bool clobber) {
 	if (InitCheck() != V_OK) return V_NO_INIT;
 	if (!path) return V_BAD_VALUE;
-	VEntry e(path);
+	VEntry e;
+	if (strchr(path, '/')) {
+		e.SetTo(path);
+	} else {
+		VDirectory d;
+		GetParent(&d);
+		e.SetTo(&d, path);
+	}
+	VPath toPath(&e);
 	if (e.Exists()) {
 		if (clobber) {
 			remove(path);
@@ -101,24 +111,59 @@ status_t VEntry::Rename(const char *path, bool clobber) {
 			return V_FILE_EXISTS;
 		}
 	}
-	VString p(_path->Path());
-	p += "/";
-	p += _path->Leaf();
-	if (rename(p.String(), path)) return errno;
+	VString from(_path->Path());
+	from += "/";
+	from += _path->Leaf();
+	VString to(toPath.Path());
+	to += "/";
+	to += toPath.Leaf();
+	if (rename(from.String(), to.String())) return errno;
 	return V_OK;
 }
 
 status_t VEntry::MoveTo(VDirectory *dir, const char *path, bool clobber) {
-	return V_ERROR;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (!dir) return V_BAD_VALUE;
+	VEntry e;
+	if (!path) {
+		char _s[V_FILE_NAME_LENGTH];
+		GetName(_s);
+		e.SetTo(dir, _s);
+	} else {
+		e.SetTo(dir, path);
+	}
+	VPath toPath;
+	status_t err = e.GetPath(&toPath);
+	if (err == V_OK) {
+		VString s(toPath.Path());
+		s += "/";
+		s += toPath.Leaf();
+		if (e.Exists()) {
+			if (clobber) {
+				remove(s.String());
+			} else {
+				return V_FILE_EXISTS;
+			}
+		}
+		VString p(_path->Path());
+		p += "/";
+		p += _path->Leaf();
+		if (rename(p.String(), s.String())) err = errno;
+	}
+	return err;
 }
 
 status_t VEntry::SetTo(const char *path, bool traverse) {
+	Unset();
 	_path = new VPath(path, 0, traverse);
 	return _path->InitCheck();
 }
 
 status_t VEntry::SetTo(const VDirectory *dir, const char *path, bool traverse) {
-	return V_ERROR;
+	if (!dir) return V_NO_INIT;
+	Unset();
+	_path = new VPath(dir, path, traverse);
+	return _path->InitCheck();
 }
 
 void VEntry::Unset(void) {

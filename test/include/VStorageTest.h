@@ -112,19 +112,28 @@ class VDirectoryTest : public CppUnit::TestFixture {
 };
 
 class VFileTest : public CppUnit::TestFixture {
-	private:
-	public:
-		static CppUnit::Test *suite() {
-			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VFileTest" );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testCreate",
-								   &VFileTest::testCreate ) );
-			return suiteOfTests;
-		}
+private:
+public:
+	static CppUnit::Test *suite() {
+		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VFileTest" );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testCreate",
+							   &VFileTest::testCreate ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testSetTo",
+							   &VFileTest::testSetTo ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testReadWrite",
+							   &VFileTest::testReadWrite ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testSize",
+							   &VFileTest::testSize ) );
+		return suiteOfTests;
+	}
 
-		void setUp();
-		void tearDown();
+	void setUp();
+	void tearDown();
 
-		void testCreate();
+	void testCreate();
+	void testSetTo();
+	void testReadWrite();
+	void testSize();
 };
 
 #endif /*VSTORAGETEST_H_*/

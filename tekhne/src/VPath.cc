@@ -29,7 +29,7 @@ using namespace std;
 
 using namespace tekhne;
 
-bool debug = false;
+static bool debug = false;
 
 bool VPath::normalize_me () {
 	if (debug) cout << "1> " << _path.String() << endl;
@@ -143,6 +143,14 @@ status_t VPath::SetTo(const char *path, const char *leaf, bool normalize) {
 }
 
 status_t VPath::SetTo(const VDirectory *dir, const char *leaf, bool normalize) {
+	if (!dir) return V_BAD_VALUE;
+	int32_t err = dir->GetPath(this);
+	if (err == V_OK) {
+		if (leaf) {
+			err = Append(leaf);
+		}
+	}
+	return err;
 }
 
 bool VPath::AllowsTypeCode(type_code code) const {
