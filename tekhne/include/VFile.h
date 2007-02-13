@@ -81,6 +81,7 @@ public:
 
 	status_t SetTo(const VEntry *entry, uint32_t openMode);
 	status_t SetTo(const char *path, uint32_t openMode);
+	status_t SetTo(const VPath &path, uint32_t openMode);
 	status_t SetTo(const VDirectory *dir, const char *path, uint32_t openMode);
 	void Unset(void);
 

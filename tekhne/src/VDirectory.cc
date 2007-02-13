@@ -144,19 +144,16 @@ status_t VDirectory::GetStatFor(const char *path, struct stat *st) const {
 
 bool VDirectory::IsRootDirectory(void) const {
 	if (InitCheck() != V_OK) return false;
-	return strcmp(_path->Path(), "/") == 0 && strlen(_path->Leaf()) == 0;
+	return strcmp(_path->FullPath(), "/") == 0;
 }
 
 status_t VDirectory::SetTo(const VEntry *entry) {
 	if (!entry) return V_BAD_VALUE;
 	if (entry->InitCheck() != V_OK) return V_NO_INIT;
-	VPath p;
-	status_t err = entry->GetPath(&p);
+	VPath p(entry);
+	status_t err = p.InitCheck();
 	if (err == V_OK) {
-		VString s(p.Path());
-		s += "/";
-		s += p.Leaf();
-		err = VEntry::SetTo(s.String());
+		err = VEntry::SetTo(p.FullPath());
 		if (err == V_OK) {
 			if (!IsDirectory()) {
 				Unset();

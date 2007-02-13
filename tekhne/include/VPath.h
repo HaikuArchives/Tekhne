@@ -35,6 +35,7 @@ class VPath : VFlattenable {
 private:
 	VString _path;
 	VString _leaf;
+	VString _fullPath;
 	inline bool must_normalize_me () {
 		if ('/' != _path.ByteAt(0) || _path.FindFirst("/./")!=V_ERROR || _path.FindFirst("/..")!=V_ERROR ||
 				  _path.FindFirst("//")!=V_ERROR || _path.FindLast("/.") == _path.Length()-2 ||
@@ -42,6 +43,7 @@ private:
 		return false;
 	}
 	inline void split_me() {
+		_fullPath = _path;
 		if (_path != "/") {
 			int32_t idx = _path.FindLast("/");
 			_leaf = _path.Substring(idx+1);
@@ -85,16 +87,23 @@ public:
 		return _leaf.String();
 	}
 
+	inline const char *FullPath(void) const {
+		if (InitCheck() != V_OK) return 0;
+		return _fullPath.String();
+	}
 
+
+	status_t SetTo(const VPath &path, bool normalize = false);
 	status_t SetTo(const char *path, const char *leaf = 0, bool normalize = false);
 	status_t SetTo(const VDirectory *dir, const char *leaf = 0, bool normalize = false);
 	inline status_t SetTo(const VEntry *entry) {
-		if (entry && entry->_path) return SetTo(entry->_path->Path(), entry->_path->Leaf());
+		if (entry && entry->_path) return SetTo(*entry->_path);
 		return V_BAD_VALUE;
 	}
 	inline void Unset(void) {
 		_leaf.Clear();
 		_path.Clear();
+		_fullPath.Clear();
 	}
 
 	virtual bool AllowsTypeCode(type_code code) const;

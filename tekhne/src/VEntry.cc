@@ -44,6 +44,10 @@ VEntry::VEntry(const VEntry &entry) {
 	_path = new VPath(&entry);
 }
 
+VEntry::VEntry(const VPath &path) {
+	_path = new VPath(path);
+}
+
 bool VEntry::Exists(void) const {
 	if (InitCheck() != V_OK) return V_NO_INIT;
 	struct stat st;
@@ -85,10 +89,7 @@ status_t VEntry::InitCheck(void) const {
 
 status_t VEntry::Remove(void) {
 	if (InitCheck() != V_OK) return V_NO_INIT;
-	VString p(_path->Path());
-	p += "/";
-	p += _path->Leaf();
-	if (remove(p.String())) return errno;
+	if (remove(_path->FullPath())) return errno;
 	return V_OK;
 }
 
@@ -111,13 +112,7 @@ status_t VEntry::Rename(const char *path, bool clobber) {
 			return V_FILE_EXISTS;
 		}
 	}
-	VString from(_path->Path());
-	from += "/";
-	from += _path->Leaf();
-	VString to(toPath.Path());
-	to += "/";
-	to += toPath.Leaf();
-	if (rename(from.String(), to.String())) return errno;
+	if (rename(_path->FullPath(), toPath.FullPath())) return errno;
 	return V_OK;
 }
 
@@ -132,23 +127,17 @@ status_t VEntry::MoveTo(VDirectory *dir, const char *path, bool clobber) {
 	} else {
 		e.SetTo(dir, path);
 	}
-	VPath toPath;
-	status_t err = e.GetPath(&toPath);
+	VPath toPath(&e);
+	status_t err = toPath.InitCheck();
 	if (err == V_OK) {
-		VString s(toPath.Path());
-		s += "/";
-		s += toPath.Leaf();
 		if (e.Exists()) {
 			if (clobber) {
-				remove(s.String());
+				remove(toPath.FullPath());
 			} else {
 				return V_FILE_EXISTS;
 			}
 		}
-		VString p(_path->Path());
-		p += "/";
-		p += _path->Leaf();
-		if (rename(p.String(), s.String())) err = errno;
+		if (rename(_path->FullPath(), toPath.FullPath())) err = errno;
 	}
 	return err;
 }
@@ -186,4 +175,3 @@ bool VEntry::operator!=(const VEntry &entry) const {
 	if (InitCheck() != V_OK || entry.InitCheck() != V_OK) return true;
 	return 	*_path != *entry._path;
 }
-

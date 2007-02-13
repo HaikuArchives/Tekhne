@@ -82,7 +82,7 @@ bool VPath::normalize_me () {
 	return true;
 }
 
-VPath::VPath(const VPath &path) : _path(path._path), _leaf(path._leaf) {
+VPath::VPath(const VPath &path) : _path(path._path), _leaf(path._leaf) , _fullPath(path._fullPath) {
 	// no need to normalize since it already is
 }
 
@@ -118,11 +118,15 @@ status_t VPath::GetParent(VPath *path) const {
 	return V_BAD_VALUE;
 }
 
+status_t VPath::SetTo(const VPath &path, bool normalize) {
+	return SetTo(path.Path(), path.Leaf(), normalize);
+}
+
 status_t VPath::SetTo(const char *path, const char *leaf, bool normalize) {
 	Unset();
 	if (!path || strlen(path) == 0) return V_BAD_VALUE;
 	_path = path;
-	if (leaf) {
+	if (leaf && strlen(leaf) > 0) {
 		if (*leaf == '/') {
 			_path.Clear();
 			return V_BAD_VALUE;
@@ -162,15 +166,13 @@ status_t VPath::Flatten(void *buffer, ssize_t size) const {
 	if (size < FlattenedSize()) return V_BAD_VALUE;
 	memset(buffer, 0, size);
 	VMemoryIO mem(buffer, size);
-	mem.Write(_path.String(), _path.Length());
-	mem.Write("/", 1);
-	mem.Write(_leaf.String(), _leaf.Length());
+	mem.Write(_fullPath.String(), _fullPath.Length());
 	return V_OK;
 }
 
 ssize_t VPath::FlattenedSize() const {
 	if (InitCheck() != V_OK) return -1;
-	return _path.Length()+_leaf.Length()+2;
+	return _fullPath.Length()+1;
 }
 
 type_code VPath::TypeCode() const {
@@ -187,6 +189,7 @@ VPath& VPath::operator=(const VPath &path) {
 	if (path.InitCheck() == V_OK) {
 		_path = path._path;
 		_leaf = path._leaf;
+		_fullPath = path._fullPath;
 	}
 	return *this;
 }
@@ -203,8 +206,7 @@ bool VPath::operator==(const VPath &path) const {
 }
 
 bool VPath::operator==(const char *string) const {
-	VPath p(string);
-	return *this == p;
+	return _fullPath == string;
 }
 
 bool VPath::operator!=(const VPath &path) const {
@@ -213,6 +215,5 @@ bool VPath::operator!=(const VPath &path) const {
 }
 
 bool VPath::operator!=(const char *string) const {
-	VPath p(string);
-	return *this != p;
+	return _fullPath != string;
 }

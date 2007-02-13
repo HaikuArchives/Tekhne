@@ -37,12 +37,9 @@ VFile::VFile(void) : _fd(0), _f(0) {
 
 VFile::VFile(const VFile &file) : _fd(0), _f(0) {
 	if (file.InitCheck() == V_OK) {
-		VPath p;
-		if (file.GetPath(&p) == V_OK) {
-			VString s(p.Path());
-			s.Append("/");
-			s.Append(p.Leaf());
-			VEntry::SetTo(s.String());
+		VPath p(&file);
+		if (p.InitCheck() == V_OK) {
+			VEntry::SetTo(p.FullPath());
 			_fd = dup(file._fd);
 			_open_stream();
 			if (!_f) {
@@ -76,10 +73,7 @@ status_t VFile::GetSize(off_t *size) const {
 
 status_t VFile::SetSize(off_t size) {
 	if (InitCheck() != V_OK) return V_NO_INIT;
-	VString s(_path->Path());
-	s += "/";
-	s += _path->Leaf();
-	if (truncate(s.String(), size)) return errno;
+	if (truncate(_path->FullPath(), size)) return errno;
 	return V_OK;
 }
 
@@ -139,12 +133,13 @@ status_t VFile::SetTo(const VEntry *entry, uint32_t openMode) {
 	VPath p;
 	status_t err = entry->GetPath(&p);
 	if (err == V_OK) {
-		VString s(p.Path());
-		s.Append("/");
-		s.Append(p.Leaf());
-		err = SetTo(s.String(), openMode);
+		err = SetTo(p.FullPath(), openMode);
 	}
 	return err;
+}
+
+status_t VFile::SetTo(const VPath &path, uint32_t openMode) {
+	return SetTo(path.FullPath(), openMode);
 }
 
 status_t VFile::SetTo(const char *path, uint32_t openMode) {
@@ -184,10 +179,7 @@ status_t VFile::SetTo(const VDirectory *dir, const char *path, uint32_t openMode
 	VPath p(dir, path);
 	int32_t err = p.InitCheck();
 	if (err == V_OK) {
-		VString s(p.Path());
-		s.Append("/");
-		s.Append(p.Leaf());
-		err = SetTo(s.String(), openMode);
+		err = SetTo(p.FullPath(), openMode);
 	}
 	return err;
 }
@@ -210,10 +202,7 @@ VFile& VFile::operator=(const VFile &file) {
 	if (file.InitCheck() == V_OK) {
 		VPath p;
 		if (file.GetPath(&p) == V_OK) {
-			VString s(p.Path());
-			s.Append("/");
-			s.Append(p.Leaf());
-			VEntry::SetTo(s.String());
+			VEntry::SetTo(p.FullPath());
 			_fd = dup(file._fd);
 			_open_stream();
 			if (!_f) {

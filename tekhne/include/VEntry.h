@@ -40,6 +40,7 @@ public:
 	VEntry(const char *path, bool traverse = false);
 	VEntry(void);
 	VEntry(const VEntry &entry);
+	VEntry(const VPath &path);
 
 	virtual ~VEntry(){}
 
