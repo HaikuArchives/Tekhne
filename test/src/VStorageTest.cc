@@ -484,14 +484,9 @@ void VFileTest::tearDown() {
 void VFileTest::testCreate() {
 	VFile bashrc("/home/clements/.bashrc", O_RDONLY);
 	CPPUNIT_ASSERT(bashrc.InitCheck() == V_OK);
-	//size_t len = 16;
-	//char *buf = (char *)malloc(len);
-	//while (bashrc.ReadLine(&buf, &len) > 0) {
-	//	cout << buf;
-	//}
-	//free(buf);
-
-	//VFile(void);
+	bashrc.Unset();
+	VFile f;
+	CPPUNIT_ASSERT(f.InitCheck() == V_NO_INIT);
 	//VFile(const VFile &file);
 	//VFile(const VEntry *entry, uint32_t openMode);
 	//VFile(VDirectory *dir, const char *path, uint32_t openMode);
@@ -511,22 +506,53 @@ void VFileTest::testSize() {
 }
 
 void VFileTest::testReadWrite() {
-	//bool IsReadable(void) const;
-	//bool IsWritable(void) const;
-	//virtual ssize_t Read(void *buffer, size_t size);
-	//virtual ssize_t ReadAt(off_t location, void *buffer, size_t size);
-	//virtual ssize_t Write(const void *buffer, size_t size);
-	//virtual ssize_t WriteAt(off_t location, const void *buffer, size_t size);
-	//inline ssize_t ReadLine(char **buffer, size_t *size)
-	//virtual off_t Seek(off_t offset, int32_t seekMode);
-	//virtual off_t Position(void) const;
+	VFile bashrc("/home/clements/.bashrc", O_RDONLY);
+	CPPUNIT_ASSERT(bashrc.InitCheck() == V_OK);
+	size_t len = 16;
+	char *buf = (char *)malloc(len);
+	int32_t count = 4;
+	CPPUNIT_ASSERT(bashrc.Position() == 0);
+	while (bashrc.ReadLine(&buf, &len) > 0 && count-- > 0) {
+		cout << buf;
+	}
+	CPPUNIT_ASSERT(bashrc.Seek(0, SEEK_SET) == V_OK);
+	count = 4;
+	int32_t bytesRead = 0;
+	while ((bytesRead += bashrc.Read(buf, len)) > 0 && count-- > 0) {
+	}
+	CPPUNIT_ASSERT(bashrc.Position() == bytesRead);
+	CPPUNIT_ASSERT(bashrc.IsReadable());
+	CPPUNIT_ASSERT(!bashrc.IsWritable());
+
+	VFile f2("/tmp/test_file", O_RDWR);
+	CPPUNIT_ASSERT(f2.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(f2.ReadAt(4, buf, 12) == 12l);
+	CPPUNIT_ASSERT(memcmp(" is a sample", buf, 12) == 0);
+	CPPUNIT_ASSERT(f2.WriteAt(534, "foo", strlen("foo")) == 3);
+	CPPUNIT_ASSERT(f2.ReadAt(534, buf, 3) == 3l);
+	CPPUNIT_ASSERT(memcmp("foo", buf, 3) == 0);
+	free(buf);
 }
 
 void VFileTest::testSetTo() {
-	//status_t SetTo(const VEntry *entry, uint32_t openMode);
-	//status_t SetTo(const char *path, uint32_t openMode);
-	//status_t SetTo(const VDirectory *dir, const char *path, uint32_t openMode);
-	//void Unset(void);
-	//VFile& operator=(const VFile &File);
-}
+	VFile f;
+	VEntry e("/tmp/test_file");
+	CPPUNIT_ASSERT(f.SetTo(&e, O_RDONLY) == V_OK);
+	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
+	off_t size;
+	CPPUNIT_ASSERT(f.GetSize(&size) == V_OK);
+	f.Unset();
+	CPPUNIT_ASSERT(f.SetTo("/tmp/test_file", O_WRONLY) == V_OK);
+	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(f.GetSize(&size) == V_OK);
+	f.Unset();
+	VDirectory d("/tmp");
+	CPPUNIT_ASSERT(f.SetTo(&d, "test_file", O_WRONLY) == V_OK);
+	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(f.GetSize(&size) == V_OK);
+	VFile g;
+	g = f;
+	CPPUNIT_ASSERT(g.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(g.GetSize(&size) == V_OK);
 
+}
