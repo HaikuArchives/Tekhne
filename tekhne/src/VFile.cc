@@ -200,6 +200,7 @@ void VFile::Unset(void) {
 VFile& VFile::operator=(const VFile &file) {
 	Unset();
 	if (file.InitCheck() == V_OK) {
+		_openMode = file._openMode;
 		VPath p;
 		if (file.GetPath(&p) == V_OK) {
 			VEntry::SetTo(p.FullPath());
