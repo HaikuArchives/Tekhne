@@ -36,19 +36,7 @@ VFile::VFile(void) : _fd(0), _f(0) {
 }
 
 VFile::VFile(const VFile &file) : _fd(0), _f(0) {
-	if (file.InitCheck() == V_OK) {
-		VPath p(&file);
-		if (p.InitCheck() == V_OK) {
-			VEntry::SetTo(p.FullPath());
-			_fd = dup(file._fd);
-			_open_stream();
-			if (!_f) {
-				Unset();
-			}
-		} else {
-			Unset();
-		}
-	}
+	SetTo(&file, file._openMode);
 }
 
 VFile::VFile(const VEntry *entry, uint32_t openMode) : _fd(0), _f(0) {
@@ -198,20 +186,6 @@ void VFile::Unset(void) {
 }
 
 VFile& VFile::operator=(const VFile &file) {
-	Unset();
-	if (file.InitCheck() == V_OK) {
-		_openMode = file._openMode;
-		VPath p;
-		if (file.GetPath(&p) == V_OK) {
-			VEntry::SetTo(p.FullPath());
-			_fd = dup(file._fd);
-			_open_stream();
-			if (!_f) {
-				Unset();
-			}
-		} else {
-			Unset();
-		}
-	}
+	SetTo(&file, file._openMode);
 	return *this;
 }

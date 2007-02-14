@@ -74,7 +74,6 @@ public:
 	void Unset(void);
 
 	VDirectory& operator=(const VDirectory &directory);
-
 };
 
 status_t create_directory(const char *path, mode_t mode);

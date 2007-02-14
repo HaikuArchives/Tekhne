@@ -30,12 +30,32 @@ using namespace std;
 
 static char *cwd = 0;
 
-inline char *get_cwd() {
+static inline char *get_cwd() {
 	if (!cwd) {
 		cwd = (char*)malloc(V_PATH_NAME_LENGTH);
 		getcwd(cwd, V_PATH_NAME_LENGTH);
 	}
 	return cwd;
+}
+
+static inline void make_test_file() {
+	const char *s = "This is a sample string for the test file.\n";
+	int32_t len = strlen(s);
+	VFile f("/tmp/test_file", O_CREAT|O_TRUNC|O_RDWR);
+	for (int i=0;i<35;i++) {
+		f.Write(s, len);
+	}
+	symlink ("/tmp/test_file", "/tmp/test_file_sym");
+	close(open("/tmp/test_file2", O_RDWR | O_CREAT | O_TRUNC, 0644));
+}
+
+static inline void remove_test_file() {
+	VEntry e1("/tmp/test_file_sym");
+	e1.Remove();
+	VEntry e2("/tmp/test_file");
+	e2.Remove();
+	VEntry e3("/tmp/test_file2");
+	e3.Remove();
 }
 
 inline void output_octal(int32_t x) {
@@ -256,23 +276,11 @@ void VPathTest::testBoolean() {
 }
 
 void VEntryTest::setUp() {
-	const char *s = "This is a sample string for the test file.\n";
-	int32_t len = strlen(s);
-	VFile f("/tmp/test_file", O_CREAT|O_TRUNC|O_RDWR);
-	for (int i=0;i<35;i++) {
-		f.Write(s, len);
-	}
-	symlink ("/tmp/test_file", "/tmp/test_file_sym");
-	close(open("/tmp/test_file2", O_RDWR | O_CREAT | O_TRUNC, 0644));
+	make_test_file();
 }
 
 void VEntryTest::tearDown() {
-	VEntry e1("/tmp/test_file_sym");
-	e1.Remove();
-	VEntry e2("/tmp/test_file");
-	e2.Remove();
-	VEntry e3("/tmp/test_file2");
-	e3.Remove();
+	remove_test_file();
 }
 
 void VEntryTest::testCreate() {
@@ -459,37 +467,100 @@ void VEntryTest::testOperator() {
 }
 
 void VDirectoryTest::setUp() {
+	make_test_file();
 }
 
 void VDirectoryTest::tearDown() {
+	remove_test_file();
 }
 
 void VDirectoryTest::testCreate() {
+//	VDirectory(const VEntry *entry);
+//	VDirectory(const char *path);
+//	VDirectory(const VDirectory *dir, const char *path);
+//	VDirectory(void);
+//	VDirectory(const VDirectory &directory);
+}
+
+void VDirectoryTest::testContains() {
+	VDirectory d("/tmp");
+	CPPUNIT_ASSERT(d.Contains("test_file") == V_OK);
+	CPPUNIT_ASSERT(d.Contains("/tmp/test_file_sym", V_SYMLINK_NODE));
+	CPPUNIT_ASSERT(d.Contains("/tmp/test_file_sym", V_FILE_NODE));
+	CPPUNIT_ASSERT(d.Contains("/tmp/test_file_sym", V_DIRECTORY_NODE));
+	CPPUNIT_ASSERT(d.Contains("/tmp/test_file_sym"));
+
+	VEntry e(&d, "test_file2");
+	CPPUNIT_ASSERT(d.Contains(&e));
+	CPPUNIT_ASSERT(!d.Contains(&e, V_DIRECTORY_NODE));
+	CPPUNIT_ASSERT(d.Contains(&e, V_FILE_NODE));
+	CPPUNIT_ASSERT(d.Contains(&e));
+	e.SetTo(&d, "foo");
+	CPPUNIT_ASSERT(!d.Contains(&e));
+}
+
+void VDirectoryTest::testCreateStuff() {
+//	status_t CreateFile(const char *path, VFile *file, bool failIfExists = false);
+//	status_t CreateDirectory(const char *path, VDirectory *dir);
+//	status_t CreateSymLink(const char *path, const char *linkToPath, VSymLink *link);
+}
+
+void VDirectoryTest::testEntry() {
+//	status_t FindEntry(const char *path, VEntry *entry, bool traverse = false) const;
+
+//	status_t GetEntry(VEntry *entry) const;
+
+//	virtual status_t GetNextEntry(VEntry *entry, bool traverse = false);
+//	virtual int32_t GetNextDirents(dirent *buf, size_t bufsize, int32_t count = INT_MAX);
+//	virtual int32_t CountEntries(void);
+//	virtual status_t Rewind(void);
+}
+
+void VDirectoryTest::testInfo() {
+	VDirectory d3("/tmp");
+	struct stat st;
+	CPPUNIT_ASSERT(d3.GetStatFor("test_file", &st) == V_OK);
+	CPPUNIT_ASSERT(!S_ISDIR(st.st_mode));
+	CPPUNIT_ASSERT(S_ISREG(st.st_mode));
+	CPPUNIT_ASSERT(!S_ISLNK(st.st_mode));
+
+	CPPUNIT_ASSERT(!d3.IsRootDirectory());
+	d3.SetTo("/");
+	CPPUNIT_ASSERT(d3.IsRootDirectory());
+	d3.Unset();
+	CPPUNIT_ASSERT(!d3.IsRootDirectory());
+}
+
+void VDirectoryTest::testSetTo() {
+//	status_t SetTo(const VEntry *entry);
+//	status_t SetTo(const char *path);
+//	status_t SetTo(const VDirectory *dir, const char *path);
+
+//	VDirectory& operator=(const VDirectory &directory);
 }
 
 void VFileTest::setUp() {
-	const char *s = "This is a sample string for the test file.\n";
-	int32_t len = strlen(s);
-	VFile f("/tmp/test_file", O_CREAT|O_TRUNC|O_RDWR);
-	for (int i=0;i<35;i++) {
-		f.Write(s, len);
-	}
+	make_test_file();
 }
 
 void VFileTest::tearDown() {
-	VEntry e("/tmp/test_file");
-	e.Remove();
+	remove_test_file();
 }
 
 void VFileTest::testCreate() {
 	VFile bashrc("/home/clements/.bashrc", O_RDONLY);
 	CPPUNIT_ASSERT(bashrc.InitCheck() == V_OK);
-	bashrc.Unset();
 	VFile f;
 	CPPUNIT_ASSERT(f.InitCheck() == V_NO_INIT);
-	//VFile(const VFile &file);
-	//VFile(const VEntry *entry, uint32_t openMode);
-	//VFile(VDirectory *dir, const char *path, uint32_t openMode);
+	VFile f2(bashrc);
+	CPPUNIT_ASSERT(f2.InitCheck() == V_OK);
+	bashrc.Unset();
+	VEntry e("/tmp/test_file");
+	VFile f3(&e, O_WRONLY|O_APPEND);
+	CPPUNIT_ASSERT(f3.InitCheck() == V_OK);
+	VDirectory d("/tmp");
+	VFile f4(&d, "test_file", O_RDWR|O_APPEND);
+	CPPUNIT_ASSERT(f4.InitCheck() == V_OK);
 }
 
 void VFileTest::testSize() {

@@ -24,7 +24,9 @@
  ****************************************************************************/
 
 #include "tekhne.h"
+#include <iostream>
 
+using namespace std;
 using namespace tekhne;
 
 VDirectory::VDirectory(const VEntry *entry) {
@@ -144,7 +146,7 @@ status_t VDirectory::GetStatFor(const char *path, struct stat *st) const {
 
 bool VDirectory::IsRootDirectory(void) const {
 	if (InitCheck() != V_OK) return false;
-	return strcmp(_path->FullPath(), "/") == 0;
+	return (strcmp(_path->FullPath(), "/") == 0);
 }
 
 status_t VDirectory::SetTo(const VEntry *entry) {

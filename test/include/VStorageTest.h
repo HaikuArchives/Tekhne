@@ -96,19 +96,34 @@ class VEntryTest : public CppUnit::TestFixture {
 };
 
 class VDirectoryTest : public CppUnit::TestFixture {
-	private:
-	public:
-		static CppUnit::Test *suite() {
-			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VDirectoryTest" );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VDirectoryTest>("testCreate",
-								   &VDirectoryTest::testCreate ) );
-			return suiteOfTests;
-		}
+private:
+public:
+	static CppUnit::Test *suite() {
+		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VDirectoryTest" );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VDirectoryTest>("testCreate",
+							   &VDirectoryTest::testCreate ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VDirectoryTest>("testContains",
+							   &VDirectoryTest::testContains ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VDirectoryTest>("testCreateStuff",
+							   &VDirectoryTest::testCreateStuff ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VDirectoryTest>("testEntry",
+							   &VDirectoryTest::testEntry ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VDirectoryTest>("testInfo",
+							   &VDirectoryTest::testInfo ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VDirectoryTest>("testSetTo",
+							   &VDirectoryTest::testSetTo ) );
+		return suiteOfTests;
+	}
 
-		void setUp();
-		void tearDown();
+	void setUp();
+	void tearDown();
 
-		void testCreate();
+	void testCreate();
+	void testContains();
+	void testCreateStuff();
+	void testEntry();
+	void testInfo();
+	void testSetTo();
 };
 
 class VFileTest : public CppUnit::TestFixture {

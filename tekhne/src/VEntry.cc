@@ -73,6 +73,7 @@ status_t VEntry::GetParent(VEntry *entry) const {
 	if (!entry) return V_BAD_VALUE;
 	entry->Unset();
 	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (strcmp(_path->FullPath(), "/") == 0) return V_BAD_VALUE;
 	return entry->SetTo(_path->Path());
 }
 
@@ -80,6 +81,7 @@ status_t VEntry::GetParent(VDirectory *dir) const {
 	if (!dir) return V_BAD_VALUE;
 	dir->Unset();
 	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (strcmp(_path->FullPath(), "/") == 0) return V_BAD_VALUE;
 	return dir->SetTo(_path->Path());
 }
 
