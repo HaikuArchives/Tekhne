@@ -186,6 +186,7 @@ void VFile::Unset(void) {
 }
 
 VFile& VFile::operator=(const VFile &file) {
+	if (this == &file) return *this;
 	SetTo(&file, file._openMode);
 	return *this;
 }

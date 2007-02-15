@@ -110,6 +110,7 @@ void VPolygon::PrintToStream(void) const {
 }
 
 VPolygon& VPolygon::operator=(const VPolygon& p) {
+	if (this == &p) return *this;
 	_points->MakeEmpty();
 	for (int i=0;i<p.CountPoints(); i++) {
 		_points->AddItem(new VPoint(*p._points->GetItem(i)));

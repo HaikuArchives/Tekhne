@@ -185,6 +185,7 @@ status_t VPath::Unflatten(type_code code, const void *buffer, ssize_t size) {
 }
 
 VPath& VPath::operator=(const VPath &path) {
+	if (this == &path) return *this;
 	Unset();
 	if (path.InitCheck() == V_OK) {
 		_path = path._path;

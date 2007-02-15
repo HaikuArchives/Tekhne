@@ -81,6 +81,7 @@ int32_t VMessageFilter::MessageSource(void) const {
 }
 
 VMessageFilter &VMessageFilter::operator=(const VMessageFilter& f) {
+	if (this == &f) return *this;
 	_delivery = f._delivery;
 	_source = f._source;
 	_command = f._command;

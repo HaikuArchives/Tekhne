@@ -54,7 +54,7 @@ public:
 	inline bool Includes(const unicode_block &block) const { if (fData[0] & block.fData[0]) return true; if (fData[1] & block.fData[1]) return true; return false; }
 	inline unicode_block operator &(const unicode_block &block) const { unicode_block ub(fData[1] & block.fData[1],fData[0] & block.fData[0]); return ub; }
 	inline unicode_block operator|(const unicode_block &block) const { unicode_block ub(fData[1] | block.fData[1],fData[0] | block.fData[0]); return ub; }
-	inline unicode_block &operator=(const unicode_block &block) { fData[0] = block.fData[0]; fData[1] = block.fData[1]; return *this;}
+	inline unicode_block &operator=(const unicode_block &block) { if (this != &block) { fData[0] = block.fData[0]; fData[1] = block.fData[1]; } return *this;}
 	inline bool operator==(const unicode_block &block) const { return fData[0] == block.fData[0] && fData[1] == block.fData[1]; }
 	inline bool operator!=(const unicode_block &block) const { return fData[0] != block.fData[0] || fData[1] != block.fData[1]; }
 

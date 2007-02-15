@@ -181,10 +181,7 @@ status_t VDirectory::SetTo(const VDirectory *dir, const char *path) {
 	VEntry e(dir, path);
 	status_t err = e.InitCheck();
 	if (err == V_OK) {
-		if (!IsDirectory()) {
-			Unset();
-			err = V_ENTRY_NOT_FOUND;
-		}
+		err = SetTo(&e);
 	}
 	return err;
 }
@@ -194,6 +191,7 @@ void VDirectory::Unset(void) {
 }
 
 VDirectory& VDirectory::operator=(const VDirectory &directory) {
+	if (this == &directory) return *this;
 	Unset();
 	SetTo(&directory);
 	return *this;

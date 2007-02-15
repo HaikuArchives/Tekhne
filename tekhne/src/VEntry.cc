@@ -163,6 +163,7 @@ void VEntry::Unset(void) {
 }
 
 VEntry& VEntry::operator=(const VEntry &entry) {
+	if (this == &entry) return *this;
 	Unset();
 	if (entry.InitCheck() == V_OK) _path = new VPath(*entry._path);
 	return *this;

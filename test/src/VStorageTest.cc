@@ -413,8 +413,6 @@ void VEntryTest::testPathOps() {
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp(p.Path(), "/home") == V_OK);
 	CPPUNIT_ASSERT(strcmp(p.Leaf(), "clements") == V_OK);
-
-
 }
 
 void VEntryTest::testFileOps() {
@@ -472,14 +470,24 @@ void VDirectoryTest::setUp() {
 
 void VDirectoryTest::tearDown() {
 	remove_test_file();
+	VEntry e3("/tmp/test_file3");
+	e3.Remove();
 }
 
 void VDirectoryTest::testCreate() {
-//	VDirectory(const VEntry *entry);
-//	VDirectory(const char *path);
-//	VDirectory(const VDirectory *dir, const char *path);
-//	VDirectory(void);
-//	VDirectory(const VDirectory &directory);
+	VEntry e("/etc/init.d");
+	VDirectory d1(&e);
+	CPPUNIT_ASSERT(d1.InitCheck() == V_OK);
+	VDirectory d2("/home");
+	CPPUNIT_ASSERT(d2.InitCheck() == V_OK);
+	VDirectory d3(&d1);
+	CPPUNIT_ASSERT(d3.InitCheck() == V_OK);
+	VDirectory d4(&d2, "clements");
+	CPPUNIT_ASSERT(d4.InitCheck() == V_OK);
+	VDirectory d5;
+	CPPUNIT_ASSERT(d5.InitCheck() == V_NO_INIT);
+	VDirectory d6(d4);
+	CPPUNIT_ASSERT(d6.InitCheck() == V_OK);
 }
 
 void VDirectoryTest::testContains() {
@@ -500,7 +508,19 @@ void VDirectoryTest::testContains() {
 }
 
 void VDirectoryTest::testCreateStuff() {
-//	status_t CreateFile(const char *path, VFile *file, bool failIfExists = false);
+	VFile f;
+	VDirectory d("/tmp");
+	CPPUNIT_ASSERT(d.CreateFile("test_file", &f, true) == V_FILE_EXISTS);
+	CPPUNIT_ASSERT(f.InitCheck() == V_NO_INIT);
+	CPPUNIT_ASSERT(d.CreateFile("test_file", &f) == V_OK);
+	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
+	f.Unset();
+	CPPUNIT_ASSERT(d.CreateFile("test_file3", &f, true) == V_OK);
+	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
+	f.Unset();
+	CPPUNIT_ASSERT(d.CreateFile("test_file3", &f) == V_OK);
+	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
+	f.Unset();
 //	status_t CreateDirectory(const char *path, VDirectory *dir);
 //	status_t CreateSymLink(const char *path, const char *linkToPath, VSymLink *link);
 }
@@ -532,11 +552,20 @@ void VDirectoryTest::testInfo() {
 }
 
 void VDirectoryTest::testSetTo() {
-//	status_t SetTo(const VEntry *entry);
-//	status_t SetTo(const char *path);
-//	status_t SetTo(const VDirectory *dir, const char *path);
+	VEntry e("/etc/init.d");
+	VDirectory d1;
+	CPPUNIT_ASSERT(d1.SetTo(&e) == V_OK);
+	CPPUNIT_ASSERT(d1.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(d1.SetTo("/home") == V_OK);
+	CPPUNIT_ASSERT(d1.InitCheck() == V_OK);
+	VDirectory d2;
+	CPPUNIT_ASSERT(d2.SetTo(&d1, "clements") == V_OK);
+	CPPUNIT_ASSERT(d2.InitCheck() == V_OK);
+	d2.Unset();
+	CPPUNIT_ASSERT(d2.InitCheck() == V_NO_INIT);
 
-//	VDirectory& operator=(const VDirectory &directory);
+	d2 = d1;
+	CPPUNIT_ASSERT(d2.InitCheck() == V_OK);
 }
 
 void VFileTest::setUp() {
