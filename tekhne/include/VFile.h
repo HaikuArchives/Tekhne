@@ -27,7 +27,6 @@
 #define _VFILE_H
 
 #include "VErrors.h"
-#include <iostream>
 
 namespace tekhne {
 
@@ -45,7 +44,6 @@ private:
 		if ((_openMode & O_ACCMODE) == O_RDWR) mode.SetTo("rw");
 		else if ((_openMode & O_ACCMODE) == O_RDONLY) mode.SetTo("r");
 		else if ((_openMode & O_ACCMODE) == O_WRONLY) mode.Append("w");
-		// std::cout << "mode: " << mode.String() << std::endl;
 		_f = fdopen(_fd, mode.String());
 	}
 public:

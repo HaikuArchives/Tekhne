@@ -1,5 +1,7 @@
 /***************************************************************************
- *            tekhne.h
+ *            VSymLink.h
+ *
+ * Copyright (c) 2006 Geoffrey Clements
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,56 +23,33 @@
  *
  ****************************************************************************/
 
-#ifndef _TEKHNE_H
-#define _TEKHNE_H
+#ifndef _VSYMLINK_H
+#define _VSYMLINK_H
 
-#include "StandardDefs.h"
-#include "InterfaceDefs.h"
-#include "GraphicsDefs.h"
-#include "StorageDefs.h"
-#include "AppDefs.h"
 #include "VErrors.h"
-#include "VBlockCache.h"
-#include "VString.h"
-#include "VList.h"
-#include "VDictionary.h"
-#include "VMallocIO.h"
-#include "VMemoryIO.h"
-#include "VArchivable.h"
-#include "VArchivable.h"
-#include "VMessageFilter.h"
-#include "VMessage.h"
-#include "VMessageQueue.h"
-#include "VHandler.h"
-#include "VLooper.h"
-#include "VLocker.h"
-#include "VAutoLock.h"
-#include "VMessenger.h"
-#include "VMessageRunner.h"
-#include "VApplication.h"
-#include "VRoster.h"
-#include "VFont.h"
-#include "VPolygon.h"
-#include "VRegion.h"
-#include "VShape.h"
-#include "VShapeIterator.h"
-#include "VStopWatch.h"
-#include "VView.h"
-#include "VControl.h"
-#include "VListView.h"
-#include "VMenu.h"
-#include "VMenuBar.h"
-#include "VScrollBar.h"
-#include "VWindow.h"
-#include "VAlert.h"
-#include "VScreen.h"
-#include "VTextView.h"
-#include "VSerialPort.h"
-#include "VUSB.h"
-#include "VClipboard.h"
-#include "VPath.h"
-#include "VDirectory.h"
-#include "VFile.h"
-#include "VSymLink.h"
 
-#endif /* _TEKHNE_H */
+namespace tekhne {
+
+class VSymLink : public VEntry {
+private:
+public:
+	VSymLink(void) {}
+	VSymLink(const VSymLink &link);
+	VSymLink(const VPath *path);
+	VSymLink(const VEntry *entry);
+	VSymLink(const char *path) { SetTo(path); }
+	VSymLink(const VDirectory *dir, const char *path) { SetTo(dir, path); }
+
+	virtual ~VSymLink() {}
+
+	bool IsAbsolute(void) { return true; }
+
+	ssize_t MakeLinkedPath(const VDirectory *dir, VPath *path) const;
+	ssize_t MakeLinkedPath(const char *dirPath, VPath *path) const;
+
+	size_t ReadLink(char *buf, size_t length);
+};
+
+}
+
+#endif // _VSYMLINK_H

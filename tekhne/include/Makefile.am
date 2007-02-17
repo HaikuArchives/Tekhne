@@ -61,6 +61,7 @@ libtekhne_include_DATA = \
 	VStatable.h\
 	VStopWatch.h\
 	VString.h\
+	VSymLink.h\
 	VTextView.h\
 	VTList.cc\
 	VTList.h\

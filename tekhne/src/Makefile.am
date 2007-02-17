@@ -47,7 +47,8 @@ libtekhne_la_SOURCES = \
 	VEntry.cc\
 	VDirectory.cc\
 	VPath.cc\
-	VFile.cc
+	VFile.cc\
+	VSymLink.cc
 
 libtekhne_la_LDFLAGS = \
 	-pthread\

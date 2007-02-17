@@ -108,7 +108,26 @@ status_t VDirectory::CreateFile(const char *path, VFile *file, bool failIfExists
 }
 
 status_t VDirectory::CreateDirectory(const char *path, VDirectory *dir) {
-	return V_ERROR;
+	if (!path) return V_BAD_VALUE;
+	if (dir) dir->Unset();
+	status_t err;
+	VEntry e;
+	if (*path == '/') e.SetTo(path);
+	else e.SetTo(this, path);
+	err = e.InitCheck();
+	if (err == V_OK) {
+		if (e.Exists()) {
+			err = V_FILE_EXISTS;
+		} else {
+			VPath p;
+			err = e.GetPath(&p);
+			if (err == V_OK) {
+				if (mkdir(p.FullPath(), S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)) err = errno;
+			}
+		}
+	}
+	if (err == V_OK && dir) dir->SetTo(&e);
+	return err;
 }
 
 status_t VDirectory::CreateSymLink(const char *path, const char *linkToPath, VSymLink *link) {

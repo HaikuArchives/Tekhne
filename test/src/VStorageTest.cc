@@ -521,7 +521,14 @@ void VDirectoryTest::testCreateStuff() {
 	CPPUNIT_ASSERT(d.CreateFile("test_file3", &f) == V_OK);
 	CPPUNIT_ASSERT(f.InitCheck() == V_OK);
 	f.Unset();
-//	status_t CreateDirectory(const char *path, VDirectory *dir);
+
+	VDirectory d2;
+	CPPUNIT_ASSERT(d.CreateDirectory("foo", &d2) == V_OK);
+	CPPUNIT_ASSERT(d2.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(d2.Exists());
+	CPPUNIT_ASSERT(d2.Remove() == V_OK);
+	CPPUNIT_ASSERT(!d2.Exists());
+
 //	status_t CreateSymLink(const char *path, const char *linkToPath, VSymLink *link);
 }
 
