@@ -24,20 +24,20 @@
  ****************************************************************************/
 
 #include "tekhne.h"
-#include <iostream>
 
-using namespace std;
 using namespace tekhne;
 
 VSymLink::VSymLink(const VSymLink &link) {
 	if (link.InitCheck() == V_OK) {
 		SetTo(link._path->FullPath());
+		if (!IsSymLink()) Unset();
 	}
 }
 
 VSymLink::VSymLink(const VPath *path) {
 	if (path && path->InitCheck() == V_OK) {
 		SetTo(path->FullPath());
+		if (!IsSymLink()) Unset();
 	}
 }
 
@@ -46,20 +46,25 @@ VSymLink::VSymLink(const VEntry *entry) {
 		VPath p;
 		if (entry->GetPath(&p) == V_OK) {
 			SetTo(p.FullPath());
+			if (!IsSymLink()) Unset();
 		}
 	}
 }
 
 
-ssize_t VSymLink::MakeLinkedPath(const VDirectory *dir, VPath *path) const {
-	return -1;
-}
-
-ssize_t VSymLink::MakeLinkedPath(const char *dirPath, VPath *path) const {
-	return -1;
+status_t VSymLink::MakeLinkedPath(VPath *path) const {
+	return GetPath(path);
 }
 
 size_t VSymLink::ReadLink(char *buf, size_t length) {
-	return -1;
+	if (!buf || InitCheck() != V_OK) return -1;
+	strcpy(buf, _path->FullPath());
+	return strlen(buf);
+}
+
+status_t VSymLink::GetStat(struct stat *st) const {
+	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
+	if (lstat(_path->FullPath(), st)) return errno;
+	return V_OK;
 }
 

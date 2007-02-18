@@ -82,6 +82,7 @@ public:
 		runner.addTest( VEntryTest::suite() );
 		runner.addTest( VDirectoryTest::suite() );
 		runner.addTest( VFileTest::suite() );
+		runner.addTest( VSymLinkTest::suite() );
 		runner.run();
 	}
 

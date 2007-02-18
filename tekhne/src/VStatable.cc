@@ -24,7 +24,7 @@
  ****************************************************************************/
 
 #include "tekhne.h"
-#include "utime.h"
+#include <utime.h>
 
 using namespace tekhne;
 
@@ -61,13 +61,10 @@ status_t VStatable::SetModificationTime(time_t mtime) {
 	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
 	struct utimbuf utb;
 	struct stat st;
-	VString p(_path->Path());
-	p += "/";
-	p += _path->Leaf();
-	if (stat(p.String(), &st)) return errno;
+	if (stat(_path->FullPath(), &st)) return errno;
 	utb.actime = st.st_atime;
 	utb.modtime = mtime;
-	if (utime(p.String(), &utb)) return errno;
+	if (utime(_path->FullPath(), &utb)) return errno;
 	return V_OK;
 }
 
@@ -85,13 +82,10 @@ status_t VStatable::SetAccessTime(time_t atime) {
 	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
 	struct utimbuf utb;
 	struct stat st;
-	VString p(_path->Path());
-	p += "/";
-	p += _path->Leaf();
-	if (stat(p.String(), &st)) return errno;
+	if (stat(_path->FullPath(), &st)) return errno;
 	utb.actime = atime;
 	utb.modtime = st.st_mtime;
-	if (utime(p.String(), &utb)) return errno;
+	if (utime(_path->FullPath(), &utb)) return errno;
 	return V_OK;
 }
 
@@ -109,10 +103,7 @@ status_t VStatable::SetOwner(uid_t owner) {
 	gid_t g;
 	status_t err = GetGroup(&g);
 	if (err == V_OK) {
-		VString p(_path->Path());
-		p += "/";
-		p += _path->Leaf();
-		if (chown (p.String(), owner, g)) err = errno;
+		if (chown (_path->FullPath(), owner, g)) err = errno;
 	}
 	return err;
 }
@@ -131,10 +122,7 @@ status_t VStatable::SetGroup(gid_t group) {
 	uid_t o;
 	status_t err = GetOwner(&o);
 	if (err == V_OK) {
-		VString p(_path->Path());
-		p += "/";
-		p += _path->Leaf();
-		if (chown (p.String(), o, group)) err = errno;
+		if (chown (_path->FullPath(), o, group)) err = errno;
 	}
 	return err;
 }
@@ -152,10 +140,7 @@ status_t VStatable::GetPermissions(mode_t *perms) const {
 status_t VStatable::SetPermissions(mode_t perms) {
 	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
 	perms = perms & (S_IRWXU|S_IRWXG|S_IRWXO);
-	VString p(_path->Path());
-	p += "/";
-	p += _path->Leaf();
-	if (chmod(p.String(), perms)) return errno;
+	if (chmod(_path->FullPath(), perms)) return errno;
 	return V_OK;
 }
 
@@ -171,10 +156,7 @@ status_t VStatable::GetSize(off_t *size) const {
 
 status_t VStatable::GetStat(struct stat *st) const {
 	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
-	VString p(_path->Path());
-	p += "/";
-	p += _path->Leaf();
-	if (stat(p.String(), st)) return errno;
+	if (stat(_path->FullPath(), st)) return errno;
 	return V_OK;
 }
 
@@ -198,11 +180,8 @@ bool VStatable::IsDirectory(void) const {
 
 bool VStatable::IsSymLink(void) const {
 	if (!_path || _path->InitCheck() != V_OK) return V_NO_INIT;
-	VString p(_path->Path());
-	p += "/";
-	p += _path->Leaf();
 	struct stat st;
-	if (!lstat(p.String(), &st)){
+	if (!lstat(_path->FullPath(), &st)){
 		return S_ISLNK(st.st_mode);
 	}
 	return false;

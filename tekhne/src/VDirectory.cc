@@ -34,24 +34,18 @@ VDirectory::VDirectory(const VEntry *entry) {
 }
 
 VDirectory::VDirectory(const char *path) : VEntry(path) {
-	if (!IsDirectory()) {
-		Unset();
-	}
+	if (!IsDirectory()) Unset();
 }
 
 VDirectory::VDirectory(const VDirectory *dir, const char *path) : VEntry (dir, path) {
-	if (!IsDirectory()) {
-		Unset();
-	}
+	if (!IsDirectory()) Unset();
 }
 
 VDirectory::VDirectory(void) {
 }
 
 VDirectory::VDirectory(const VDirectory &directory) : VEntry(directory) {
-	if (!IsDirectory()) {
-		Unset();
-	}
+	if (!IsDirectory()) Unset();
 }
 
 bool VDirectory::Contains(const char *path, int32_t nodeFlags) const {
@@ -131,7 +125,29 @@ status_t VDirectory::CreateDirectory(const char *path, VDirectory *dir) {
 }
 
 status_t VDirectory::CreateSymLink(const char *path, const char *linkToPath, VSymLink *link) {
-	return V_ERROR;
+	if (link) link->Unset();
+	if (!linkToPath) return V_BAD_VALUE;
+	VEntry toEntry(linkToPath);
+	status_t err = toEntry.InitCheck();
+	if (err == V_OK) {
+		VEntry fromEntry;
+		if (path && *path == '/') fromEntry.SetTo(path);
+		else fromEntry.SetTo(this, path);
+		err = fromEntry.InitCheck();
+		if (err == V_OK) {
+			if (toEntry.Exists()) {
+				err = V_FILE_EXISTS;
+			} else {
+				VPath fromPath(&fromEntry);
+				VPath toPath(&toEntry);
+				if (err == V_OK) {
+					if (symlink(fromPath.FullPath(), toPath.FullPath())) err = errno;
+				}
+			}
+		}
+	}
+	if (err == V_OK && link) link->SetTo(linkToPath);
+	return err;
 }
 
 status_t VDirectory::FindEntry(const char *path, VEntry *entry, bool traverse) const {

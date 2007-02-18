@@ -68,31 +68,31 @@ public:
 };
 
 class VEntryTest : public CppUnit::TestFixture {
-	private:
-	public:
-		static CppUnit::Test *suite() {
-			CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VEntryTest" );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testCreate",
-								   &VEntryTest::testCreate ) );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testStatable",
-								   &VEntryTest::testStatable ) );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testPathOps",
-								   &VEntryTest::testPathOps ) );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testFileOps",
-								   &VEntryTest::testFileOps ) );
-			suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testOperator",
-								   &VEntryTest::testOperator ) );
-			return suiteOfTests;
-		}
+private:
+public:
+	static CppUnit::Test *suite() {
+		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VEntryTest" );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testCreate",
+								&VEntryTest::testCreate ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testStatable",
+								&VEntryTest::testStatable ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testPathOps",
+								&VEntryTest::testPathOps ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testFileOps",
+								&VEntryTest::testFileOps ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VEntryTest>("testOperator",
+								&VEntryTest::testOperator ) );
+		return suiteOfTests;
+	}
 
-		void setUp();
-		void tearDown();
+	void setUp();
+	void tearDown();
 
-		void testCreate();
-		void testStatable();
-		void testPathOps();
-		void testFileOps();
-		void testOperator();
+	void testCreate();
+	void testStatable();
+	void testPathOps();
+	void testFileOps();
+	void testOperator();
 };
 
 class VDirectoryTest : public CppUnit::TestFixture {
@@ -132,13 +132,13 @@ public:
 	static CppUnit::Test *suite() {
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VFileTest" );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testCreate",
-							   &VFileTest::testCreate ) );
+								&VFileTest::testCreate ) );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testSetTo",
-							   &VFileTest::testSetTo ) );
+								&VFileTest::testSetTo ) );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testReadWrite",
-							   &VFileTest::testReadWrite ) );
+								&VFileTest::testReadWrite ) );
 		suiteOfTests->addTest( new CppUnit::TestCaller<VFileTest>("testSize",
-							   &VFileTest::testSize ) );
+								&VFileTest::testSize ) );
 		return suiteOfTests;
 	}
 
@@ -149,6 +149,28 @@ public:
 	void testSetTo();
 	void testReadWrite();
 	void testSize();
+};
+
+class VSymLinkTest : public CppUnit::TestFixture {
+private:
+public:
+	static CppUnit::Test *suite() {
+		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite( "VSymLinkTest" );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VSymLinkTest>("testCreate",
+							   &VSymLinkTest::testCreate ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VSymLinkTest>("testMakeLink",
+							   &VSymLinkTest::testMakeLink ) );
+		suiteOfTests->addTest( new CppUnit::TestCaller<VSymLinkTest>("testReadLink",
+							   &VSymLinkTest::testReadLink ) );
+		return suiteOfTests;
+	}
+
+	void setUp();
+	void tearDown();
+
+	void testCreate();
+	void testMakeLink();
+	void testReadLink();
 };
 
 #endif /*VSTORAGETEST_H_*/

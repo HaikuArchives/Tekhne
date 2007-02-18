@@ -37,17 +37,21 @@ public:
 	VSymLink(const VSymLink &link);
 	VSymLink(const VPath *path);
 	VSymLink(const VEntry *entry);
-	VSymLink(const char *path) { SetTo(path); }
-	VSymLink(const VDirectory *dir, const char *path) { SetTo(dir, path); }
+	VSymLink(const char *path) { SetTo(path); if (!IsSymLink()) Unset(); }
+	VSymLink(const VDirectory *dir, const char *path) { SetTo(dir, path); if (!IsSymLink()) Unset(); }
 
 	virtual ~VSymLink() {}
 
+	// Unlike on the BeOS VSymLinks are alwas absolute.
 	bool IsAbsolute(void) { return true; }
 
-	ssize_t MakeLinkedPath(const VDirectory *dir, VPath *path) const;
-	ssize_t MakeLinkedPath(const char *dirPath, VPath *path) const;
+	// Since VSymLinks are always absolute we don't have to tell the VSymLink
+	// what directory it is in.
+	status_t MakeLinkedPath(VPath *path) const;
 
 	size_t ReadLink(char *buf, size_t length);
+	// over ride from statable so we don't follow the link
+	virtual status_t GetStat(struct stat *st) const;
 };
 
 }

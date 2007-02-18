@@ -24,10 +24,8 @@
  ****************************************************************************/
 
 #include "tekhne.h"
-#include <iostream>
 
 using namespace tekhne;
-using namespace std;
 
 VEntry::VEntry(const VDirectory *dir, const char *path, bool traverse) {
 	SetTo(dir, path, traverse);

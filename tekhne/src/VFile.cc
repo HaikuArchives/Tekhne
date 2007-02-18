@@ -25,12 +25,8 @@
 
 #include "tekhne.h"
 #include <stdio_ext.h>
-#include <iostream>
 
 using namespace tekhne;
-using namespace std;
-
-static bool debug = false;
 
 VFile::VFile(void) : _fd(0), _f(0) {
 }
@@ -66,7 +62,6 @@ status_t VFile::SetSize(off_t size) {
 }
 
 status_t VFile::InitCheck(void) const {
-	if (debug) cout << "ic: " << _fd << " " << VEntry::InitCheck() << endl;
 	if (_fd < 0 || VEntry::InitCheck() != V_OK) return V_NO_INIT;
 	return V_OK;
 }
@@ -132,34 +127,29 @@ status_t VFile::SetTo(const VPath &path, uint32_t openMode) {
 
 status_t VFile::SetTo(const char *path, uint32_t openMode) {
 	VEntry::SetTo(path);
-	if (VEntry::InitCheck() == V_OK) {
+	status_t err = VEntry::InitCheck();
+	if (err == V_OK) {
 		_openMode = openMode;
-		if (openMode & O_CREAT) {
-			_fd = open(path, openMode, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		if (Exists() && !IsFile() && !IsSymLink()) {
+			err = V_NO_INIT;
 		} else {
-			_fd = open(path, openMode);
+			if (openMode & O_CREAT) {
+				_fd = open(path, openMode, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+			} else {
+				_fd = open(path, openMode);
+			}
+			if (_fd < 0) {
+				err = errno;
+			} else {
+				_open_stream();
+				if (!_f) {
+					err = errno;
+				}
+			}
 		}
-		if (debug) cout << "_fd: " << _fd << endl;
-		int32_t err;
-		if (_fd < 0) {
-			if (debug) cout << "errno: " << strerror(errno) << endl;
-			err = errno;
-			Unset();
-			return err;
-		}
-		_open_stream();
-		if (!_f) {
-			if (debug) cout << "_f: " << _f << endl;
-			if (debug) cout << "errno: " << strerror(errno) << endl;
-			err = errno;
-			Unset();
-			return err;
-		}
-	} else {
-		Unset();
-		return V_NO_INIT;
 	}
-	return V_OK;
+	if (err != V_OK) Unset();
+	return err;
 }
 
 status_t VFile::SetTo(const VDirectory *dir, const char *path, uint32_t openMode) {

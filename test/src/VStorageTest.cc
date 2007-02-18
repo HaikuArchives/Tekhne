@@ -472,6 +472,12 @@ void VDirectoryTest::tearDown() {
 	remove_test_file();
 	VEntry e3("/tmp/test_file3");
 	e3.Remove();
+	e3.SetTo("/tmp/test_file4");
+	e3.Remove();
+	e3.SetTo("/tmp/test_file5");
+	e3.Remove();
+	e3.SetTo("/tmp/test_file6");
+	e3.Remove();
 }
 
 void VDirectoryTest::testCreate() {
@@ -529,7 +535,24 @@ void VDirectoryTest::testCreateStuff() {
 	CPPUNIT_ASSERT(d2.Remove() == V_OK);
 	CPPUNIT_ASSERT(!d2.Exists());
 
-//	status_t CreateSymLink(const char *path, const char *linkToPath, VSymLink *link);
+	VSymLink l;
+	CPPUNIT_ASSERT(d.CreateSymLink("test_file", "/tmp/test_file4", 0) == V_OK);
+	VEntry e;
+	CPPUNIT_ASSERT(e.SetTo("/tmp/test_file4") == V_OK);
+	CPPUNIT_ASSERT(e.Exists());
+	CPPUNIT_ASSERT(e.IsSymLink());
+
+	CPPUNIT_ASSERT(d.CreateSymLink("test_file", "/tmp/test_file5", &l) == V_OK);
+	CPPUNIT_ASSERT(e.SetTo("/tmp/test_file5") == V_OK);
+	CPPUNIT_ASSERT(e.Exists());
+	CPPUNIT_ASSERT(e.IsSymLink());
+	CPPUNIT_ASSERT(e == l);
+
+	CPPUNIT_ASSERT(d.CreateSymLink("/tmp/test_file", "/tmp/test_file6", &l) == V_OK);
+	CPPUNIT_ASSERT(e.SetTo("/tmp/test_file6") == V_OK);
+	CPPUNIT_ASSERT(e.Exists());
+	CPPUNIT_ASSERT(e.IsSymLink());
+	CPPUNIT_ASSERT(e == l);
 }
 
 void VDirectoryTest::testEntry() {
@@ -661,5 +684,76 @@ void VFileTest::testSetTo() {
 	g = f;
 	CPPUNIT_ASSERT(g.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(g.GetSize(&size) == V_OK);
+
+}
+
+void VSymLinkTest::setUp() {
+	make_test_file();
+}
+
+void VSymLinkTest::tearDown() {
+	remove_test_file();
+}
+
+void VSymLinkTest::testCreate() {
+
+	VSymLink l;
+	CPPUNIT_ASSERT(l.InitCheck() == V_NO_INIT);
+
+	VSymLink l2("/tmp/test_file_sym");
+	CPPUNIT_ASSERT(l2.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(l2.IsSymLink());
+	CPPUNIT_ASSERT(!l2.IsFile());
+	CPPUNIT_ASSERT(!l2.IsDirectory());
+
+	VPath p("/tmp/test_file_sym");
+	VSymLink l3(&p);
+	CPPUNIT_ASSERT(l3.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(l3.IsSymLink());
+	CPPUNIT_ASSERT(!l3.IsFile());
+	CPPUNIT_ASSERT(!l3.IsDirectory());
+
+	VEntry e(p);
+	VSymLink l4(&e);
+	CPPUNIT_ASSERT(l4.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(l4.IsSymLink());
+	CPPUNIT_ASSERT(!l4.IsFile());
+	CPPUNIT_ASSERT(!l4.IsDirectory());
+	CPPUNIT_ASSERT(l4.MakeLinkedPath(&p) == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.FullPath(), "/tmp/test_file_sym") == 0);
+	VDirectory d("/tmp");
+
+	VSymLink l5(&d, "test_file_sym");
+	CPPUNIT_ASSERT(l5.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(l5.IsSymLink());
+	CPPUNIT_ASSERT(!l5.IsFile());
+	CPPUNIT_ASSERT(!l5.IsDirectory());
+	CPPUNIT_ASSERT(l5.MakeLinkedPath(&p) == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.FullPath(), "/tmp/test_file_sym") == 0);
+
+	VSymLink l6(l5);
+	CPPUNIT_ASSERT(l6.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(l6.IsSymLink());
+	CPPUNIT_ASSERT(!l6.IsFile());
+	CPPUNIT_ASSERT(!l6.IsDirectory());
+	CPPUNIT_ASSERT(l6.MakeLinkedPath(&p) == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.FullPath(), "/tmp/test_file_sym") == 0);
+
+	CPPUNIT_ASSERT(l.IsAbsolute());
+}
+
+void VSymLinkTest::testMakeLink() {
+	VPath p;
+	VSymLink l3("/tmp/test_file_sym");
+	CPPUNIT_ASSERT(l3.InitCheck() == V_OK);
+	CPPUNIT_ASSERT(l3.MakeLinkedPath(&p) == V_OK);
+	CPPUNIT_ASSERT(strcmp(p.FullPath(), "/tmp/test_file_sym") == 0);
+}
+
+void VSymLinkTest::testReadLink() {
+	VSymLink l("/tmp/test_file_sym");
+	char buf[V_PATH_NAME_LENGTH];
+	CPPUNIT_ASSERT(l.ReadLink(buf, V_PATH_NAME_LENGTH) == strlen("/tmp/test_file_sym"));
+	CPPUNIT_ASSERT(strcmp(buf, "/tmp/test_file_sym") == 0);
 
 }
