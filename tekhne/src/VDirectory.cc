@@ -176,8 +176,27 @@ status_t VDirectory::GetNextEntry(VEntry *entry, bool traverse) {
 	return entry->SetTo(this, ep->d_name);
 }
 
-int32_t VDirectory::GetNextDirents(dirent *buf, size_t bufsize, int32_t count) {
-	return V_ERROR;
+int32_t VDirectory::GetNextDirents(struct dirent *buf, size_t bufsize, int32_t count) {
+	if (!buf) return V_BAD_VALUE;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (count > (int32_t)(bufsize/sizeof(struct dirent))) count = bufsize/sizeof(struct dirent);
+	if (!_dir) _dir = opendir(_path->FullPath());
+	int32_t num = 0;
+	while(num < count) {
+		struct dirent *ep = readdir (_dir);
+		// skip "." and ".."
+		while (ep && (strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0)) {
+			ep = readdir (_dir);
+		}
+		if (!ep) {
+			closedir(_dir);
+			_dir = 0;
+			return num;
+		}
+		memcpy (&buf[num], ep, sizeof(struct dirent));
+		num++;
+	}
+	return num;
 }
 
 int32_t VDirectory::CountEntries(void) {
@@ -185,7 +204,10 @@ int32_t VDirectory::CountEntries(void) {
 	int32_t count = 0;
 	Rewind();
 	if (!_dir) _dir = opendir(_path->FullPath());
-	while (readdir(_dir)) count++;
+	struct dirent *ep;
+	while ((ep = readdir(_dir))) {
+		if (!(strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0)) count++;
+	}
 	Rewind();
 	return count;
 }
