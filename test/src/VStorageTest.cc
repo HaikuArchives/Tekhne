@@ -571,7 +571,7 @@ void VDirectoryTest::testEntry() {
 	cout << buf[0].d_name << endl;
 	CPPUNIT_ASSERT(d.Rewind() == V_OK);
 	int32_t val;
-	while ((val = d.GetNextDirents(buf, 2*sizeof(struct dirent), 2)) < 2) {
+	while ((val = d.GetNextDirents(buf, 2*sizeof(struct dirent), 2)) == 2) {
 		count -= val;
 	}
 	count -= val;
