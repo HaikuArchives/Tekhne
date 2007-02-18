@@ -43,11 +43,8 @@ VSymLink::VSymLink(const VPath *path) {
 
 VSymLink::VSymLink(const VEntry *entry) {
 	if (entry && entry->InitCheck() == V_OK) {
-		VPath p;
-		if (entry->GetPath(&p) == V_OK) {
-			SetTo(p.FullPath());
-			if (!IsSymLink()) Unset();
-		}
+		SetTo(entry->FullPath());
+		if (!IsSymLink()) Unset();
 	}
 }
 

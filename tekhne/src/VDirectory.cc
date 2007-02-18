@@ -29,22 +29,22 @@
 using namespace std;
 using namespace tekhne;
 
-VDirectory::VDirectory(const VEntry *entry) {
+VDirectory::VDirectory(const VEntry *entry) : _dir(0) {
 	SetTo(entry);
 }
 
-VDirectory::VDirectory(const char *path) : VEntry(path) {
+VDirectory::VDirectory(const char *path) : VEntry(path), _dir(0) {
 	if (!IsDirectory()) Unset();
 }
 
-VDirectory::VDirectory(const VDirectory *dir, const char *path) : VEntry (dir, path) {
+VDirectory::VDirectory(const VDirectory *dir, const char *path) : VEntry (dir, path), _dir(0) {
 	if (!IsDirectory()) Unset();
 }
 
-VDirectory::VDirectory(void) {
+VDirectory::VDirectory(void) : _dir(0) {
 }
 
-VDirectory::VDirectory(const VDirectory &directory) : VEntry(directory) {
+VDirectory::VDirectory(const VDirectory &directory) : VEntry(directory), _dir(0) {
 	if (!IsDirectory()) Unset();
 }
 
@@ -113,11 +113,7 @@ status_t VDirectory::CreateDirectory(const char *path, VDirectory *dir) {
 		if (e.Exists()) {
 			err = V_FILE_EXISTS;
 		} else {
-			VPath p;
-			err = e.GetPath(&p);
-			if (err == V_OK) {
-				if (mkdir(p.FullPath(), S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)) err = errno;
-			}
+			if (mkdir(e.FullPath(), S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)) err = errno;
 		}
 	}
 	if (err == V_OK && dir) dir->SetTo(&e);
@@ -138,11 +134,7 @@ status_t VDirectory::CreateSymLink(const char *path, const char *linkToPath, VSy
 			if (toEntry.Exists()) {
 				err = V_FILE_EXISTS;
 			} else {
-				VPath fromPath(&fromEntry);
-				VPath toPath(&toEntry);
-				if (err == V_OK) {
-					if (symlink(fromPath.FullPath(), toPath.FullPath())) err = errno;
-				}
+				if (symlink(fromEntry.FullPath(), toEntry.FullPath())) err = errno;
 			}
 		}
 	}
@@ -151,15 +143,33 @@ status_t VDirectory::CreateSymLink(const char *path, const char *linkToPath, VSy
 }
 
 status_t VDirectory::FindEntry(const char *path, VEntry *entry, bool traverse) const {
-	return V_ERROR;
+	if (!path || *path == '/' || !entry) return V_BAD_VALUE;
+	status_t err = entry->SetTo(this, path);
+	if (err == V_OK) {
+		if (!entry->Exists()) {
+			entry->Unset();
+			err = V_ENTRY_NOT_FOUND;
+		}
+	}
+	return err;
 }
 
 status_t VDirectory::GetEntry(VEntry *entry) const {
-	return V_ERROR;
+	if (!entry) return V_BAD_VALUE;
+	return entry->SetTo(this, 0);
 }
 
 status_t VDirectory::GetNextEntry(VEntry *entry, bool traverse) {
-	return V_ERROR;
+	if (!entry) return V_BAD_VALUE;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (!_dir) _dir = opendir(_path->FullPath());
+	struct dirent *ep = readdir (_dir);
+	if (!ep) {
+		closedir(_dir);
+		_dir = 0;
+		return errno;
+	}
+	return entry->SetTo(this, ep->d_name);
 }
 
 int32_t VDirectory::GetNextDirents(dirent *buf, size_t bufsize, int32_t count) {
@@ -171,7 +181,11 @@ int32_t VDirectory::CountEntries(void) {
 }
 
 status_t VDirectory::Rewind(void) {
-	return V_ERROR;
+	if (InitCheck() != V_OK) return V_NO_INIT;
+	if (_dir) {
+		rewinddir(_dir);
+	}
+	return V_OK;
 }
 
 status_t VDirectory::GetStatFor(const char *path, struct stat *st) const {
@@ -187,15 +201,11 @@ bool VDirectory::IsRootDirectory(void) const {
 status_t VDirectory::SetTo(const VEntry *entry) {
 	if (!entry) return V_BAD_VALUE;
 	if (entry->InitCheck() != V_OK) return V_NO_INIT;
-	VPath p(entry);
-	status_t err = p.InitCheck();
+	status_t err = VEntry::SetTo(entry->FullPath());
 	if (err == V_OK) {
-		err = VEntry::SetTo(p.FullPath());
-		if (err == V_OK) {
-			if (!IsDirectory()) {
-				Unset();
-				err = V_ENTRY_NOT_FOUND;
-			}
+		if (!IsDirectory()) {
+			Unset();
+			err = V_ENTRY_NOT_FOUND;
 		}
 	}
 	return err;
@@ -223,6 +233,7 @@ status_t VDirectory::SetTo(const VDirectory *dir, const char *path) {
 
 void VDirectory::Unset(void) {
 	VEntry::Unset();
+	if (_dir) { closedir(_dir) ; _dir = 0; }
 }
 
 VDirectory& VDirectory::operator=(const VDirectory &directory) {

@@ -400,19 +400,13 @@ void VEntryTest::testPathOps() {
 	CPPUNIT_ASSERT(e1.SetTo("/home/clements/.bashrc") == V_OK);
 	CPPUNIT_ASSERT(e.SetTo("/tmp") == V_OK);
 	CPPUNIT_ASSERT(e1.GetParent(&e) == V_OK);
-	CPPUNIT_ASSERT(e.GetPath(&p) == V_OK);
-	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp(p.Path(), "/home") == V_OK);
-	CPPUNIT_ASSERT(strcmp(p.Leaf(), "clements") == V_OK);
+	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/clements") == V_OK);
 
 	VDirectory d;
 	CPPUNIT_ASSERT(e1.GetParent(&d) == V_OK);
 	CPPUNIT_ASSERT(d.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(d.Exists());
-	CPPUNIT_ASSERT(d.GetPath(&p) == V_OK);
-	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp(p.Path(), "/home") == V_OK);
-	CPPUNIT_ASSERT(strcmp(p.Leaf(), "clements") == V_OK);
+	CPPUNIT_ASSERT(strcmp(d.FullPath(), "/home/clements") == V_OK);
 }
 
 void VEntryTest::testFileOps() {
@@ -556,7 +550,11 @@ void VDirectoryTest::testCreateStuff() {
 }
 
 void VDirectoryTest::testEntry() {
+	VDirectory d("/home/clements");
 //	status_t FindEntry(const char *path, VEntry *entry, bool traverse = false) const;
+	VEntry e;
+	CPPUNIT_ASSERT(d.FindEntry("workspace/tekhne", &e) == V_OK);
+	CPPUNIT_ASSERT(e.Exists());
 
 //	status_t GetEntry(VEntry *entry) const;
 

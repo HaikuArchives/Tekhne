@@ -28,6 +28,7 @@
 
 #include "VEntry.h"
 #include "VEntryList.h"
+#include <dirent.h>
 
 namespace tekhne {
 
@@ -38,7 +39,7 @@ class VVolvume;
 
 class VDirectory : public VEntry, VEntryList {
 private:
-
+	DIR *_dir;
 public:
 	VDirectory(const VEntry *entry);
 	VDirectory(const char *path);
@@ -46,7 +47,7 @@ public:
 	VDirectory(void);
 	VDirectory(const VDirectory &directory);
 
-	virtual ~VDirectory(){}
+	virtual ~VDirectory(){ if (_dir) { closedir(_dir) ; _dir = 0; } }
 
 	bool Contains(const char *path, int32_t nodeFlags = V_ANY_NODE) const;
 	bool Contains(const VEntry *entry, int32_t nodeFlags = V_ANY_NODE) const;
@@ -60,7 +61,7 @@ public:
 	status_t GetEntry(VEntry *entry) const;
 
 	virtual status_t GetNextEntry(VEntry *entry, bool traverse = false);
-	virtual int32_t GetNextDirents(dirent *buf, size_t bufsize, int32_t count = INT_MAX);
+	virtual int32_t GetNextDirents(struct dirent *buf, size_t bufsize, int32_t count = INT_MAX);
 	virtual int32_t CountEntries(void);
 	virtual status_t Rewind(void);
 

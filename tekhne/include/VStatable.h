@@ -57,9 +57,12 @@ public:
 
 	virtual status_t GetStat(struct stat *st) const;
 
+	const char *FullPath(void) const;
+
 	bool IsFile(void) const;
 	bool IsDirectory(void) const;
 	bool IsSymLink(void) const;
+
 	friend class VPath;
 };
 

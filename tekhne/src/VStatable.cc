@@ -186,3 +186,8 @@ bool VStatable::IsSymLink(void) const {
 	}
 	return false;
 }
+
+const char *VStatable::FullPath(void) const {
+	if (_path && _path->InitCheck() == V_OK) return _path->FullPath();
+	return 0;
+}
