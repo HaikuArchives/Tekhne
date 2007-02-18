@@ -164,6 +164,10 @@ status_t VDirectory::GetNextEntry(VEntry *entry, bool traverse) {
 	if (InitCheck() != V_OK) return V_NO_INIT;
 	if (!_dir) _dir = opendir(_path->FullPath());
 	struct dirent *ep = readdir (_dir);
+	// skip "." and ".."
+	while (ep && (strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0)) {
+		ep = readdir (_dir);
+	}
 	if (!ep) {
 		closedir(_dir);
 		_dir = 0;
@@ -177,7 +181,13 @@ int32_t VDirectory::GetNextDirents(dirent *buf, size_t bufsize, int32_t count) {
 }
 
 int32_t VDirectory::CountEntries(void) {
-	return V_ERROR;
+	if (InitCheck() != V_OK) return 0;
+	int32_t count = 0;
+	Rewind();
+	if (!_dir) _dir = opendir(_path->FullPath());
+	while (readdir(_dir)) count++;
+	Rewind();
+	return count;
 }
 
 status_t VDirectory::Rewind(void) {

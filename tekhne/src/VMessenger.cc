@@ -383,7 +383,7 @@ VMessenger *findMessenger(int32_t id) {
 VDictionary socketDictionary;
 
 extern fd_set active_fd_set;
-static int32_t messenger_id = 0;
+static int32_t messenger_id = 2112;
 VLocker messenger_id_lock;
 
 int32_t getMextMessengerId(void) {

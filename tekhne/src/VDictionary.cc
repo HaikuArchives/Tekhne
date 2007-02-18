@@ -45,6 +45,7 @@ VDictionary::~VDictionary() {
 	dict_item **di = static_cast<dict_item **>(items.Items());
 	for (int i=0;i<items.CountItems(); i++) {
 		delete di[i];
+		di[i] = 0;
 	}
 }
 
@@ -68,7 +69,6 @@ void *VDictionary::FindItem(VHashable &k) {
 }
 
 void *VDictionary::RemoveItem(VHashable &k) {
-	void *reply = 0;
 	uint32_t key = k.hash();
 	VListIterator iter(items);
 	while(iter.HasNext()) {
@@ -76,13 +76,13 @@ void *VDictionary::RemoveItem(VHashable &k) {
 		if (item) {
 			if (item->key == key) {
 				items.RemoveItem(item);
-				reply = item->value;
+				void *reply = item->value;
 				delete item;
-				break;
+				return reply;
 			}
 		}
 	}
-	return reply;
+	return 0;
 }
 
 void *VDictionary::RemoveItem(void *value) {

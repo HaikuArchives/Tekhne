@@ -551,17 +551,24 @@ void VDirectoryTest::testCreateStuff() {
 
 void VDirectoryTest::testEntry() {
 	VDirectory d("/home/clements");
-//	status_t FindEntry(const char *path, VEntry *entry, bool traverse = false) const;
 	VEntry e;
 	CPPUNIT_ASSERT(d.FindEntry("workspace/tekhne", &e) == V_OK);
 	CPPUNIT_ASSERT(e.Exists());
+	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/clements/workspace/tekhne") == 0);
 
-//	status_t GetEntry(VEntry *entry) const;
+	CPPUNIT_ASSERT(d.GetEntry(&e) == V_OK);
+	CPPUNIT_ASSERT(e.Exists());
+	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/clements") == 0);
 
-//	virtual status_t GetNextEntry(VEntry *entry, bool traverse = false);
-//	virtual int32_t GetNextDirents(dirent *buf, size_t bufsize, int32_t count = INT_MAX);
-//	virtual int32_t CountEntries(void);
-//	virtual status_t Rewind(void);
+	while(d.GetNextEntry(&e) == V_OK) {
+		VPath p(&e);
+		cout << p.Leaf() << endl;
+	}
+	CPPUNIT_ASSERT(d.Rewind() == V_OK);
+	CPPUNIT_ASSERT(d.CountEntries() > 0);
+//	struct dirent buf[2];
+//	CPPUNIT_ASSERT(d.GetNextDirents(buf, 2*sizeof(struct dirent), 2) == 2);
+//	cout << buf[0].d_name << endl;
 }
 
 void VDirectoryTest::testInfo() {

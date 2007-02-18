@@ -34,7 +34,7 @@ using namespace std;
 
 VClipboard *tekhne::v_clipboard = 0;
 
-VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), _shared_mem(0), _shmid(0), _page_size(0), _lock(new VLocker()) {
+VClipboard::VClipboard(const char *name, bool discard) : _data(new VMessage()), _shared_mem(0), _shmid(0), _page_size(0), _lock(new VLocker()), _watchers(0) {
 	memset(_name, 0, V_NAME_LENGTH);
 	strncpy(_name, name, V_NAME_LENGTH-1);
 	if (v_clipboard == 0 && strcmp(name, "system") == 0) {
