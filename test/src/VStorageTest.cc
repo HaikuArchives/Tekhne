@@ -78,21 +78,21 @@ inline void display_path(VPath &p) {
 void VPathTest::testCreate() {
 	VPath p1;
 	CPPUNIT_ASSERT(p1.InitCheck() == V_NO_INIT);
-	VPath p("/home/clements/", ".bashrc");
+	VPath p("/home/gclements/", ".bashrc");
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp(".bashrc", p.Leaf()) == 0);
-	CPPUNIT_ASSERT(strcmp("/home/clements", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements", p.Path()) == 0);
 	p.Unset();
 	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
 
-	VPath p2("/home/clements/../foo/./../bar", ".bashrc");
+	VPath p2("/home/gclements/../foo/./../bar", ".bashrc");
 	CPPUNIT_ASSERT(p2.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp(".bashrc", p2.Leaf()) == 0);
 	CPPUNIT_ASSERT(strcmp("/home/bar", p2.Path()) == 0);
 	p2.Unset();
 	CPPUNIT_ASSERT(p2.InitCheck() == V_NO_INIT);
 
-	VPath p3("/home/clements/../foo/./../bar/.bashrc");
+	VPath p3("/home/gclements/../foo/./../bar/.bashrc");
 	CPPUNIT_ASSERT(p3.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp(".bashrc", p3.Leaf()) == 0);
 	CPPUNIT_ASSERT(strcmp("/home/bar", p3.Path()) == 0);
@@ -102,11 +102,11 @@ void VPathTest::testCreate() {
 	CPPUNIT_ASSERT(strcmp("/home/bar", p4.Path()) == 0);
 	VPath p5(".");
 	CPPUNIT_ASSERT(p5.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne/trunk", p5.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements/tekhne/trunk", p5.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("test", p5.Leaf()) == 0);
 	VPath p6("..");
 	CPPUNIT_ASSERT(p6.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne", p6.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements/tekhne", p6.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("trunk", p6.Leaf()) == 0);
 
 	VPath p7("/");
@@ -131,10 +131,10 @@ void VPathTest::testAppend() {
 	VPath p5(".");
 	CPPUNIT_ASSERT(p5.Append("src/VStorageTest.cc") == V_OK);
 	CPPUNIT_ASSERT(p5.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne/trunk/test/src", p5.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements/tekhne/trunk/test/src", p5.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("VStorageTest.cc", p5.Leaf()) == 0);
 
-	VPath p2("/home/clements/");
+	VPath p2("/home/gclements/");
 	CPPUNIT_ASSERT(p2.Append("..") == V_OK);
 	CPPUNIT_ASSERT(p2.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp("home", p2.Leaf()) == 0);
@@ -144,18 +144,18 @@ void VPathTest::testAppend() {
 	CPPUNIT_ASSERT(p3.Append("../..") == V_OK);
 	CPPUNIT_ASSERT(p3.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp("tekhne", p3.Leaf()) == 0);
-	CPPUNIT_ASSERT(strcmp("/home/clements/workspace", p3.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements", p3.Path()) == 0);
 
-	VPath p("/home/clements/");
+	VPath p("/home/gclements/");
 	CPPUNIT_ASSERT(p.Append(".") == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("clements", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(strcmp("gclements", p.Leaf()) == 0);
 	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
 }
 
 void VPathTest::testGetParent() {
 	VPath ans;
-	VPath p("/home/clements/");
+	VPath p("/home/gclements/");
 	CPPUNIT_ASSERT(p.GetParent(&ans) == V_OK);
 	CPPUNIT_ASSERT(ans.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp("home", ans.Leaf()) == 0);
@@ -180,11 +180,11 @@ void VPathTest::testSetTo() {
 	CPPUNIT_ASSERT(strcmp("foo", p.Leaf()) == 0);
 	CPPUNIT_ASSERT(p.SetTo(".", "foo") == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne/trunk/test", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements/tekhne/trunk/test", p.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("foo", p.Leaf()) == 0);
 	CPPUNIT_ASSERT(p.SetTo(".") == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("/home/clements/workspace/tekhne/trunk", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements/tekhne/trunk", p.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("test", p.Leaf()) == 0);
 	CPPUNIT_ASSERT(p.SetTo("/home", "foo") == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
@@ -202,21 +202,21 @@ void VPathTest::testSetTo() {
 	CPPUNIT_ASSERT(p.SetTo("/home/foo/", "bar/..baz/") == V_BAD_VALUE);
 	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
 
-	VDirectory d("/home/clements");
+	VDirectory d("/home/gclements");
 	CPPUNIT_ASSERT(p.SetTo(&d) == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
-	CPPUNIT_ASSERT(strcmp("clements", p.Leaf()) == 0);
-	d.SetTo("/home/clements");
+	CPPUNIT_ASSERT(strcmp("gclements", p.Leaf()) == 0);
+	d.SetTo("/home/gclements");
 	CPPUNIT_ASSERT(p.SetTo(&d, ".bashrc") == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("/home/clements", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements", p.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp(".bashrc", p.Leaf()) == 0);
 
-	VEntry e("/home/clements");
+	VEntry e("/home/gclements");
 	CPPUNIT_ASSERT(p.SetTo(&e) == V_OK);
 	CPPUNIT_ASSERT(p.InitCheck() == V_OK);
-	CPPUNIT_ASSERT(strcmp("clements", p.Leaf()) == 0);
+	CPPUNIT_ASSERT(strcmp("gclements", p.Leaf()) == 0);
 	CPPUNIT_ASSERT(strcmp("/home", p.Path()) == 0);
 }
 
@@ -236,13 +236,13 @@ void VPathTest::testFlatten() {
 }
 
 void VPathTest::testAssignment() {
-	VPath p("/home/clements");
+	VPath p("/home/gclements");
 	VPath q;
 	q = p;
 	CPPUNIT_ASSERT(p == q);
 	CPPUNIT_ASSERT(!(p != q));
 	q.Unset();
-	q = "/home/clements";
+	q = "/home/gclements";
 	CPPUNIT_ASSERT(p == q);
 	CPPUNIT_ASSERT(!(p != q));
 	q.Unset();
@@ -253,8 +253,8 @@ void VPathTest::testAssignment() {
 }
 
 void VPathTest::testBoolean() {
-	VPath p("/home/clements");
-	VPath q("/home/clements");
+	VPath p("/home/gclements");
+	VPath q("/home/gclements");
 	CPPUNIT_ASSERT(p == q);
 	CPPUNIT_ASSERT(!(p != q));
 	p.SetTo(".","foo");
@@ -269,8 +269,8 @@ void VPathTest::testBoolean() {
 	q.SetTo(".","./foo");
 	CPPUNIT_ASSERT(p == q);
 	CPPUNIT_ASSERT(!(p != q));
-	p.SetTo("/home/clements");
-	q.SetTo("/home/clementsd");
+	p.SetTo("/home/gclements");
+	q.SetTo("/home/gclementsd");
 	CPPUNIT_ASSERT(p != q);
 	CPPUNIT_ASSERT(!(p == q));
 }
@@ -292,12 +292,12 @@ void VEntryTest::testCreate() {
 	CPPUNIT_ASSERT(e11.Exists());
 	e11.Unset();
 
-	VEntry e1("/home/clements/.bashrc");
+	VEntry e1("/home/gclements/.bashrc");
 	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(e1.Exists());
 	e1.Unset();
 	CPPUNIT_ASSERT(e1.InitCheck() == V_NO_INIT);
-	e1.SetTo("/home/clements/this-doesn't-exist");
+	e1.SetTo("/home/gclements/this-doesn't-exist");
 	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(!e1.Exists());
 
@@ -306,7 +306,7 @@ void VEntryTest::testCreate() {
 	CPPUNIT_ASSERT(!e3.Exists());
 	VPath p;
 	CPPUNIT_ASSERT(e3.GetPath(&p) == V_OK);
-	CPPUNIT_ASSERT(strcmp("/home/clements", p.Path()) == 0);
+	CPPUNIT_ASSERT(strcmp("/home/gclements", p.Path()) == 0);
 	CPPUNIT_ASSERT(strcmp("this-doesn't-exist", p.Leaf()) == 0);
 
 	e1.SetTo("/tmp/test_file", true);
@@ -319,7 +319,7 @@ void VEntryTest::testCreate() {
 }
 
 void VEntryTest::testStatable() {
-	VEntry e1("/home/clements/.bashrc");
+	VEntry e1("/home/gclements/.bashrc");
 	CPPUNIT_ASSERT(e1.InitCheck() == V_OK);
 	struct stat st;
 	CPPUNIT_ASSERT(e1.GetStat(&st) == V_OK);
@@ -397,16 +397,16 @@ void VEntryTest::testPathOps() {
 	CPPUNIT_ASSERT(e.GetPath(&p) == V_NO_INIT);
 	CPPUNIT_ASSERT(p.InitCheck() == V_NO_INIT);
 
-	CPPUNIT_ASSERT(e1.SetTo("/home/clements/.bashrc") == V_OK);
+	CPPUNIT_ASSERT(e1.SetTo("/home/gclements/.bashrc") == V_OK);
 	CPPUNIT_ASSERT(e.SetTo("/tmp") == V_OK);
 	CPPUNIT_ASSERT(e1.GetParent(&e) == V_OK);
-	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/clements") == V_OK);
+	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/gclements") == V_OK);
 
 	VDirectory d;
 	CPPUNIT_ASSERT(e1.GetParent(&d) == V_OK);
 	CPPUNIT_ASSERT(d.InitCheck() == V_OK);
 	CPPUNIT_ASSERT(d.Exists());
-	CPPUNIT_ASSERT(strcmp(d.FullPath(), "/home/clements") == V_OK);
+	CPPUNIT_ASSERT(strcmp(d.FullPath(), "/home/gclements") == V_OK);
 }
 
 void VEntryTest::testFileOps() {
@@ -424,10 +424,10 @@ void VEntryTest::testFileOps() {
 	CPPUNIT_ASSERT(e1.Exists());
 	CPPUNIT_ASSERT(!e2.Exists());
 
-	VDirectory home("/home/clements");
+	VDirectory home("/home/gclements");
 	VDirectory tmp("/tmp");
-	VEntry eHome("/home/clements/test_file");
-	VEntry eTmp("/home/clements/test_file3");
+	VEntry eHome("/home/gclements/test_file");
+	VEntry eTmp("/home/gclements/test_file3");
 	CPPUNIT_ASSERT(e1.MoveTo(&home) == V_OK);
 	CPPUNIT_ASSERT(!e1.Exists());
 	CPPUNIT_ASSERT(eHome.Exists());
@@ -482,7 +482,7 @@ void VDirectoryTest::testCreate() {
 	CPPUNIT_ASSERT(d2.InitCheck() == V_OK);
 	VDirectory d3(&d1);
 	CPPUNIT_ASSERT(d3.InitCheck() == V_OK);
-	VDirectory d4(&d2, "clements");
+	VDirectory d4(&d2, "gclements");
 	CPPUNIT_ASSERT(d4.InitCheck() == V_OK);
 	VDirectory d5;
 	CPPUNIT_ASSERT(d5.InitCheck() == V_NO_INIT);
@@ -550,15 +550,15 @@ void VDirectoryTest::testCreateStuff() {
 }
 
 void VDirectoryTest::testEntry() {
-	VDirectory d("/home/clements");
+	VDirectory d("/home/gclements");
 	VEntry e;
-	CPPUNIT_ASSERT(d.FindEntry("workspace/tekhne", &e) == V_OK);
+	CPPUNIT_ASSERT(d.FindEntry("tekhne", &e) == V_OK);
 	CPPUNIT_ASSERT(e.Exists());
-	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/clements/workspace/tekhne") == 0);
+	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/gclements/tekhne") == 0);
 
 	CPPUNIT_ASSERT(d.GetEntry(&e) == V_OK);
 	CPPUNIT_ASSERT(e.Exists());
-	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/clements") == 0);
+	CPPUNIT_ASSERT(strcmp(e.FullPath(), "/home/gclements") == 0);
 	int32_t count = 0;
 	while(d.GetNextEntry(&e) == V_OK) {
 		VPath p(&e);
@@ -601,7 +601,7 @@ void VDirectoryTest::testSetTo() {
 	CPPUNIT_ASSERT(d1.SetTo("/home") == V_OK);
 	CPPUNIT_ASSERT(d1.InitCheck() == V_OK);
 	VDirectory d2;
-	CPPUNIT_ASSERT(d2.SetTo(&d1, "clements") == V_OK);
+	CPPUNIT_ASSERT(d2.SetTo(&d1, "gclements") == V_OK);
 	CPPUNIT_ASSERT(d2.InitCheck() == V_OK);
 	d2.Unset();
 	CPPUNIT_ASSERT(d2.InitCheck() == V_NO_INIT);
@@ -619,7 +619,7 @@ void VFileTest::tearDown() {
 }
 
 void VFileTest::testCreate() {
-	VFile bashrc("/home/clements/.bashrc", O_RDONLY);
+	VFile bashrc("/home/gclements/.bashrc", O_RDONLY);
 	CPPUNIT_ASSERT(bashrc.InitCheck() == V_OK);
 	VFile f;
 	CPPUNIT_ASSERT(f.InitCheck() == V_NO_INIT);
@@ -648,7 +648,7 @@ void VFileTest::testSize() {
 }
 
 void VFileTest::testReadWrite() {
-	VFile bashrc("/home/clements/.bashrc", O_RDONLY);
+	VFile bashrc("/home/gclements/.bashrc", O_RDONLY);
 	CPPUNIT_ASSERT(bashrc.InitCheck() == V_OK);
 	size_t len = 16;
 	char *buf = (char *)malloc(len);
